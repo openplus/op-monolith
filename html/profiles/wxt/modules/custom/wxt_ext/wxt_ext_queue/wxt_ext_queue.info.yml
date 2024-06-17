@@ -1,0 +1,12 @@
+name: 'WxT Extend Queue'
+description: 'Provides Queueing and related functionality.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'content_moderation:content_moderation'
+  - 'config_rewrite:config_rewrite'
+  - 'drupal:entityqueue'
+  - 'drupal:wxt_ext_landing_page'
+  - 'wxt_ext_media:wxt_ext_media'
+version: 5.2.0

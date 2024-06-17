@@ -1,0 +1,7 @@
+administer convert_bundles:
+  title: 'Administer Convert Bundles'
+  description: 'Allows a user to convert entity bundles from one value to another.'
+  restrict access: TRUE
+
+permission_callbacks:
+  - Drupal\convert_bundles\Permissions::get

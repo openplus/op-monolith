@@ -1,0 +1,6 @@
+csvfile_formatter.data_tables_settings:
+  title: DataTables settings
+  description: Change settings for DataTables integration with CSV File Formatter.
+  parent: system.admin_config_media
+  route_name: csvfile_formatter.data_tables_settings
+  weight: 10

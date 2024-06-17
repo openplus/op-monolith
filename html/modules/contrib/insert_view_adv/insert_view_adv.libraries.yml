@@ -1,0 +1,13 @@
+reset_redirect:
+  js:
+    js/redirect.js: {  }
+  dependencies:
+    - core/drupalSettings
+
+ckeditor5:
+  version: VERSION
+  js:
+    js/build/insert_view_adv.js: { preprocess: false, minified: true }
+  css:
+    theme:
+      css/insert_view_adv.ckeditor5.css: {  }

@@ -1,0 +1,18 @@
+footnotes_footnotes:
+  # Configuration that will be sent to CKEditor 5 JavaScript plugins.
+  ckeditor5:
+    plugins:
+      - footnotes.Footnotes
+  # Configuration that will be used directly by Drupal.
+  drupal:
+    label: Footnotes
+    # The library loaded while using the editor.
+    library: footnotes/footnotes-ckeditor5
+    # The library loaded when configuring the text format using this plugin.
+    admin_library: footnotes/admin.footnotes-ckeditor5
+    toolbar_items:
+      Footnotes:
+        label: Footnotes
+    elements:
+      - <fn>
+      - <fn value text>

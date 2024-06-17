@@ -1,0 +1,13 @@
+name: 'WxT Extend Blocks'
+description: 'Creates custom blocks of type Basic, Search, and Spotlight.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'block_content_permissions:block_content_permissions'
+  - 'content_moderation:content_moderation'
+  - 'wxt_core:wxt_core'
+  - 'wxt_translation:wxt_translation'
+  - 'wxt_ext_media:wxt_ext_media'
+  - 'wxt_ext_media_image:wxt_ext_media_image'
+version: 5.2.0

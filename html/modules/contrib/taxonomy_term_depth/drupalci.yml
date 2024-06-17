@@ -1,0 +1,32 @@
+build:
+  assessment:
+    validate_codebase:
+      phplint: {  }
+      container_composer:
+        options: ' install --prefer-dist --no-progress --no-interaction'
+        halt-on-fail: true
+      #container_command:
+      #  commands:
+      #    - 'sudo -u www-data /usr/local/bin/composer require drupal/simpletest-simpletest dev-3.x --prefer-source --prefer-stable --no-suggest --no-interaction --working-dir /var/www/html'
+      csslint:
+        halt-on-fail: false
+      eslint:
+        halt-on-fail: false
+      phpcs:
+        sniff-all-files: false
+        halt-on-fail: false
+        coder-version: ^8.2@stable
+    testing:
+      run_tests.standard:
+        types: 'Simpletest,PHPUnit-Functional'
+        testgroups: '--all'
+        color: true
+        die-on-fail: false
+        keep-results: true
+        keep-results-table: false
+        verbose: false
+        concurrency: 0
+        halt-on-fail: false
+        repeat: 1
+        suppress-deprecations: true
+      nightwatchjs: {  }

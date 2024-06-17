@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "deploy-libraries": "npm install"
+  },
+  "dependencies": {},
+  "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://git.drupal.org/project/wxt.git"
+  }
+}

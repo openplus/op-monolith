@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Contains wxt_ext_blocks.install.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function wxt_ext_blocks_install() {
+  // Enable translation for our core entities/bundles.
+  $entities = [
+    'block_content' => [
+      'basic',
+    ],
+  ];
+  wxt_translation_enable_translation($entities);
+}

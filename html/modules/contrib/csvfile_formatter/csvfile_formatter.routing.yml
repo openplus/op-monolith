@@ -1,0 +1,7 @@
+csvfile_formatter.data_tables_settings:
+  path: '/admin/config/csvfile_formatter/data-tables-settings'
+  defaults:
+    _title: 'DataTables settings'
+    _form: 'Drupal\csvfile_formatter\Form\DataTablesSettingsForm'
+  requirements:
+    _permission: 'administer site configuration'

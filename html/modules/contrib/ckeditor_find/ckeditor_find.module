@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains ckeditor_find.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ckeditor_find_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the ckeditor_find module.
+    case 'help.page.ckeditor_find':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This plugin module adds the find and replace dialog to CKEditor in Drupal 8') . '</p>';
+      $output .= '<p><ul>';
+      $output .= '  <li>Quickly search the text as well as replace words inside it.</li>';
+      $output .= '  <li>Common options available for matching: ';
+      $output .= '    <ul>';
+      $output .= '      <li>case</li>';
+      $output .= '      <li>whole word</li>';
+      $output .= '      <li>cyclic</li>';
+      $output .= '    </ul>';
+      $output .= '  </li>';
+      $output .= '</ul></p>';
+      $output .= '<p><a href="https://ckeditor.com/docs/ckeditor5/latest/features/find-and-replace.html">https://ckeditor.com/docs/ckeditor5/latest/features/find-and-replace.html</a></p>';
+      return $output;
+
+    default:
+  }
+}

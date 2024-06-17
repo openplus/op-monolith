@@ -1,0 +1,14 @@
+name: 'WxT Extend Landing Page'
+description: 'Provides Landing Page related functionality.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'drupal:node'
+  - 'drupal:text'
+  - 'content_moderation:content_moderation'
+  - 'config_rewrite:config_rewrite'
+  - 'wxt_ext_layout:wxt_ext_layout'
+  - 'wxt_ext_metatag:wxt_ext_metatag'
+  - 'wxt_translation:wxt_translation'
+version: 5.2.0

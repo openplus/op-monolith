@@ -1,0 +1,19 @@
+findAndReplace:
+  remote: https://github.com/ckeditor/ckeditor5
+  version: "35.3.1"
+  license:
+    name: GNU-GPL-2.0-or-later
+    url: https://github.com/ckeditor/ckeditor5/blob/master/LICENSE.md
+    gpl-compatible: true
+  js:
+    js/build/find-and-replace.js: { preprocess: false, minified: true }
+  dependencies:
+    - core/ckeditor5
+    - core/ckeditor5.translations
+
+findAndReplace.admin:
+  css:
+    theme:
+      css/findandreplaceform.css: { }
+      css/findandreplace.css: { }
+      css/icon.css: { }

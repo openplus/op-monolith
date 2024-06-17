@@ -1,0 +1,8 @@
+name: 'WxT Extend Theme'
+description: 'Provides theming and related functionality.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'config_rewrite:config_rewrite'
+version: 5.2.0

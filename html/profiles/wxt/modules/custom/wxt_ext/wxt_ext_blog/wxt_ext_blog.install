@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Set up the WxT Extend Blog module.
+ */
+
+use Drupal\path_alias\Entity\PathAlias;
+use Drupal\wxt_translation\TranslationHelper;
+
+/**
+ * Implements hook_install().
+ */
+function wxt_ext_blog_install() {
+  // Stop here during a config sync.
+  if (Drupal::isConfigSyncing()) {
+    return;
+  }
+
+  // Enable translation for our core entities/bundles.
+  $entities = [
+    'node' => [
+      'blog_post',
+    ],
+  ];
+  wxt_translation_enable_translation($entities);
+
+  // Add URL alias for blog listing page.
+  $path_alias = PathAlias::create([
+    'path' => '/blog',
+    'alias' => '/blogue',
+    'langcode' => 'fr',
+  ]);
+
+  $path_alias->save();
+
+  // Install French config.
+  $moduleHandler = \Drupal::service('module_handler');
+
+  if ($moduleHandler->moduleExists('wxt_translation')) {
+    TranslationHelper::importTranslations('wxt_ext_blog');
+  }
+}

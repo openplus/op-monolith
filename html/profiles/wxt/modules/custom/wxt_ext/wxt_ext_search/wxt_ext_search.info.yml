@@ -1,0 +1,14 @@
+name: 'WxT Extend Search'
+description: 'Provides a default setup for Search API.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'drupal:field'
+  - 'drupal:image'
+  - 'drupal:node'
+  - 'drupal:text'
+  - 'drupal:user'
+  - 'drupal:views'
+  - 'search_api:search_api'
+version: 5.2.0

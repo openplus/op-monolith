@@ -1,0 +1,22 @@
+name: 'WxT Extend Editor'
+type: module
+description: 'Provides CKEditor 4/5 integration along with several plugins (WET Alert, Panels).'
+package: WxT
+core_version_requirement: '^9 || ^10'
+dependencies:
+  - 'blazy:blazy'
+  - 'ckeditor_abbreviation:ckeditor_abbreviation'
+  - 'ckeditor4_codemirror:ckeditor4_codemirror'
+  - 'ckeditor_codemirror:ckeditor_codemirror'
+  - 'ckeditor_details:ckeditor_details'
+  - 'drupal:ckeditor5'
+  - 'entity_embed:entity_embed'
+  - 'footnotes:footnotes'
+  - 'linkit:linkit'
+  - 'media:media'
+  - 'toc_api:toc_api'
+  - 'toc_filter:toc_filter'
+  - 'token_filter:token_filter'
+  - 'url_embed:url_embed'
+  - 'wxt_ext_media_image_responsive:wxt_ext_media_image_responsive'
+version: 5.2.0

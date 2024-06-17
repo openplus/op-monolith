@@ -1,0 +1,16 @@
+name: 'WxT Extend Migrate'
+description: 'Provides Migration related functionality along with a plethora of plugins and default content.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'entityqueue:entityqueue'
+  - 'migrate:migrate'
+  - 'migrate_plus:migrate_plus'
+  - 'migrate_tools:migrate_tools'
+  - 'page_manager:page_manager'
+  - 'panels_ipe:panels_ipe'
+  - 'wxt_ext_layout:wxt_ext_layout'
+  - 'wxt_ext_media:wxt_ext_media'
+  - 'wxt_ext_media_slideshow:wxt_ext_media_slideshow'
+version: 5.2.0

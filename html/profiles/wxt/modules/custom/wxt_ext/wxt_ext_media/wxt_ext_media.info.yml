@@ -1,0 +1,16 @@
+name: 'WxT Extend Media'
+description: 'Provides Media related functionality and enhancements.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+configure: wxt_ext_media.settings
+dependencies:
+  - 'content_moderation:content_moderation'
+  - 'drupal:image'
+  - 'drupal:media_library'
+  - 'drupal:user'
+  - 'entity_browser:entity_browser'
+  - 'inline_entity_form:inline_entity_form'
+  - 'wxt_core:wxt_core'
+  - 'wxt_translation:wxt_translation'
+version: 5.2.0

@@ -1,0 +1,9 @@
+# IDE/sysem paths.
+.idea
+
+# Node modules
+node_modules
+
+# Vendor paths.
+composer.lock
+vendor

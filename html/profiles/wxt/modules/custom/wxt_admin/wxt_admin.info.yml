@@ -1,0 +1,10 @@
+name: 'WxT Admin'
+description: 'Provides the default configuration and various helper methods for administrative tasks.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'admin_toolbar:admin_toolbar'
+  - 'admin_toolbar_tools:admin_toolbar_tools'
+  - 'admin_toolbar_links_access_filter:admin_toolbar_links_access_filter'
+version: 5.2.0

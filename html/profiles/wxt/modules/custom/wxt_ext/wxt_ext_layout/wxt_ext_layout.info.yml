@@ -1,0 +1,18 @@
+name: 'WxT Extend Layout'
+description: 'Provides Layout related functionality and enhancements.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'drupal:block'
+  - 'drupal:layout_builder'
+  - 'drupal:options'
+  - 'bootstrap_layouts:bootstrap_layouts'
+  - 'config_rewrite:config_rewrite'
+  - 'core_context:core_context'
+  - 'layout_library:layout_library'
+  - 'layout_builder_restrictions:layout_builder_restrictions'
+  - 'layout_builder_st:layout_builder_st'
+  - 'layout_builder_styles:layout_builder_styles'
+  - 'page_manager_ui:page_manager_ui'
+version: 5.2.0

@@ -1,0 +1,162 @@
+<?php
+
+/**
+ * @file
+ * Contains wxt_ext_webform.module.
+ */
+
+use Drupal\webform\Entity\Webform;
+use Drupal\webform\Entity\WebformSubmission;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+
+/**
+ * Implements hook_theme().
+ */
+function wxt_ext_webform_theme($existing, $type, $theme, $path) {
+  return [
+    'gcweb-inline-webform' => [
+      'variables' => [
+        'content' => NULL,
+      ],
+    ],
+    'gcweb-find-what-you-looking-for' => [
+      'variables' => [
+        'content' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function wxt_ext_webform_theme_suggestions_form_element_alter(array &$suggestions, array $variables) {
+  if (!empty($variables['element']['#webform']) && !empty($variables['element']['#webform_key'])) {
+    $webform = $variables['element']['#webform'];
+    $field_name = $variables['element']['#webform_key'];
+    $suggestions[] = 'form_element__' . $webform . '__' . $field_name;
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function wxt_ext_webform_theme_suggestions_container_alter(array &$suggestions, array $variables) {
+  if (!empty($variables['element']['#webform_id']) && $variables['element']['#webform_id'] == 'gcweb_did_you_find--actions_02') {
+    $suggestions[] = 'container__gcweb_did_you_find_actions';
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function wxt_ext_webform_webform_submission_presave(WebformSubmission $submission) {
+  $did_you_find_answer = $submission->getElementData('did_you_find_answer');
+
+  if (empty($did_you_find_answer)) {
+    // Since "No" button is really the next button for the wizard
+    // setting field value to "No" on presave.
+    $submission->setElementData('did_you_find_answer', 'No');
+  }
+}
+
+/**
+ * Implements hook_webform_submission_form_alter().
+ */
+function wxt_ext_webform_webform_submission_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  if (strpos($form_id, 'webform_submission_gcweb_did_you_find') !== FALSE) {
+    if ($form_state->get('current_page') == 'initial_page') {
+      // Add class to No button for spacing.
+      $form['actions']['wizard_next']['#attributes']['class'][] = 'mrgn-lft-sm';
+
+      // Add submit button on first page of wizard.
+      $form['actions']['submit_first_page'] = [
+        '#type' => 'submit',
+        '#value' => t('Yes'),
+        '#ajax' => [
+          'callback' => '_gcweb_did_you_find_form_ajax_submit',
+          'wrapper' => $form['#form_wrapper_id'],
+          'method' => 'replace',
+          'effect' => 'fade',
+        ],
+        '#attributes' => [
+          'class' => ['btn btn-primary'],
+        ],
+      ];
+    }
+  }
+}
+
+/**
+ * AJAX callback function for Yes button on gcweb_did_you_find webform.
+ */
+function _gcweb_did_you_find_form_ajax_submit($form, $form_state) {
+  // Programmatically submit webform and mark answer as "Yes".
+  $webform_id = 'gcweb_did_you_find';
+  $webform = Webform::load($webform_id);
+
+  $values = [
+    'webform_id' => $webform->id(),
+    'data' => [
+      'did_you_find_answer' => 'Yes',
+    ],
+  ];
+
+  $webform_submission = WebformSubmission::create($values);
+  $webform_submission->save();
+
+  // Build confirmation message.
+  $confirmation = [
+    '#type' => 'markup',
+    '#markup' => '<div class="webform-confirmation">
+                    <div class="webform-confirmation__message">
+                      <div class="gc-pg-hlpfl-thnk">
+                        <p class="h3 mrgn-tp-sm mrgn-bttm-sm"><span class="far fa-check-circle text-success mrgn-rght-sm" aria-hidden="true"></span> ' . t("Thank you for your feedback") . '</p>
+                      </div>
+                    </div>
+                  </div>',
+  ];
+
+  return $confirmation;
+}
+
+/**
+ * Implements hook_webform_options_WEBFORM_OPTIONS_ID_alter() for country names options.
+ */
+function wxt_ext_webform_webform_options_country_names_alter(array &$options, array $element = []) {
+  $config = \Drupal::configFactory()->get('wxt_core.settings.countries');
+  if ($config->get('webform-override') == 1) {
+    $countryManager = \Drupal::service('wxt.country_whitelist');
+    $options = $countryManager->whitelistedOptionsSorted();
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_form_alter() for WXT Country related additions.
+ */
+function wxt_ext_webform_form_wxt_core_countries_settings_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['webform-box'] = [
+    '#weight' => -1,
+    '#type' => 'fieldset',
+    '#title' => t('WxT Extend Webform'),
+  ];
+  $link = Link::createFromRoute(t('Webform Country Name Options'), 'entity.webform_options.edit_form', ['webform_options' => 'country_names']);
+  $form['webform-box']['webform-override'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Override Webform Options for Country Names'),
+    '#default_value' => \Drupal::config('wxt_core.settings.countries')->get('webform-override'),
+    '#description' => t('@link can be edited or reset in many circumstances.', ['@link' => $link->toString()]),
+  ];
+  $form['#submit'][] = 'wxt_ext_webform_form_wxt_core_countries_submit';
+}
+
+/**
+ * Process new field added to form.
+ */
+function wxt_ext_webform_form_wxt_core_countries_submit(&$form, FormStateInterface $form_state) {
+  \Drupal::configFactory()
+    ->getEditable('wxt_core.settings.countries')
+    ->set('webform-override', $form_state->getValue('webform-override'))
+    ->save();
+}

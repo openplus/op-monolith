@@ -1,0 +1,32 @@
+system.404:
+  path: '/system/404'
+  defaults:
+    _controller: '\Drupal\wxt_core\Controller\WxTHttp4xxController:on404'
+    _title: 'Page not found'
+  requirements:
+    # Overrides core native 404 handling
+    _access: 'TRUE'
+
+wxt_core.settings:
+  path: '/admin/config/wxt'
+  defaults:
+    _title: WxT
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+  requirements:
+    _permission: 'administer site configuration'
+
+wxt4032404.config:
+  path: '/admin/config/wxt/4032404'
+  defaults:
+    _form: '\Drupal\wxt_core\Form\WxT4032404Form'
+    _title: '403 to 404 Settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+wxt_core_countries.settings:
+  path: '/admin/config/wxt/wxt-countries'
+  defaults:
+    _title: WxT Countries
+    _form: '\Drupal\wxt_core\Form\CountriesWhitelistForm'
+  requirements:
+    _permission: 'administer site configuration'

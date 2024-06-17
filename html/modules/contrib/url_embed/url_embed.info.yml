@@ -1,0 +1,14 @@
+name: URL Embed
+type: module
+description: 'Allows URLs to be embedded using a text editor.'
+core_version_requirement: ^9 || ^10
+package: Filters
+dependencies:
+  - drupal:editor
+  - embed:embed
+  - drupal:filter
+
+# Information added by Drupal.org packaging script on 2024-01-04
+version: '2.0.0-alpha2'
+project: 'url_embed'
+datestamp: 1704363830

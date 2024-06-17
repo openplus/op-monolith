@@ -1,0 +1,40 @@
+/********** WxT fixes file **********/
+
+/* Search block */
+#wxt-search-api-block-form {
+  position: relative;
+}
+
+#wb-srch {
+  padding-top: 0.25em;
+}
+
+#wb-srch .form-group {
+  display: block;
+}
+
+#wb-srch input {
+  margin-right: 0px;
+}
+
+#wb-srch .submit {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+#wb-srch button {
+  min-height: 39px;
+}
+
+#wb-srch .contextual .trigger {
+  min-height: unset;
+  min-width: unset;
+}
+
+/* Fix search and menu icons stacking on mobile */
+@media only screen and (max-width: 479px) {
+  #wb-glb-mn ul {
+    min-width: 150px;
+  }
+}

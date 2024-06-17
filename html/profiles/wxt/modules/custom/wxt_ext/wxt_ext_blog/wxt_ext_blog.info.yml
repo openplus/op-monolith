@@ -1,0 +1,18 @@
+name: 'WxT Extend Blog'
+description: 'Creates a default Blog listing layout page.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'blog:blog'
+  - 'bootstrap_layouts:bootstrap_layouts'
+  - 'content_moderation:content_moderation'
+  - 'config_rewrite:config_rewrite'
+  - 'page_manager:page_manager'
+  - 'panels_ipe:panels_ipe'
+  - 'views_bootstrap:views_bootstrap'
+  - 'wxt_translation:wxt_translation'
+  - 'wxt_ext_comment:wxt_ext_comment'
+  - 'wxt_ext_metatag:wxt_ext_metatag'
+  - 'wxt_ext_taxonomy:wxt_ext_taxonomy'
+version: 5.2.0

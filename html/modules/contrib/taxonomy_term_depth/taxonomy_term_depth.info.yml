@@ -1,0 +1,17 @@
+type: module
+name: Taxonomy term depth
+core_version_requirement: ^8 || ^9 || ^10
+description: Provides field for storing taxonomy depth value and some wrappers integration with modules
+package: Taxonomy
+dependencies:
+  - drupal:taxonomy
+tags:
+  - taxonomy
+
+# version: VERSION
+# core: 8.x
+
+# Information added by Drupal.org packaging script on 2023-05-23
+version: '8.x-2.6'
+project: 'taxonomy_term_depth'
+datestamp: 1684849559

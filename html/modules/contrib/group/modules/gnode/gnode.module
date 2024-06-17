@@ -1,0 +1,105 @@
+<?php
+
+/**
+ * @file
+ * Enables Group functionality for the Node module.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\group\Entity\Group;
+use Drupal\group\Entity\GroupContent;
+use Drupal\node\NodeInterface;
+use Drupal\node\NodeTypeInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function gnode_node_type_insert(NodeTypeInterface $node_type) {
+  \Drupal::service('plugin.manager.group_content_enabler')->clearCachedDefinitions();
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function gnode_entity_operation(EntityInterface $entity) {
+  $operations = [];
+
+  if ($entity->getEntityTypeId() == 'group' && \Drupal::moduleHandler()->moduleExists('views')) {
+    /** @var \Drupal\group\Entity\GroupInterface $entity */
+    if ($entity->hasPermission('access group_node overview', \Drupal::currentUser())) {
+      /** @var \Symfony\Component\Routing\RouterInterface $router */
+      $router = \Drupal::service('router.no_access_checks');
+      if ($router->getRouteCollection()->get('view.group_nodes.page_1') !== NULL) {
+        $operations['nodes'] = [
+          'title' => t('Nodes'),
+          'weight' => 20,
+          'url' => Url::fromRoute('view.group_nodes.page_1', ['group' => $entity->id()]),
+        ];
+      }
+    }
+  }
+
+  return $operations;
+}
+
+
+/**
+ * Implements hook_entity_operation_alter().
+ */
+function gnode_entity_operation_alter(array &$operations, EntityInterface $entity) {
+  if (isset($operations['translate']) && $entity instanceof NodeInterface) {
+    $can_translate = TRUE;
+    $group_content_array = GroupContent::loadByEntity($entity);
+    $group_ids = [];
+    foreach ($group_content_array as $group_content) {
+      $group_ids[] = $group_content->gid->target_id;
+    }
+    if (!empty($group_ids)) {
+      $can_translate = FALSE;
+      $account = Drupal::currentUser();
+      $groups = Group::loadMultiple($group_ids);
+      $plugin_id = 'group_node:' . $entity->bundle();
+      /** @var \Drupal\group\Entity\Group[] $groups */
+      foreach ($groups as $group) {
+        if ($group->hasPermission("translate $plugin_id entity", $account)) {
+          $can_translate = TRUE;
+          break;
+        }
+      }
+    }
+    if (!$can_translate) {
+      unset($operations['translate']);
+    }
+
+  }
+}
+
+/**
+ * Implements hook_entity_translation_access().
+ */
+function gnode_entity_translation_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  if ($entity instanceof \Drupal\node\Entity\Node) {
+    $group_content_array = GroupContent::loadByEntity($entity);
+    $group_ids = [];
+    foreach ($group_content_array as $group_content) {
+      $group_ids[] = $group_content->gid->target_id;
+    }
+
+    if (!empty($group_ids)) {
+      $account = Drupal::currentUser();
+      $groups = Group::loadMultiple($group_ids);
+      $plugin_id = 'group_node:' . $entity->bundle();
+      /** @var \Drupal\group\Entity\Group[] $groups */
+      foreach ($groups as $group) {
+        if ($group->hasPermission("translate $plugin_id entity", $account)) {
+          return AccessResult::allowed();
+        }
+      }
+    }
+  }
+
+  return AccessResult::neutral();
+}

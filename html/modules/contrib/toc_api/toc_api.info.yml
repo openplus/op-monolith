@@ -1,0 +1,11 @@
+name: 'TOC API'
+type: module
+description: 'API for building a a hierarchical table of contents from header tags.'
+package: 'API'
+core_version_requirement: ^9.4 || ^10.0
+configure: entity.toc_type.collection
+
+# Information added by Drupal.org packaging script on 2023-11-24
+version: '8.x-1.4'
+project: 'toc_api'
+datestamp: 1700830614

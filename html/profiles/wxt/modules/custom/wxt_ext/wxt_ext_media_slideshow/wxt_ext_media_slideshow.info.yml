@@ -1,0 +1,12 @@
+name: 'WxT Extend Media Slideshow'
+description: 'Provides a Slideshow entity type for Media.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'drupal:block_content'
+  - 'field_formatter:field_formatter'
+  - 'media_entity_slideshow:media_entity_slideshow'
+  - 'slick_entityreference:slick_entityreference'
+  - 'wxt_ext_media:wxt_ext_media'
+version: 5.2.0

@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Update functions for the toc_api module.
+ */
+
+/**
+ * Add header_exclude_xpath to existing TOCs
+ */
+function toc_api_update_8001() {
+  $toc_types = \Drupal::entityQuery('toc_type')->execute();
+
+  foreach ($toc_types as $type) {
+    $entity = \Drupal::entityTypeManager()->getStorage('toc_type')->load($type);
+    $options = $entity->getOptions();
+
+    if (empty($options['header_exclude_xpath'])) {
+      $config_factory = \Drupal::configFactory();
+      $config_factory->getEditable('toc_api.toc_type.' . $type)->set('options.header_exclude_xpath', '')->save();
+    }
+  }
+}

@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Implemented hooks for the csvfile_formatter module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function csvfile_formatter_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.csvfile_formatter':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('A file field formatter that renders CSV files as HTML tables.') . '</p>';
+      return $output;
+  }
+}

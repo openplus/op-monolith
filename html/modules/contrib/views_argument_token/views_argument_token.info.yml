@@ -1,0 +1,13 @@
+name: 'Views Argument Token'
+description: 'This module allow to add a view argument token.'
+core_version_requirement: ^8 || ^9 || ^10
+type: module
+package: views
+dependencies:
+    - drupal:views
+    - token:token
+
+# Information added by Drupal.org packaging script on 2023-10-18
+version: '2.0.2'
+project: 'views_argument_token'
+datestamp: 1697637710

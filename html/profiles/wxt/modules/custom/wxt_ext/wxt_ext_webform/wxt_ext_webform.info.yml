@@ -1,0 +1,13 @@
+name: 'WxT Extend Webform'
+description: 'Provides enhanced functionality and custom plugins (Report a Problem, Did you Find).'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'content_moderation:content_moderation'
+  - 'config_rewrite:config_rewrite'
+  - 'webform:webform'
+  - 'webform_bootstrap:webform_bootstrap'
+  - 'webform_node:webform_node'
+  - 'webform_ui:webform_ui'
+version: 5.2.0

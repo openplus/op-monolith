@@ -1,0 +1,18 @@
+# This adds the plugin JavaScript to the page.
+# cSpell:ignore detail
+
+detail:
+  css:
+    theme:
+      css/detail.editor.css: { }
+  js:
+    js/build/detail.js: { preprocess: false, minified: true }
+  dependencies:
+    - core/ckeditor5
+
+# Loaded in the text format configuration form to provide styling for the icon
+# used in toolbar config.
+admin.detail:
+  css:
+    theme:
+      css/detail.admin.css: { }

@@ -1,0 +1,14 @@
+name: 'Advanced Insert View BUEditor Integration'
+type: module
+description: 'BUEditor Input filter which allows to embed views.'
+dependencies:
+  - insert_view_adv:insert_view_adv
+  - bueditor:bueditor
+package: 'Input filters'
+core: 8.x
+core_version_requirement: ^8 || ^9 || ^10
+
+# Information added by Drupal.org packaging script on 2022-10-10
+version: '2.0.0-alpha2'
+project: 'insert_view_adv'
+datestamp: 1665433822

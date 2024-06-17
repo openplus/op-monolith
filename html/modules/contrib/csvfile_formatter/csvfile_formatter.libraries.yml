@@ -1,0 +1,24 @@
+# Custom module library for general purposes.
+csvfile_formatter:
+  js:
+    js/csvfile-formatter.js: {}
+  css:
+    component:
+      css/csvfile-formatter.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - csvfile_formatter/datatables
+    - core/once
+    - core/drupalSettings
+
+datatables:
+  version: 1.11
+  license:
+    name: MIT
+    url: https://github.com/DataTables/DataTables/blob/master/license.txt
+  js:
+    https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js: { type: external }
+  css:
+    theme:
+      https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css: { type: external }

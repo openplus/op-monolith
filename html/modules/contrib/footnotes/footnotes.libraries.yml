@@ -1,0 +1,14 @@
+footnotes:
+  version: VERSION
+  css:
+    component:
+      assets/css/footnotes.css: {}
+footnotes-ckeditor5:
+  js:
+    assets/js/build/footnotes.js: { preprocess: false, minified: true }
+  dependencies:
+    - core/ckeditor5
+admin.footnotes-ckeditor5:
+  css:
+    theme:
+      assets/css/footnotes-ckeditor5.admin.css: { }

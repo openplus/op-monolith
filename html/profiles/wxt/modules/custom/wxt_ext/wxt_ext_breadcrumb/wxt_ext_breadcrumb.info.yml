@@ -1,0 +1,9 @@
+name: 'WxT Extend Breadcrumb'
+description: 'Configures breadcrumb and related functionality.'
+type: module
+core_version_requirement: '^9 || ^10'
+package: WxT
+dependencies:
+  - 'menu_breadcrumb:menu_breadcrumb'
+configure: wxt_ext_breadcrumb.settings_form
+version: 5.2.0

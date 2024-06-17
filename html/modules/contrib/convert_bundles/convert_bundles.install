@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Contains install and update functions for Convert Bundles.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function convert_bundles_install() {
+  $bundleInfo = \Drupal::service('entity_type.bundle.info');
+  foreach (\Drupal::entityTypeManager()->getDefinitions() as $entity_type_machine_name => $entity_type) {
+
+    $bundles = $bundleInfo->getBundleInfo($entity_type_machine_name);
+    if (count($bundles) < 2) {
+      continue;
+    }
+
+    _create_action($entity_type_machine_name, $entity_type->getLabel());
+  }
+}

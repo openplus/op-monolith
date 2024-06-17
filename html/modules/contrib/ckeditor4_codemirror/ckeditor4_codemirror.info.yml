@@ -1,0 +1,12 @@
+name: CKEditor4 CodeMirror
+type: module
+description: Adds the CKEditor4 CodeMirror source syntax highlighter plugin (http://ckeditor.com/addon/codemirror).
+package: CKEditor
+core_version_requirement: ^9.4 || ^10
+dependencies:
+  - drupal:ckeditor
+
+# Information added by Drupal.org packaging script on 2023-08-22
+version: '1.0.4'
+project: 'ckeditor4_codemirror'
+datestamp: 1692747993
