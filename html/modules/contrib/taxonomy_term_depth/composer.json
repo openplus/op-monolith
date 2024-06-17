@@ -1,0 +1,7 @@
+{
+  "name": "drupal/taxonomy_term_depth",
+  "type": "drupal-module",
+  "description": "Provides field for storing taxonomy depth value and some wrappers integration with modules",
+  "homepage": "http://drupal.org/project/taxonomy_term_depth",
+  "license": "GPL-2.0+"
+}

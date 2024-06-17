@@ -15,7 +15,6 @@ translations
 .gitattributes
 Makefile
 README.md
-composer.json
 composer.lock
 docker-compose.base.yml
 docker-compose.ci.yml
