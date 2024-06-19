@@ -1,0 +1,10 @@
+paths:
+ - '/admin'
+ - '/admin/*'
+ - '/admin*'
+ - '/node/add/*'
+ - '/node/*/edit'
+ - '/node/*/translations'
+ - '/node'
+admin_routes: false
+use_default_lang: false

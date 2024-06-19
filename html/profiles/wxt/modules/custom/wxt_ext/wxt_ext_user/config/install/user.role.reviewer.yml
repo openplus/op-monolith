@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies: {  }
+id: reviewer
+label: Reviewer
+weight: 4
+is_admin: null
+permissions:
+  - 'access administration pages'
+  - 'access comments'
+  - 'access content overview'
+  - 'access contextual links'
+  - 'access files overview'
+  - 'access shortcuts'
+  - 'access toolbar'
+  - 'access user profiles'
+  - 'create content translations'
+  - 'delete all revisions'
+  - 'delete content translations'
+  - 'dropzone upload files'
+  - 'edit own comments'
+  - 'revert all revisions'
+  - 'update content translations'
+  - 'use text format full_html'
+  - 'use text format rich_text'
+  - 'use text format full_html_ckeditor5'
+  - 'use text format rich_text_ckeditor5'
+  - 'view all revisions'
+  - 'view any unpublished content'
+  - 'view latest version'
+  - 'view own unpublished content'

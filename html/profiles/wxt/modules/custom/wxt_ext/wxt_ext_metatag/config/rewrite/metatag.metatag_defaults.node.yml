@@ -1,0 +1,15 @@
+config_rewrite: replace
+langcode: en
+status: true
+dependencies: {  }
+id: node
+label: Content
+tags:
+  description: '[node:summary]'
+  canonical_url: '[node:url]'
+  title: '[node:title] - [site:name]'
+  dcterms_title: '[node:title]'
+  dcterms_description: '[node:summary]'
+  dcterms_language: '[language:langcode]'
+  dcterms_issued: '[node:created:custom:Y-m-d]'
+  dcterms_modified: '[node:changed:custom:Y-m-d]'

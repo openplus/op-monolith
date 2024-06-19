@@ -1,19 +1,19 @@
 # Directories
 .github
-config
-content
-drush
+/config
+/content
+/drush/*
 html/modules/custom
 html/themes/custom
-scripts
-translations
+/scripts
+/translations
 
 # Files
 .dockerignore
 .editorconfig
 .env
 .gitattributes
-Makefile
+/Makefile
 README.md
 composer.lock
 docker-compose.base.yml
@@ -21,4 +21,4 @@ docker-compose.ci.yml
 docker-compose.mutagen.yml
 docker-compose.yml
 load.environment.php
-theme-topic.css
+/theme-topic.css
