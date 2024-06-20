@@ -1,0 +1,8 @@
+# This has 'change-this-to-info' in the filename instead of 'info' so this
+name: CKEditor5 Fullscreen
+type: module
+description: "Adds a Fullscreen / Maximize button for CKEditor5"
+package: CKEditor 5
+core_version_requirement: ^10
+dependencies:
+  - drupal:ckeditor5
