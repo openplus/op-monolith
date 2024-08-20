@@ -56,12 +56,34 @@ library_manager.library_definition.*:
           minified:
             type: boolean
             label: Minified
+          typemodulecheck:
+            type: boolean
+            label: Typemodule
+          nomodulecheck:
+            type: boolean
+            label: Nomodule
+          attributes:
+            type: mapping
+            label: Attributes
+            mapping:
+              type:
+                type: string
+                label: module
+              nomodule:
+                type: string
+                label: nomodule
           weight:
             type: integer
             label: Weight
           external:
             type: boolean
             label: External
+          code_type:
+            type: string
+            label: 'Code Type'
+          file_upload:
+            type: integer
+            label: 'File Upload'
           code:
             type: string
             label: Code
@@ -93,6 +115,12 @@ library_manager.library_definition.*:
           external:
             type: boolean
             label: External
+          code_type:
+            type: string
+            label: 'Code Type'
+          file_upload:
+            type: integer
+            label: 'File Upload'
           code:
             type: string
             label: Code

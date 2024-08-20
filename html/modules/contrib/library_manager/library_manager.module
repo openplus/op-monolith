@@ -8,6 +8,7 @@
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Component\Plugin\Exception\ContextException;
+use Drupal\file\Entity\File;
 
 /**
  * Implements hook_library_info_build().
@@ -20,7 +21,7 @@ function library_manager_library_info_build() {
   $libraries['library_manager'] = [];
   $libraries['library_manager']['js']['js/library-manager.js'] = [];
   $libraries['library_manager']['dependencies'][] = 'core/jquery';
-  $libraries['library_manager']['dependencies'][] = 'core/jquery.once';
+  $libraries['library_manager']['dependencies'][] = 'core/once';
   $libraries['library_manager']['dependencies'][] = 'core/drupal.debounce';
 
   return $libraries;
@@ -117,9 +118,33 @@ function library_manager_build_libraries() {
         // Set header.
         $library_info['header'] = isset($file['header']) && !empty($file['header']) ? TRUE : FALSE;
 
+        // Add custom attributes if they exist.
+        if (isset($file['attributes']) && is_array($file['attributes'])) {
+          foreach ($file['attributes'] as $attribute_name => $attribute_value) {
+            $options['attributes'][$attribute_name] = $attribute_value;
+          }
+        }
+
+        // Set the nomodule attribute to TRUE if it is set.
+        if (!empty($options['attributes']['nomodule'])) {
+          $options['attributes']['nomodule'] = TRUE;
+        }
+
         if ($file['external']) {
           $options['type'] = 'external';
           $library_info['js'][$file['url']] = $options;
+        }
+        elseif (isset($file['code_type']) && $file['code_type'] == 'file_upload') {
+          if (!empty($file['file_upload'])) {
+            $uploaded_file_id = $file['file_upload'];
+            /** @var \Drupal\file\Entity\File $uploaded_file */
+            $uploaded_file = File::load($uploaded_file_id);
+            if (!empty($uploaded_file)) {
+              $uploaded_file_uri = $uploaded_file->getFileUri();
+              $uploaded_file_path = \Drupal::service('file_url_generator')->generateAbsoluteString($uploaded_file_uri);
+              $library_info['js'][$uploaded_file_path] = $options;
+            }
+          }
         }
         else {
           $file_path = $libraries_path . '/' . $definition->id() . '/' . $file['file_name'];
@@ -142,6 +167,18 @@ function library_manager_build_libraries() {
         if ($file['external']) {
           $options['type'] = 'external';
           $library_info['css'][$file['group']][$file['url']] = $options;
+        }
+        elseif (isset($file['code_type']) && $file['code_type'] == 'file_upload') {
+          if (!empty($file['file_upload'])) {
+            $uploaded_file_id = $file['file_upload'];
+            /** @var \Drupal\file\Entity\File $uploaded_file */
+            $uploaded_file = File::load($uploaded_file_id);
+            if (!empty($uploaded_file)) {
+              $uploaded_file_uri = $uploaded_file->getFileUri();
+              $uploaded_file_path = \Drupal::service('file_url_generator')->generateAbsoluteString($uploaded_file_uri);
+              $library_info['css'][$file['group']][$uploaded_file_path] = $options;
+            }
+          }
         }
         else {
           $file_path = $libraries_path . '/' . $definition->id() . '/' . $file['file_name'];
@@ -216,4 +253,25 @@ function library_manager_codemirror_editor_assets_alter(array &$assets) {
   $assets['js'][] = 'mode/javascript/javascript.min.js';
   $assets['js'][] = 'mode/css/css.min.js';
   $assets['js'][] = 'mode/yaml/yaml.min.js';
+}
+
+/**
+ * Implements hook_css_alter().
+ */
+function library_manager_css_alter(array &$css, \Drupal\Core\Asset\AttachedAssetsInterface $assets) {
+  $libraries = $assets->getLibraries();
+
+  foreach (library_manager_library_info_build() as $lib_id => $library) {
+    if (in_array("library_manager/$lib_id", $libraries) && !empty($library['css'])) {
+      foreach ($library['css'] as $group_key => $group) {
+        foreach (array_keys($group) as $file) {
+          $key = trim($file, '/ ');
+          if (array_key_exists($key, $css)) {
+            // Detailed Reference: \Drupal\Core\Asset\LibraryDiscoveryParser.
+            $css[$key]['group'] = $group_key == 'theme' ? CSS_AGGREGATE_THEME : CSS_AGGREGATE_DEFAULT;
+          }
+        }
+      }
+    }
+  }
 }

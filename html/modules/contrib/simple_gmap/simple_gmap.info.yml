@@ -8,8 +8,3 @@ dependencies:
   - text
 test_dependencies:
   - address
-
-# Information added by Drupal.org packaging script on 2023-09-22
-version: '3.1.0'
-project: 'simple_gmap'
-datestamp: 1695409418

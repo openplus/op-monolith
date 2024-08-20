@@ -12,7 +12,7 @@ final class GeneratedConfig
 	public const EXTENSIONS = array (
   'composer/composer' => 
   array (
-    'install_path' => '/var/opt/docker/site-cra-tmp/vendor/composer/composer',
+    'install_path' => '/var/opt/docker/site-cra/vendor/composer/composer',
     'relative_install_path' => '../../../composer/composer',
     'extra' => 
     array (
@@ -25,7 +25,7 @@ final class GeneratedConfig
   ),
   'mglaman/phpstan-drupal' => 
   array (
-    'install_path' => '/var/opt/docker/site-cra-tmp/vendor/mglaman/phpstan-drupal',
+    'install_path' => '/var/opt/docker/site-cra/vendor/mglaman/phpstan-drupal',
     'relative_install_path' => '../../../mglaman/phpstan-drupal',
     'extra' => 
     array (
@@ -39,7 +39,7 @@ final class GeneratedConfig
   ),
   'phpstan/phpstan-deprecation-rules' => 
   array (
-    'install_path' => '/var/opt/docker/site-cra-tmp/vendor/phpstan/phpstan-deprecation-rules',
+    'install_path' => '/var/opt/docker/site-cra/vendor/phpstan/phpstan-deprecation-rules',
     'relative_install_path' => '../../phpstan-deprecation-rules',
     'extra' => 
     array (
@@ -52,7 +52,7 @@ final class GeneratedConfig
   ),
   'phpstan/phpstan-phpunit' => 
   array (
-    'install_path' => '/var/opt/docker/site-cra-tmp/vendor/phpstan/phpstan-phpunit',
+    'install_path' => '/var/opt/docker/site-cra/vendor/phpstan/phpstan-phpunit',
     'relative_install_path' => '../../phpstan-phpunit',
     'extra' => 
     array (

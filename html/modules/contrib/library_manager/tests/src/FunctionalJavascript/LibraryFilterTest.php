@@ -13,6 +13,11 @@ class LibraryFilterTest extends WebDriverTestBase {
 
   /**
    * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
    *
    * @see https://www.drupal.org/node/2787529
    */
@@ -21,7 +26,7 @@ class LibraryFilterTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['library_manager_test'];
+  protected static $modules = ['library_manager_test'];
 
   /**
    * Tests if the library list can be filtered with JavaScript.

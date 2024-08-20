@@ -46,7 +46,7 @@ class LibraryInformationTest extends TestBase {
    */
   public function testDetailsPage() {
 
-    $module_path = drupal_get_path('module', 'library_manager_test');
+    $module_path = \Drupal::service('extension.list.module')->getPath('library_manager_test');
 
     $this->drupalGet('admin/structure/library');
     $this->clickLinkInRow('library_manager_test/library_manager_test', 'library_manager_test/library_manager_test');

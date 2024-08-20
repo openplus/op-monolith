@@ -28,6 +28,8 @@ class LibraryDefinitionCssForm extends EntityForm {
       'preprocess' => TRUE,
       'minified' => FALSE,
       'external' => FALSE,
+      'code_type' => 'code',
+      'file_upload' => NULL,
       'url' => '',
       'weight' => 0,
     ];
@@ -46,14 +48,6 @@ class LibraryDefinitionCssForm extends EntityForm {
     $form['file_id'] = [
       '#type' => 'value',
       '#value' => $file_id,
-    ];
-
-    $form['file_name'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('File name'),
-      '#required' => TRUE,
-      '#placeholder' => 'example.css',
-      '#default_value' => $defaults['file_name'],
     ];
 
     $form['group'] = [
@@ -102,7 +96,67 @@ class LibraryDefinitionCssForm extends EntityForm {
       '#states' => ['visible' => [':input[name="external"]' => ['checked' => TRUE]]],
     ];
 
-    $form['code'] = [
+    $form['code_wrapper'] = [
+      '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          ':input[name="external"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
+
+    $form['code_wrapper']['code_type'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Code Type'),
+      '#options' => [
+        'file_upload' => $this->t('File Upload'),
+        'code' => $this->t('Code'),
+      ],
+      '#required' => TRUE,
+      '#default_value' => $defaults['code_type'],
+    ];
+
+    // Add a wrapper, because managed_file didn't support states api until https://www.drupal.org/node/2847425 be
+    // solved.
+    $form['code_wrapper']['file_upload_wrapper'] = [
+      '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          ':input[name="code_type"]' => ['value' => 'file_upload'],
+        ],
+      ],
+    ];
+
+    $form['code_wrapper']['file_upload_wrapper']['file_upload'] = [
+      '#type' => 'managed_file',
+      '#title' => $this->t('Css File Upload'),
+      '#description' => $this->t('Upload a file, allowed extensions: css'),
+      '#upload_validators' => [
+        'FileExtension' => ['extensions' => 'css'],
+      ],
+      '#upload_location' => 'public://libraries/file_upload',
+    ];
+
+    if (!empty($defaults['file_upload'])) {
+      $form['code_wrapper']['file_upload_wrapper']['file_upload']['#default_value'] = [$defaults['file_upload']];
+    }
+
+    $form['code_wrapper']['file_name'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('File name'),
+      '#placeholder' => 'example.css',
+      '#default_value' => $defaults['file_name'],
+      '#states' => [
+        'visible' => [
+          ':input[name="code_type"]' => ['value' => 'code'],
+        ],
+        'required' => [
+          ':input[name="code_type"]' => ['value' => 'code'],
+        ],
+      ],
+    ];
+
+    $form['code_wrapper']['code'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Code'),
       '#default_value' => $defaults['code'],
@@ -120,7 +174,11 @@ class LibraryDefinitionCssForm extends EntityForm {
           'shrink',
         ],
       ],
-      '#states' => ['visible' => [':input[name="external"]' => ['checked' => FALSE]]],
+      '#states' => [
+        'visible' => [
+          ':input[name="code_type"]' => ['value' => 'code'],
+        ],
+      ],
     ];
 
     return $form;
@@ -131,8 +189,11 @@ class LibraryDefinitionCssForm extends EntityForm {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $file_name = $form_state->getValue('file_name');
-    if (!preg_match('#^\w[\w\-\.\/]*\.css$#i', $file_name) || strpos($file_name, '..') !== FALSE) {
-      $form_state->setError($form['file_name'], $this->t('The file name is not correct.'));
+    $code_type = $form_state->getValue('code_type');
+    if ($code_type != 'file_upload') {
+      if (!preg_match('#^\w[\w\-\.\/]*\.css$#i', $file_name) || strpos($file_name, '..') !== FALSE) {
+        $form_state->setError($form['file_name'], $this->t('The file name is not correct.'));
+      }
     }
   }
 
@@ -173,6 +234,18 @@ class LibraryDefinitionCssForm extends EntityForm {
       $ids = array_keys($css);
       $file_id = count($ids) > 0 ? max($ids) + 1 : 1;
     }
+    if (isset($values['file_upload'][0])) {
+      $uploaded_file_id = $values['file_upload'][0];
+      if (!empty($uploaded_file_id)) {
+        $uploaded_file = \Drupal::entityTypeManager()->getStorage('file')->load($uploaded_file_id);
+        if (!empty($uploaded_file)) {
+          if (!$uploaded_file->isPermanent()) {
+            $uploaded_file->setPermanent();
+            $uploaded_file->save();
+          }
+        }
+      }
+    }
 
     $css[$file_id] = [
       'file_name' => $values['file_name'],
@@ -181,6 +254,8 @@ class LibraryDefinitionCssForm extends EntityForm {
       'minified' => $values['minified'],
       'weight' => $values['weight'],
       'external' => $values['external'],
+      'code_type' => $values['code_type'],
+      'file_upload' => $values['file_upload'][0] ?? NULL,
       'code' => $values['code'],
       'url' => $values['url'],
     ];

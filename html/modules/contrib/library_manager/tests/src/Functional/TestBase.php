@@ -14,7 +14,7 @@ abstract class TestBase extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['library_manager', 'library_manager_test'];
+  protected static $modules = ['library_manager', 'library_manager_test'];
 
   /**
    * {@inheritdoc}

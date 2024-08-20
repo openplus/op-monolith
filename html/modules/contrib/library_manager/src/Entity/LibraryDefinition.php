@@ -6,6 +6,7 @@ use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
+use Drupal\file\Entity\File;
 use Drupal\library_manager\LibraryDefinitionInterface;
 
 /**
@@ -205,6 +206,57 @@ class LibraryDefinition extends ConfigEntityBase implements LibraryDefinitionInt
    * {@inheritdoc}
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    if ($update) {
+      $original_upload_file_ids = [];
+      /** @var \Drupal\library_manager\Entity\LibraryDefinition $orignal */
+      $original = $this->original;
+      $original_css = $original->get('css');
+      $original_js = $original->get('js');
+      foreach ($original_css as $value) {
+        if (!empty($value['file_upload'])) {
+          $original_upload_file_ids[$value['file_upload']] = $value['file_upload'];
+        }
+      }
+      foreach ($original_js as $value) {
+        if (!empty($value['file_upload'])) {
+          $original_upload_file_ids[$value['file_upload']] = $value['file_upload'];
+        }
+      }
+
+      $upload_file_ids = [];
+      $css = $this->get('css');
+      $js = $this->get('js');
+      foreach ($css as $value) {
+        if (!empty($value['file_upload'])) {
+          $upload_file_ids[$value['file_upload']] = $value['file_upload'];
+        }
+      }
+      foreach ($js as $value) {
+        if (!empty($value['file_upload'])) {
+          $upload_file_ids[$value['file_upload']] = $value['file_upload'];
+        }
+      }
+
+      /** @var FileUsageInterface $file_usage */
+      $file_usage = \Drupal::service('file.usage');
+      $entity_id = $this->id();
+      foreach ($upload_file_ids as $file_id) {
+        if (!isset($original_upload_file_ids[$file_id])) {
+          $file = File::load($file_id);
+          if (!empty($file)) {
+            $file_usage->add($file, 'library_manager', 'library_definition', $entity_id);
+          }
+        }
+      }
+      foreach ($original_upload_file_ids as $file_id) {
+        if (!isset($upload_file_ids[$file_id])) {
+          $file = File::load($file_id);
+          if (!empty($file)) {
+            $file_usage->delete($file, 'library_manager', 'library_definition', $entity_id);
+          }
+        }
+      }
+    }
     parent::postSave($storage, $update);
     \Drupal::service('library.discovery')->clearCachedDefinitions();
     drupal_static_reset('library_manager_build_libraries');

@@ -5,6 +5,8 @@
 /drush/*
 html/modules/custom
 html/themes/custom
+html/sites/default
+html/sites/settings.php
 /scripts
 /translations
 

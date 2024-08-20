@@ -20,26 +20,29 @@ class LibraryDefinitionAssetsTest extends TestBase {
       'id' => 'beta',
       'version' => '1.0.0',
     ];
-    $this->drupalPostForm('admin/structure/library/definition/add', $edit, 'Save');
+    $this->drupalGet('admin/structure/library/definition/add');
+    $this->submitForm($edit, 'Save');
 
     // Create new file.
     $edit = [
       'file_name' => 'example-1.js',
       'code' => 'alert(123)',
     ];
-    $this->drupalPostForm('admin/structure/library/definition/beta/js/add', $edit, 'Save');
+    $this->drupalGet('admin/structure/library/definition/beta/js/add');
+    $this->submitForm($edit, 'Save');
     $this->assertTrue(file_exists($libraries_path . 'beta/example-1.js'));
 
     // Rename the file.
     $edit = [
       'file_name' => 'example-2.js',
     ];
-    $this->drupalPostForm('admin/structure/library/definition/beta/js/1/edit', $edit, 'Save');
+    $this->drupalGet('admin/structure/library/definition/beta/js/1/edit');
+    $this->submitForm($edit, 'Save');
     $this->assertFalse(file_exists($libraries_path . 'beta/example-1.js'));
     $this->assertTrue(file_exists($libraries_path . 'beta/example-2.js'));
-
     // Delete the file.
-    $this->drupalPostForm('admin/structure/library/definition/beta/js/1/delete', [], 'Delete');
+    $this->drupalGet('admin/structure/library/definition/beta/js/1/delete');
+    $this->submitForm([], 'Delete');
     $this->assertFalse(file_exists($libraries_path . 'beta/example-2.js'));
 
     // Create new file.
@@ -47,11 +50,12 @@ class LibraryDefinitionAssetsTest extends TestBase {
       'file_name' => 'example-3.css',
       'code' => 'body {color: blue;}',
     ];
-    $this->drupalPostForm('admin/structure/library/definition/beta/css/add', $edit, 'Save');
+    $this->drupalGet('admin/structure/library/definition/beta/css/add');
+    $this->submitForm($edit, 'Save');
     $this->assertTrue(file_exists($libraries_path . 'beta/example-3.css'));
-
     // Delete the definition.
-    $this->drupalPostForm('admin/structure/library/definition/beta/delete', [], 'Delete');
+    $this->drupalGet('admin/structure/library/definition/beta/delete');
+    $this->submitForm([], 'Delete');
     $this->assertFalse(file_exists($libraries_path . 'beta'));
   }
 

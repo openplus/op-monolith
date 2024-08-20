@@ -18,7 +18,7 @@ class AssetsCheckFormTest extends TestBase {
     $this->clickLink('Library assets');
     $this->assertPageTitle('Library assets');
     $this->assertXpath('//div[normalize-space() = "Last check: never."]');
-    $this->drupalPostForm(NULL, [], 'Check assets');
+    $this->submitForm([], 'Check assets');
     $assert_session = $this->assertSession();
     $assert_session->responseMatches('#Could not load .*library_manager/tests/library_manager_test/js/example.js#');
     $assert_session->responseMatches('#Could not load .*library_manager/tests/library_manager_test/css/example.css#');

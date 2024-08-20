@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Contains install and update functions for Library Manager.
+ */
+
+/**
+ * Add new JS attributes to existing libraries.
+ */
+function library_manager_update_8205() {
+  // Load all existing library definitions.
+  $config_factory = \Drupal::service('config.factory');
+  $library_definitions = $config_factory->listAll('library_manager.library_definition.');
+
+  foreach ($library_definitions as $library_definition) {
+    $config = $config_factory->getEditable($library_definition);
+
+    // Update the configuration schema to include the new fields.
+    if (!$config->get('attributes')) {
+      $config->set('attributes', []);
+    }
+    if (!$config->get('typemodulecheck')) {
+      $config->set('typemodulecheck', FALSE);
+    }
+    if (!$config->get('nomodulecheck')) {
+      $config->set('nomodulecheck', FALSE);
+    }
+
+    // Save the updated configuration.
+    $config->save();
+  }
+
+  // Invalidate the cache to ensure changes take effect.
+  \Drupal::service('cache.config')->invalidateAll();
+}

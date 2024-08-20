@@ -116,8 +116,9 @@ class LibraryDiscovery extends BaseLibraryDiscovery implements LibraryDiscoveryI
     }
 
     // Allow modules to add dynamic library definitions.
-    if ($this->moduleHandler->implementsHook($extension, 'library_info_build')) {
-      $libraries = NestedArray::mergeDeep($libraries, $this->moduleHandler->invoke($extension, 'library_info_build'));
+    $hook = 'library_info_build';
+    if ($this->moduleHandler->hasImplementations($hook, $extension)) {
+      $libraries = NestedArray::mergeDeep($libraries, $this->moduleHandler->invoke($extension, $hook));
     }
 
     // Allow modules to alter the module's registered libraries.
@@ -131,7 +132,7 @@ class LibraryDiscovery extends BaseLibraryDiscovery implements LibraryDiscoveryI
   public function getExtensionPath($extension) {
     $path = $extension == 'core' ?
       'core' :
-      drupal_get_path($this->moduleHandler->moduleExists($extension) ? 'module' : 'theme', $extension);
+    ($this->moduleHandler->moduleExists($extension) ? \Drupal::service('extension.list.module')->getPath($extension) : \Drupal::service('extension.list.theme')->getPath($extension));
 
     return $path . '/';
   }

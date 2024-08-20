@@ -6,8 +6,3 @@ package: views
 dependencies:
     - drupal:views
     - token:token
-
-# Information added by Drupal.org packaging script on 2023-10-18
-version: '2.0.2'
-project: 'views_argument_token'
-datestamp: 1697637710

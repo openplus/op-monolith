@@ -40,12 +40,12 @@ class LibraryDefinitionBuildFormTest extends TestBase {
       $this->assertPageTitle('Create library definition');
       $cloned_library_id = $extension . '_' . $library . '_cloned';
 
-      $this->drupalPostForm(NULL, ['id' => $cloned_library_id], 'Create');
+      $this->submitForm(['id' => $cloned_library_id], 'Create');
       $this->assertStatusMessage('Library definition has been created.');
       $this->assertPageTitle('Edit library definition');
 
       // Register a new library to compare its properties with original.
-      $this->drupalPostForm(NULL, ['mode' => 'new'], 'Save');
+      $this->submitForm(['mode' => 'new'], 'Save');
 
       drupal_static_reset('library_manager_build_libraries');
       $library_info = $library_discovery->exportLibraryByName($extension, $library);

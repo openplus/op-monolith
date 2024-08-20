@@ -13,8 +13,3 @@ dependencies:
 libraries:
   - wxt_library/wet-boew
   - wxt_library/wet-boew-dev
-
-# Information added by Drupal.org packaging script on 2024-01-18
-version: '8.x-8.0'
-project: 'wxt_library'
-datestamp: 1705612182

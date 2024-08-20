@@ -12,7 +12,7 @@ class LibraryAutoLoadTest extends TestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node'];
+  protected static $modules = ['node'];
 
   /**
    * Test callback.
@@ -29,8 +29,8 @@ class LibraryAutoLoadTest extends TestBase {
       'load' => TRUE,
       'visibility[request_path][pages]' => '/node/1',
     ];
-
-    $this->drupalPostForm('admin/structure/library/definition/alpha/edit', $edit, 'Save');
+    $this->drupalGet('admin/structure/library/definition/alpha/edit');
+    $this->submitForm($edit, 'Save');
 
     $this->drupalGet('node/1');
     $assert_session->responseContains('/sites/default/files/libraries/custom/alpha/example.css');
@@ -42,7 +42,8 @@ class LibraryAutoLoadTest extends TestBase {
 
     // Negate the condition and check the pages again.
     $edit['visibility[request_path][negate]'] = TRUE;
-    $this->drupalPostForm('admin/structure/library/definition/alpha/edit', $edit, 'Save');
+    $this->drupalGet('admin/structure/library/definition/alpha/edit');
+    $this->submitForm($edit, 'Save');
     $this->drupalGet('admin/structure/library/definition/alpha/edit');
 
     drupal_flush_all_caches();

@@ -176,7 +176,9 @@ class LibraryDefinitionBuildForm extends EntityForm {
         $file_definition['group'] = $group;
       }
       $local_path = FALSE;
+      $file_definition['code_type'] = 'code';
       if ($file_definition['external'] == 'external') {
+        $file_definition['code_type'] = NULL;
         $file_definition['code'] = '';
         $file_definition['url'] = $file[$file_name];
       }
@@ -189,18 +191,20 @@ class LibraryDefinitionBuildForm extends EntityForm {
           }
           // A protocol-free URI (e.g., //cdn.com/example.js) is external.
           else {
+            $file_definition['code_type'] = NULL;
             $file_definition['external'] = 'external';
             $file_definition['url'] = $file[$file_name];
           }
         }
         // A stream wrapper URI (e.g., public://generated_js/example.js).
-        elseif (file_valid_uri($file_name)) {
+        elseif (\Drupal::service('stream_wrapper_manager')->isValidUri($file_name)) {
           $local_path = $file_name;
         }
         // A regular URI (e.g., http://example.com/example.js) without
         // 'external' explicitly specified, which may happen if, e.g.
         // libraries-override is used.
         elseif (count(explode('://', $file_name)) === 2) {
+          $file_definition['code_type'] = NULL;
           $file_definition['external'] = 'external';
           $file_definition['url'] = $file_name;
         }

@@ -14,7 +14,7 @@ class LibraryDiscoveryTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['library_manager'];
+  protected static $modules = ['library_manager'];
 
   /**
    * Tests the library discovery service.

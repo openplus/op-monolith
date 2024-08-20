@@ -10,7 +10,9 @@ use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
+use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -182,13 +184,33 @@ class LibraryDefinitionForm extends EntityForm {
           $weight,
         ];
       }
+      elseif (isset($js_data['code_type']) && $js_data['code_type'] == 'file_upload') {
+        $file_name = '';
+        $file_size = '';
+        if (isset($js_data['file_upload'])) {
+          $uploaded_file_id = $js_data['file_upload'];
+          if (!empty($uploaded_file_id)) {
+            $uploaded_file = File::load($uploaded_file_id);
+            if (!empty($uploaded_file)) {
+              $file_name = $uploaded_file->getFilename();
+              $file_size = $uploaded_file->getSize();
+              $file_size = ByteSizeMarkup::create($file_size);
+            }
+          }
+        }
+        $rows = [
+          $file_name,
+          $file_size,
+          $this->t('File Upload'),
+        ];
+      }
       else {
         $file_path = '/' . $settings['libraries_path'] . '/' . $this->entity->id() . '/' . $js_data['file_name'];
         $file_url = Url::fromUri('internal:' . $file_path, ['attributes' => ['target' => '_blank']]);
         $file_name = Link::fromTextAndUrl($js_data['file_name'], $file_url)->toString();
         $rows = [
           $file_name,
-          format_size(mb_strlen($js_data['code'])),
+          \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create(mb_strlen($js_data['code'])), fn() => format_size(mb_strlen($js_data['code']))),
           $this->t('Local'),
           $weight,
         ];
@@ -264,13 +286,33 @@ class LibraryDefinitionForm extends EntityForm {
           $this->t('External'),
         ];
       }
+      elseif (isset($css_data['code_type']) && $css_data['code_type'] == 'file_upload') {
+        $file_name = '';
+        $file_size = '';
+        if (isset($css_data['file_upload'])) {
+          $uploaded_file_id = $css_data['file_upload'];
+          if (!empty($uploaded_file_id)) {
+            $uploaded_file = File::load($uploaded_file_id);
+            if (!empty($uploaded_file)) {
+              $file_name = $uploaded_file->getFilename();
+              $file_size = $uploaded_file->getSize();
+              $file_size = ByteSizeMarkup::create($file_size);
+            }
+          }
+        }
+        $rows = [
+          $file_name,
+          $file_size,
+          $this->t('File Upload'),
+        ];
+      }
       else {
         $file_path = '/' . $settings['libraries_path'] . '/' . $this->entity->id() . '/' . $css_data['file_name'];
         $file_url = Url::fromUri('internal:' . $file_path, ['attributes' => ['target' => '_blank']]);
         $file_name = Link::fromTextAndUrl($css_data['file_name'], $file_url)->toString();
         $rows = [
           $file_name,
-          format_size(mb_strlen($css_data['code'])),
+          \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create(mb_strlen($css_data['code'])), fn() => format_size(mb_strlen($css_data['code']))),
           $this->t('Local'),
         ];
       }
@@ -407,7 +449,7 @@ class LibraryDefinitionForm extends EntityForm {
 
     $visibility = $this->entity->getVisibility();
 
-    foreach ($this->conditionManager->getDefinitions() as $condition_id => $definition) {
+    foreach ($this->conditionManager->getFilteredDefinitions('library_manager') as $condition_id => $definition) {
 
       /** @var \Drupal\Core\Condition\ConditionInterface $condition */
       $condition = $this->conditionManager->createInstance($condition_id, isset($visibility[$condition_id]) ? $visibility[$condition_id] : []);

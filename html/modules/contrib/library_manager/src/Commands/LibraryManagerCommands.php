@@ -152,7 +152,7 @@ class LibraryManagerCommands extends DrushCommands {
         foreach ($library_info[$asset_type] as $file) {
 
           if ($file['type'] == 'file') {
-            $url = file_create_url($file['data']);
+            $url = \Drupal::service('file_url_generator')->generateAbsoluteString($file['data']);
           }
           elseif ($file['type'] == 'external') {
             $url = $file['data'];

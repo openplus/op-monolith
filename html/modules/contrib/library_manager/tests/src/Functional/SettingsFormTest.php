@@ -19,7 +19,7 @@ class SettingsFormTest extends TestBase {
     $edit = [
       'libraries_path' => 'sites/default/files/foo',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save configuration');
+    $this->submitForm($edit, 'Save configuration');
     $this->assertStatusMessage('The configuration options have been saved.');
     $this->assertXpath($form_prefix . '//input[@name = "libraries_path" and @value = "sites/default/files/foo"]');
   }

@@ -5,8 +5,3 @@ package: Fields
 core_version_requirement: ^8 || ^9 || ^10
 dependencies:
   - drupal:file
-
-# Information added by Drupal.org packaging script on 2023-06-01
-version: '1.0.18'
-project: 'csvfile_formatter'
-datestamp: 1685631348

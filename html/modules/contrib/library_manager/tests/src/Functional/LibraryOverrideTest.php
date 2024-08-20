@@ -23,7 +23,7 @@ class LibraryOverrideTest extends TestBase {
     // Override core/jquery library.
     $this->drupalGet('admin/structure/library');
     $this->clickLinkInRow('core/jquery', 'Create definition');
-    $this->drupalPostForm(NULL, ['id' => 'jquery_overridden'], 'Create');
+    $this->submitForm(['id' => 'jquery_overridden'], 'Create');
 
     // Make sure that the jQuery library is replaced.
     $this->drupalGet('<front>');

@@ -54,6 +54,19 @@ usage of entities on your site.
 Go to the URL /admin/config/entity-usage/batch-update in order to start the
 batch operation.
 
+Tracking via queue
+============
+The module support tracking entity usage via a queue. When the entity usage is
+tracked via a queue, the tracking information will be updated when cron runs.
+This means some references between entities could be missing. Only use this setting
+when you are sure there are no automatic processes using the tracking information
+to update or delete content.
+
+Since this is for advanced users only, this setting is not exposed in the UI.
+This can be enabled through the settings.php by adding the following line:
+
+$config['entity_usage.settings']['queue_tracking'] = TRUE;
+
 Project page and Online handbook
 ================================
 

@@ -1,0 +1,25 @@
+--- build/cshs.js
++++ build/cshs.js
+@@ -7,19 +7,19 @@ var __webpack_exports__ = {};
+  */
+ 
+ 
+-(function ($) {
++(function ($, once) {
+   'use strict';
+ 
+   Drupal.behaviors.cshs = {
+     attach: function attach(context, settings) {
+-      $('select.simpler-select-root', context).once('cshs').each(function (index, element) {
++      $(once('cshs', 'select.simpler-select-root', context)).each(function (index, element) {
+         if (settings === null || settings === void 0 ? void 0 : settings.cshs[element.id]) {
+           $(element).simplerSelect(settings.cshs[element.id]);
+         }
+       });
+     }
+   };
+-})(jQuery);
++})(jQuery, once);
+ /******/ })()
+ ;
+-//# sourceMappingURL=cshs.js.map+//# sourceMappingURL=cshs.js.map

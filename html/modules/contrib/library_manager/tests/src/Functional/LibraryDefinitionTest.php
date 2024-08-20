@@ -100,7 +100,7 @@ class LibraryDefinitionTest extends TestBase {
       'visibility[user_role][roles][anonymous]' => TRUE,
     ];
 
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertStatusMessage('Library definition has been created.');
 
     // Check default form values for newly created definition.
@@ -131,7 +131,7 @@ class LibraryDefinitionTest extends TestBase {
     $this->clickLink('Cancel');
     $this->assertPageTitle('Library definitions');
     $this->drupalGet($delete_url);
-    $this->drupalPostForm(NULL, [], 'Delete');
+    $this->submitForm([], 'Delete');
     $this->assertStatusMessage($this->t('Deleted library definition %definition_name.', ['%definition_name' => 'foo']));
     $this->assertPageTitle('Library definitions');
   }
@@ -162,19 +162,19 @@ class LibraryDefinitionTest extends TestBase {
       'external' => FALSE,
       'code' => 'console.log(123);',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertErrorMessage('The file name is not correct.');
 
     $edit['file_name'] = 'foo.php';
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertErrorMessage('The file name is not correct.');
 
     $edit['file_name'] = 'bar/../foo.js';
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertErrorMessage('The file name is not correct.');
 
     $edit['file_name'] = 'foo.js';
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
 
     $this->assertStatusMessage('The JS file has been saved.');
     $this->assertPageTitle('Edit library definition');
@@ -198,7 +198,7 @@ class LibraryDefinitionTest extends TestBase {
     $this->assertPageTitle('Edit library definition');
 
     $this->clickLinkInRow('foo.js', 'Delete');
-    $this->drupalPostForm(NULL, [], 'Delete');
+    $this->submitForm([], 'Delete');
 
     $this->assertStatusMessage('The JS file has been deleted.');
     $this->assertPageTitle('Edit library definition');
@@ -231,19 +231,19 @@ class LibraryDefinitionTest extends TestBase {
       'url' => 'http://example.com/foo.css',
     ];
 
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertErrorMessage('The file name is not correct.');
 
     $edit['file_name'] = 'foo.php';
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertErrorMessage('The file name is not correct.');
 
     $edit['file_name'] = 'bar/../foo.css';
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertErrorMessage('The file name is not correct.');
 
     $edit['file_name'] = 'foo.css';
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
 
     $this->assertStatusMessage('The CSS file has been saved.');
     $this->assertPageTitle('Edit library definition');
@@ -268,7 +268,7 @@ class LibraryDefinitionTest extends TestBase {
 
     $this->clickLinkInRow('foo.css', 'Delete');
 
-    $this->drupalPostForm(NULL, [], 'Delete');
+    $this->submitForm([], 'Delete');
 
     $this->assertStatusMessage('The CSS file has been deleted.');
     $this->assertPageTitle('Edit library definition');
@@ -282,9 +282,9 @@ class LibraryDefinitionTest extends TestBase {
     $this->clickLinkInRow('alpha', 'Duplicate');
     $this->assertPageTitle('Duplicate of alpha');
     $this->assertXpath('//input[@name = "id" and @value = "duplicate_of_alpha"]');
-    $this->drupalPostForm(NULL, ['id' => 'alpha'], 'Duplicate');
+    $this->submitForm(['id' => 'alpha'], 'Duplicate');
     $this->assertErrorMessage('The machine-readable name is already in use. It must be unique.');
-    $this->drupalPostForm(NULL, ['id' => 'beta'], 'Duplicate');
+    $this->submitForm(['id' => 'beta'], 'Duplicate');
     $this->assertPageTitle('Edit library definition');
     $this->assertXpath('//input[@name = "id" and @value = "beta"]');
     $this->assertXpath('//input[@name = "version" and @value = "1.2.3"]');

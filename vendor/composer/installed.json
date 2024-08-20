@@ -486,7 +486,7 @@
             "version_normalized": "2.3.4.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:fengyuanchen/cropper.git",
+                "url": "https://github.com/fengyuanchen/cropper.git",
                 "reference": "30c58b29ee21010e17e58ebab165fbd84285c685"
             },
             "dist": {
@@ -528,7 +528,7 @@
             "version_normalized": "1.8.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/kenwheeler/slick.git",
+                "url": "git@github.com:kenwheeler/slick.git",
                 "reference": "0f40c9d6a02a5c08b5f4dd80fdada3a854a59bee"
             },
             "dist": {
@@ -3283,10 +3283,6 @@
                     "role": "Maintainer"
                 },
                 {
-                    "name": "Mohammed J. Razem",
-                    "homepage": "https://www.drupal.org/user/255384"
-                },
-                {
                     "name": "Rajab Natshah",
                     "homepage": "https://www.drupal.org/user/1414312"
                 }
@@ -4158,7 +4154,7 @@
             "extra": {
                 "drupal": {
                     "version": "1.0.2",
-                    "datestamp": "1695740655",
+                    "datestamp": "1687261951",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -4297,6 +4293,54 @@
                 "issues": "https://www.drupal.org/project/issues/ckeditor4_codemirror?version=8.x"
             },
             "install-path": "../../html/modules/contrib/ckeditor4_codemirror"
+        },
+        {
+            "name": "drupal/ckeditor5_fullscreen",
+            "version": "1.0.0-beta8",
+            "version_normalized": "1.0.0.0-beta8",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/ckeditor5_fullscreen.git",
+                "reference": "1.0.0-beta8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/ckeditor5_fullscreen-1.0.0-beta8.zip",
+                "reference": "1.0.0-beta8",
+                "shasum": "695dffd509065c9aba5804f78ff665c344d81e86"
+            },
+            "require": {
+                "drupal/core": "^10"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "1.0.0-beta8",
+                    "datestamp": "1712766370",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Project has not opted into security advisory coverage!"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "O'Toole, James",
+                    "homepage": "https://www.drupal.org/user/174967",
+                    "email": "james.otoole@ubc.ca"
+                }
+            ],
+            "description": "A Fullscreen / Maximize button for CKeditor5",
+            "homepage": "https://www.drupal.org/project/ckeditor5_fullscreen",
+            "support": {
+                "source": "https://git.drupalcode.org/project/ckeditor5_fullscreen"
+            },
+            "install-path": "../../html/modules/contrib/ckeditor5_fullscreen"
         },
         {
             "name": "drupal/ckeditor_abbreviation",
@@ -4615,7 +4659,7 @@
             },
             "time": "2024-01-27T18:13:12+00:00",
             "type": "phpcodesniffer-standard",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Drupal\\": "coder_sniffer/Drupal/",
@@ -5841,7 +5885,7 @@
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0-or-later"
@@ -7462,7 +7506,7 @@
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0-or-later"
@@ -7612,6 +7656,9 @@
                     "services": {
                         "drush.services.yml": "^9 || ^10 || ^11"
                     }
+                },
+                "patches_applied": {
+                    "3015287 - Use Drupal queue for updating the usage of entities": "https://www.drupal.org/files/issues/2024-02-09/3015287-entity-usage-tracker-queue.patch"
                 }
             },
             "installation-source": "dist",
@@ -7965,10 +8012,6 @@
                 "GPL-2.0-or-later"
             ],
             "authors": [
-                {
-                    "name": "Anybody",
-                    "homepage": "https://www.drupal.org/user/291091"
-                },
                 {
                     "name": "Hydra",
                     "homepage": "https://www.drupal.org/user/647364"
@@ -8501,10 +8544,6 @@
                     "name": "Henrik Ingo (hingo)",
                     "homepage": "https://www.drupal.org/u/hingo",
                     "role": "Maintainer"
-                },
-                {
-                    "name": "scott_euser",
-                    "homepage": "https://www.drupal.org/user/3267594"
                 },
                 {
                     "name": "smulvih2",
@@ -9148,6 +9187,10 @@
                 {
                     "name": "bnjmnm",
                     "homepage": "https://www.drupal.org/user/2369194"
+                },
+                {
+                    "name": "ivnish",
+                    "homepage": "https://www.drupal.org/user/3547706"
                 },
                 {
                     "name": "jrockowitz",
@@ -9831,18 +9874,18 @@
         },
         {
             "name": "drupal/library_manager",
-            "version": "2.0.4",
-            "version_normalized": "2.0.4.0",
+            "version": "2.1.1",
+            "version_normalized": "2.1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/library_manager.git",
-                "reference": "2.0.4"
+                "reference": "2.1.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/library_manager-2.0.4.zip",
-                "reference": "2.0.4",
-                "shasum": "4b6a0f05c4b98091dbf558bd106dfcc3a2305001"
+                "url": "https://ftp.drupal.org/files/projects/library_manager-2.1.1.zip",
+                "reference": "2.1.1",
+                "shasum": "f8326c7a342811cd4b006fd53c6d1cbac7aef3e3"
             },
             "require": {
                 "drupal/codemirror_editor": "^1.0",
@@ -9854,15 +9897,15 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.0.4",
-                    "datestamp": "1695226159",
+                    "version": "2.1.1",
+                    "datestamp": "1721037470",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0+"
@@ -9875,6 +9918,10 @@
                 {
                     "name": "joel_osc",
                     "homepage": "https://www.drupal.org/user/124931"
+                },
+                {
+                    "name": "lawxen",
+                    "homepage": "https://www.drupal.org/user/2936003"
                 },
                 {
                     "name": "smulvih2",
@@ -10803,7 +10850,7 @@
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0-or-later"
@@ -11316,6 +11363,92 @@
             "install-path": "../../html/modules/contrib/prepopulate"
         },
         {
+            "name": "drupal/queue_ui",
+            "version": "3.1.4",
+            "version_normalized": "3.1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/queue_ui.git",
+                "reference": "3.1.4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/queue_ui-3.1.4.zip",
+                "reference": "3.1.4",
+                "shasum": "a701e551683b2b026f4223ac81a6f5a3c34eedcb"
+            },
+            "require": {
+                "drupal/core": "^9.2 || ^10"
+            },
+            "require-dev": {
+                "drupal/queue_order": "^2"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "3.1.4",
+                    "datestamp": "1708276956",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                },
+                "drush": {
+                    "services": {
+                        "drush.services.yml": "^9 || ^10 || ^11"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "floretan",
+                    "homepage": "https://www.drupal.org/user/2743951",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "coltrane",
+                    "homepage": "https://www.drupal.org/user/91990",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "tsphethean",
+                    "homepage": "https://www.drupal.org/user/66163",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "bceyssens",
+                    "homepage": "https://www.drupal.org/user/2811585",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "voleger",
+                    "homepage": "https://www.drupal.org/user/881620",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "voleger",
+                    "homepage": "https://www.drupal.org/user/3260314"
+                }
+            ],
+            "description": "Interface and manager for Drupal queues.",
+            "homepage": "https://www.drupal.org/project/queue_ui",
+            "keywords": [
+                "drupal",
+                "php",
+                "queue"
+            ],
+            "support": {
+                "source": "https://git.drupalcode.org/project/queue_ui",
+                "issues": "https://www.drupal.org/project/issues/queue_ui"
+            },
+            "install-path": "../../html/modules/contrib/queue_ui"
+        },
+        {
             "name": "drupal/quickedit",
             "version": "1.0.3",
             "version_normalized": "1.0.3.0",
@@ -11584,7 +11717,7 @@
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0+"
@@ -11926,7 +12059,7 @@
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0-or-later"
@@ -12212,7 +12345,7 @@
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0-or-later"
@@ -13426,7 +13559,7 @@
                     }
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0+"
@@ -14516,7 +14649,7 @@
                 "enable-patching": true,
                 "patches": []
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
                 "GPL-2.0+"
@@ -14869,6 +15002,9 @@
                     "drupal/webform": {
                         "Enter drupal/webform patch #3205860 description here": "https://www.drupal.org/files/issues/2021-03-26/webform_clientside_validation-3205860-2.patch"
                     }
+                },
+                "patches_applied": {
+                    "3456754 - split footer migrations": "https://www.drupal.org/files/issues/2024-06-24/wxt-split-contextual-menu-item-migration-3456754-2.patch"
                 }
             },
             "installation-source": "dist",
@@ -20144,12 +20280,12 @@
             "type": "library",
             "installation-source": "dist",
             "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
                 "psr-4": {
                     "Rogervila\\": "src/"
-                }
+                },
+                "files": [
+                    "src/helpers.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [

@@ -28,7 +28,7 @@
         $emptyRow.toggle($rows.filter(':visible').length === 0);
       }
 
-      var $input = $('[data-drupal-selector="library-filter"]').once('lm-filter');
+      var $input = $(once('lm-filter','[data-drupal-selector="library-filter"]'));
       if ($input.length === 1) {
         var $table = $('[data-drupal-selector="library-list"]');
         var $rows = $table.find('tbody tr');

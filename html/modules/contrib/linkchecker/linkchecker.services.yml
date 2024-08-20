@@ -1,8 +1,8 @@
 services:
   # Linkchecker Module logs
   logger.channel.linkchecker:
-    parent: 'logger.channel_base'
-    arguments: ['linkchecker']
+    class: Drupal\linkchecker\Logger\LinkCheckerLogger
+    arguments: ['linkchecker', '@config.factory']
 
   linkchecker.extractor:
     class: Drupal\linkchecker\LinkExtractorService
