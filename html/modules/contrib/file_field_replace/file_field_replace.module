@@ -1,0 +1,169 @@
+<?php
+
+/**
+ * @file
+ * Contains file_field_replace.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Plugin\Field\FieldType\FileFieldItemList;
+use Drupal\file_field_replace\Element\ManagedFilePlus;
+
+/**
+ * Implements hook_help().
+ */
+function file_field_replace_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the file_field_replace module.
+    case 'help.page.file_field_replace':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Adds a file field widget to replace uploaded files instead of renaming') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Saves any files that have been uploaded into a managed_file_plus element.
+ *
+ * This function is a copy of file_managed_file_save_upload() but with the added
+ * $replace parameter to control the behaviour when the destination file exists.
+ *
+ * @param array $element
+ *   The FAPI element whose values are being saved.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ * @param int $replace
+ *   (optional) Replace behavior when the destination file already exists.
+ *   Possible values include:
+ *   - FILE_EXISTS_REPLACE: Replace the existing file. If a managed file with
+ *     the destination name exists, then its database entry will be updated. If
+ *     no database entry is found, then a new one will be created.
+ *   - FILE_EXISTS_RENAME: (default) Append _{incrementing number} until the
+ *     filename is unique.
+ *   - FILE_EXISTS_ERROR: Do nothing and return FALSE.
+ *
+ * @return array|false
+ *   An array of file entities for each file that was saved, keyed by its file
+ *   ID. Each array element contains a file entity. Function returns FALSE if
+ *   upload directory could not be created or no files were uploaded.
+ *
+ * @see file_managed_file_save_upload()
+ */
+function file_managed_plus_file_save_upload($element, FormStateInterface $form_state, $replace = FileSystemInterface::EXISTS_RENAME) {
+  $upload_name = implode('_', $element['#parents']);
+  $all_files = \Drupal::request()->files->get('files', []);
+  if (empty($all_files[$upload_name])) {
+    return FALSE;
+  }
+  $file_upload = $all_files[$upload_name];
+
+  $destination = isset($element['#upload_location']) ? $element['#upload_location'] : NULL;
+  if (isset($destination) && !\Drupal::service('file_system')->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY)) {
+    \Drupal::logger('file')->notice('The upload directory %directory for the file field %name could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', ['%directory' => $destination, '%name' => $element['#field_name']]);
+    $form_state->setError($element, t('The file could not be uploaded.'));
+    return FALSE;
+  }
+
+  // Save attached files to the database.
+  $files_uploaded = $element['#multiple'] && count(array_filter($file_upload)) > 0;
+  $files_uploaded |= !$element['#multiple'] && !empty($file_upload);
+  if ($files_uploaded) {
+    if (!$files = _file_save_upload_from_form($element, $form_state, NULL, $replace)) {
+      \Drupal::logger('file')->notice('The file upload failed. %upload', ['%upload' => $upload_name]);
+      return [];
+    }
+
+    // Value callback expects FIDs to be keys.
+    $files = array_filter($files);
+    $fids = array_map(function ($file) {
+      return $file->id();
+    }, $files);
+
+    return empty($files) ? [] : array_combine($fids, $files);
+  }
+
+  return [];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function file_field_replace_form_field_config_edit_form_alter(array &$form, FormStateInterface $form_state) {
+  /** @var Drupal\field\Entity\FieldConfig $field */
+  $field = $form_state->getFormObject()->getEntity();
+  $class = $field->getClass();
+
+  if (class_exists($class) && new $class($field->getItemDefinition()) instanceof FileFieldItemList) {
+    $entity_info = \Drupal::entityTypeManager()
+      ->getDefinition($field->getTargetEntityTypeId());
+    $settings = $field->getThirdPartySettings('file_field_replace');
+
+    $form['settings']['file_field_replace'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#weight' => 2,
+      '#parents' => ['third_party_settings', 'file_field_replace'],
+    ];
+
+    $form['settings']['file_field_replace']['replace'] = [
+      '#type' => 'radios',
+      '#title' => t('Handle Existing Files'),
+      '#description' => t('Select the method of handling where there is a file already with the same name as the file being uploaded.<br><em>Note that the Replace option will replace a file with the same name even if that file is being used/referenced by another file field. Use at your own risk.</em>'),
+      '#default_value' => isset($settings['replace']) ? $settings['replace'] : FileSystemInterface::EXISTS_RENAME,
+      '#options' => [
+        FileSystemInterface::EXISTS_RENAME => t('Rename the new file'),
+        FileSystemInterface::EXISTS_REPLACE => t('Replace the existing file.'),
+        FileSystemInterface::EXISTS_ERROR => t('Prevent the file from being uploaded.'),
+      ],
+    ];
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function file_field_replace_field_widget_single_element_form_alter(&$element, FormStateInterface $form_state, $context) {
+  // All file-based fields use the managed_file element type
+  if (isset($element['#type']) && $element['#type'] == 'managed_file') {
+    $settings = $context['items']->getFieldDefinition()
+      ->getThirdPartySettings('file_field_replace');
+    if (isset($settings['replace']) && $settings['replace'] !== FileSystemInterface::EXISTS_RENAME) {
+      $element['#type'] = 'managed_file_plus';
+      $element['#upload_replace'] = $settings['replace'];
+      $element['#value_callback'] = 'file_field_replace_field_widget_value_calback';
+    }
+  }
+}
+
+/**
+ * Replacement value callback for file fields.
+ *
+ * This is essentially a copy of the core FileWidget::value(), but using the
+ * ManagedFilePlus::valueCallback() instead of ManagedFile::valueCallback().
+ */
+function file_field_replace_field_widget_value_calback($element, $input, FormStateInterface $form_state) {
+  if ($input) {
+    // Checkboxes lose their value when empty.
+    // If the display field is present make sure its unchecked value is saved.
+    if (empty($input['display'])) {
+      $input['display'] = $element['#display_field'] ? 0 : 1;
+    }
+  }
+
+  // We depend on the managed file plus element to handle uploads.
+  $return = ManagedFilePlus::valueCallback($element, $input, $form_state);
+
+  // Ensure that all the required properties are returned even if empty.
+  $return += [
+    'fids' => [],
+    'display' => 1,
+    'description' => '',
+  ];
+
+  return $return;
+}

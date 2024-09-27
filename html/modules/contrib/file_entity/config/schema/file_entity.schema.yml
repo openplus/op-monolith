@@ -69,7 +69,7 @@ field.formatter.settings.file_download_link:
       type: string
       label: 'Access message'
     text:
-      type: string
+      type: label
       label: 'Link text'
 
 field.formatter.settings.file_audio:

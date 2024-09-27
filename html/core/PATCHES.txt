@@ -53,6 +53,14 @@ Source: https://www.drupal.org/files/issues/2020-07-28/3161942-2-filter-aliases-
 Source: https://www.drupal.org/files/issues/2023-12-19/2313309-179.patch
 
 
+2783897 - Select all for theme visibility condition
+Source: https://www.drupal.org/files/issues/2023-07-10/core_drupal-current-theme_2783897_11x_37_0.patch
+
+
+3417971 - wsod when saving content language settings
+Source: https://www.drupal.org/files/issues/2024-09-19/logic_exception_wsod_temporary-3417971-14.patch
+
+
 Enter drupal/core patch #2752443 description here
 Source: https://www.drupal.org/files/issues/in_correct_order_and-2752443-1.patch
 

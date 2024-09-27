@@ -5277,6 +5277,8 @@
                     "2938129 - PHP8.2 fix": "https://www.drupal.org/files/issues/2024-01-21/drupal-PageTitle_block-2938129-42.patch",
                     "3161942 - URL Alias: Extend filter aliases to recognize system path": "https://www.drupal.org/files/issues/2020-07-28/3161942-2-filter-aliases-to-search-through-alias-or-system-path.patch",
                     "2313309 - Admin toolbar follow lang preference": "https://www.drupal.org/files/issues/2023-12-19/2313309-179.patch",
+                    "2783897 - Select all for theme visibility condition": "https://www.drupal.org/files/issues/2023-07-10/core_drupal-current-theme_2783897_11x_37_0.patch",
+                    "3417971 - wsod when saving content language settings": "https://www.drupal.org/files/issues/2024-09-19/logic_exception_wsod_temporary-3417971-14.patch",
                     "Enter drupal/core patch #2752443 description here": "https://www.drupal.org/files/issues/in_correct_order_and-2752443-1.patch",
                     "Enter drupal/core patch #850600 description here": "https://www.drupal.org/files/issues/2023-11-14/postgresql-ssl-dns-850600-29.patch",
                     "Enter drupal/core patch #2559833 description here": "https://www.drupal.org/files/issues/2024-01-14/comment_form_redirect-2559833-100.patch",
@@ -6861,6 +6863,93 @@
             "install-path": "../../html/modules/contrib/dynamic_entity_reference"
         },
         {
+            "name": "drupal/editablefields",
+            "version": "1.0.2",
+            "version_normalized": "1.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/editablefields.git",
+                "reference": "1.0.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/editablefields-1.0.2.zip",
+                "reference": "1.0.2",
+                "shasum": "3fac77340531a3adf60024ba9120bbd022d7c405"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9 || ^10"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "1.0.2",
+                    "datestamp": "1707846362",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Project has not opted into security advisory coverage!"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "andreiashu",
+                    "homepage": "https://www.drupal.org/user/212904"
+                },
+                {
+                    "name": "bengtan",
+                    "homepage": "https://www.drupal.org/user/132729"
+                },
+                {
+                    "name": "dags",
+                    "homepage": "https://www.drupal.org/user/1248930"
+                },
+                {
+                    "name": "Damien Tournoud",
+                    "homepage": "https://www.drupal.org/user/22211"
+                },
+                {
+                    "name": "gilmord",
+                    "homepage": "https://www.drupal.org/user/2913239"
+                },
+                {
+                    "name": "Island Usurper",
+                    "homepage": "https://www.drupal.org/user/86683"
+                },
+                {
+                    "name": "Jan van Diepen",
+                    "homepage": "https://www.drupal.org/user/195578"
+                },
+                {
+                    "name": "joelpittet",
+                    "homepage": "https://www.drupal.org/user/160302"
+                },
+                {
+                    "name": "krlucas",
+                    "homepage": "https://www.drupal.org/user/271780"
+                },
+                {
+                    "name": "markfoodyburton",
+                    "homepage": "https://www.drupal.org/user/114447"
+                },
+                {
+                    "name": "vishun",
+                    "homepage": "https://www.drupal.org/user/199418"
+                }
+            ],
+            "description": "Allows you to make some fields editable from the display.",
+            "homepage": "https://www.drupal.org/project/editablefields",
+            "support": {
+                "source": "https://git.drupalcode.org/project/editablefields"
+            },
+            "install-path": "../../html/modules/contrib/editablefields"
+        },
+        {
             "name": "drupal/editor_advanced_link",
             "version": "2.2.4",
             "version_normalized": "2.2.4.0",
@@ -8013,6 +8102,10 @@
             ],
             "authors": [
                 {
+                    "name": "Anybody",
+                    "homepage": "https://www.drupal.org/user/291091"
+                },
+                {
                     "name": "Hydra",
                     "homepage": "https://www.drupal.org/user/647364"
                 },
@@ -8247,6 +8340,9 @@
                         "status": "not-covered",
                         "message": "RC releases are not covered by Drupal security advisories."
                     }
+                },
+                "patches_applied": {
+                    "3157682 - Make field settings translatable": "https://www.drupal.org/files/issues/2020-07-08/3157682.patch"
                 }
             },
             "installation-source": "dist",
@@ -8264,7 +8360,7 @@
                     "homepage": "https://www.drupal.org/user/27259"
                 },
                 {
-                    "name": "Berdir",
+                    "name": "berdir",
                     "homepage": "https://www.drupal.org/user/214652"
                 },
                 {
@@ -8272,15 +8368,15 @@
                     "homepage": "https://www.drupal.org/user/657902"
                 },
                 {
-                    "name": "DamienMcKenna",
+                    "name": "damienmckenna",
                     "homepage": "https://www.drupal.org/user/108450"
                 },
                 {
-                    "name": "Dave Reid",
+                    "name": "dave reid",
                     "homepage": "https://www.drupal.org/user/53892"
                 },
                 {
-                    "name": "Devin Carlson",
+                    "name": "devin carlson",
                     "homepage": "https://www.drupal.org/user/290182"
                 },
                 {
@@ -8308,7 +8404,7 @@
                     "homepage": "https://www.drupal.org/user/68912"
                 },
                 {
-                    "name": "JeffM2001",
+                    "name": "jeffm2001",
                     "homepage": "https://www.drupal.org/user/262092"
                 },
                 {
@@ -8346,6 +8442,57 @@
                 "source": "https://git.drupalcode.org/project/file_entity"
             },
             "install-path": "../../html/modules/contrib/file_entity"
+        },
+        {
+            "name": "drupal/file_field_replace",
+            "version": "3.0.0",
+            "version_normalized": "3.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/file_field_replace.git",
+                "reference": "3.0.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/file_field_replace-3.0.0.zip",
+                "reference": "3.0.0",
+                "shasum": "14a4b43ddef9ff566a6faad931c46ff7bc3ff793"
+            },
+            "require": {
+                "drupal/core": "^9 || ^10"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "3.0.0",
+                    "datestamp": "1697043665",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "drclaw",
+                    "homepage": "https://www.drupal.org/user/823702"
+                }
+            ],
+            "description": "Adds a file field widget to replace uploaded files instead of renaming",
+            "homepage": "https://www.drupal.org/project/file_field_replace",
+            "keywords": [
+                "Drupal"
+            ],
+            "support": {
+                "source": "http://cgit.drupalcode.org/file_field_replace",
+                "issues": "https://www.drupal.org/project/issues/file_field_replace"
+            },
+            "install-path": "../../html/modules/contrib/file_field_replace"
         },
         {
             "name": "drupal/flag",
@@ -9187,10 +9334,6 @@
                 {
                     "name": "bnjmnm",
                     "homepage": "https://www.drupal.org/user/2369194"
-                },
-                {
-                    "name": "ivnish",
-                    "homepage": "https://www.drupal.org/user/3547706"
                 },
                 {
                     "name": "jrockowitz",
@@ -11562,7 +11705,8 @@
                     }
                 },
                 "patches_applied": {
-                    "3383171 - Call to undefined method Drupal/entity_browser/Form/EntityBrowserForm::getEntity()": "https://www.drupal.org/files/issues/2023-09-15/3383171-7.patch"
+                    "3383171 - Call to undefined method Drupal/entity_browser/Form/EntityBrowserForm::getEntity()": "https://www.drupal.org/files/issues/2023-09-15/3383171-7.patch",
+                    "3400907 - WSOD on deleting translation": "https://www.drupal.org/files/issues/2024-08-19/3400907-11-10.3.patch"
                 }
             },
             "installation-source": "dist",
@@ -11584,7 +11728,11 @@
                     "homepage": "https://www.drupal.org/user/2803351"
                 },
                 {
-                    "name": "Matroskeen",
+                    "name": "japerry",
+                    "homepage": "https://www.drupal.org/user/45640"
+                },
+                {
+                    "name": "matroskeen",
                     "homepage": "https://www.drupal.org/user/3426249"
                 },
                 {
@@ -14730,6 +14878,10 @@
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
                     }
+                },
+                "patches_applied": {
+                    "3145858 - Reverse order of year selection": "https://www.drupal.org/files/issues/2022-12-13/yearonly-reverse_order-3145858-15.patch",
+                    "3035638 - Allow add extra years (NOW + x)": "https://www.drupal.org/files/issues/2019-02-25/yearonly-allow_extra%2Byears-3035638-2-D8.patch"
                 }
             },
             "installation-source": "dist",

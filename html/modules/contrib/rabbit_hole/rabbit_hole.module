@@ -49,7 +49,11 @@ function rabbit_hole_form_alter(&$form, FormStateInterface $form_state, $form_id
       'delete', 'cancel', 'reset', 'layout_builder', 'replicate',
     ];
 
-    $is_bundle_form = in_array($current_type, $affected_bundle_types) && !in_array($current_operation, $disallowed_operations);
+    if (in_array($current_operation, $disallowed_operations)) {
+      return;
+    }
+
+    $is_bundle_form = in_array($current_type, $affected_bundle_types);
     if ($is_bundle_form) {
       $form_mangler->addRabbitHoleChangeNotice($form);
     }

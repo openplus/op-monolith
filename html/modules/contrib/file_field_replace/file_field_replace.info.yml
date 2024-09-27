@@ -1,0 +1,12 @@
+name: File Field Replace
+type: module
+description: Adds a setting to file fields to replace uploaded files instead of renaming
+core_version_requirement: ^9 || ^10
+package: Custom
+dependencies:
+  - drupal:file
+
+# Information added by Drupal.org packaging script on 2023-10-11
+version: '3.0.0'
+project: 'file_field_replace'
+datestamp: 1697043667

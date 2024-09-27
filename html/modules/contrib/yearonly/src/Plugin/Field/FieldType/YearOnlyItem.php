@@ -66,6 +66,7 @@ class YearOnlyItem extends FieldItemBase implements FieldItemInterface {
     return [
       'yearonly_from' => '',
       'yearonly_to' => '',
+      'yearonly_extra' => '',
     ] + parent::defaultFieldSettings();
   }
 
@@ -88,6 +89,7 @@ class YearOnlyItem extends FieldItemBase implements FieldItemInterface {
     ];
 
     $options = [
+      'now_extra' => 'NOW (plus extra)',
       'now' => 'NOW',
     ];
     $options += array_combine(range(date('Y') + 1, date('Y') + 50), range(date('Y') + 1, date('Y') + 50));
@@ -97,7 +99,21 @@ class YearOnlyItem extends FieldItemBase implements FieldItemInterface {
       '#default_value' => $this->getSetting('yearonly_to'),
       '#options' => $options,
       '#description' => $this->t('Select last year.'),
-      '#weight' => 1,
+      '#weight' => 2,
+    ];
+
+    $element['yearonly_extra'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Extra years since NOW'),
+      '#weight' => 3,
+      '#min' => 1,
+      '#size' => 100,
+      '#default_value' => $this->getSetting('yearonly_extra'),
+      '#states' => [
+        'visible' => [
+          'select[name="settings[yearonly_to]"]' => ['value' => 'now_extra'],
+        ],
+      ],
     ];
 
     return $element;

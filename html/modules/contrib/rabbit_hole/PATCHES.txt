@@ -5,3 +5,7 @@ Patches applied to this directory:
 Source: https://www.drupal.org/files/issues/2023-09-15/3383171-7.patch
 
 
+3400907 - WSOD on deleting translation
+Source: https://www.drupal.org/files/issues/2024-08-19/3400907-11-10.3.patch
+
+

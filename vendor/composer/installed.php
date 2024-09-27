@@ -3,7 +3,7 @@
         'name' => 'openplus/site-cra',
         'pretty_version' => '1.0.x-dev',
         'version' => '1.0.9999999.9999999-dev',
-        'reference' => '9180523d3e2ce97bc6130bc66f4058e7fb730d98',
+        'reference' => '412b39f3affc6934c371b34acb556bca0620d4ed',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -1071,6 +1071,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/editablefields' => array(
+            'pretty_version' => '1.0.2',
+            'version' => '1.0.2.0',
+            'reference' => '1.0.2',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../html/modules/contrib/editablefields',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/editor_advanced_link' => array(
             'pretty_version' => '2.2.4',
             'version' => '2.2.4.0',
@@ -1269,6 +1278,15 @@
             'aliases' => array(
                 0 => '2.0-beta10',
             ),
+            'dev_requirement' => false,
+        ),
+        'drupal/file_field_replace' => array(
+            'pretty_version' => '3.0.0',
+            'version' => '3.0.0.0',
+            'reference' => '3.0.0',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../html/modules/contrib/file_field_replace',
+            'aliases' => array(),
             'dev_requirement' => false,
         ),
         'drupal/flag' => array(
@@ -2464,7 +2482,7 @@
         'openplus/site-cra' => array(
             'pretty_version' => '1.0.x-dev',
             'version' => '1.0.9999999.9999999-dev',
-            'reference' => '9180523d3e2ce97bc6130bc66f4058e7fb730d98',
+            'reference' => '412b39f3affc6934c371b34acb556bca0620d4ed',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -2839,8 +2857,8 @@
         'psr/http-client-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.0',
-                1 => '*',
+                0 => '*',
+                1 => '1.0',
             ),
         ),
         'psr/http-factory' => array(
@@ -2855,8 +2873,8 @@
         'psr/http-factory-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.0',
-                1 => '*',
+                0 => '*',
+                1 => '1.0',
             ),
         ),
         'psr/http-message' => array(
@@ -2871,8 +2889,8 @@
         'psr/http-message-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.0',
-                1 => '*',
+                0 => '*',
+                1 => '1.0',
             ),
         ),
         'psr/log' => array(
