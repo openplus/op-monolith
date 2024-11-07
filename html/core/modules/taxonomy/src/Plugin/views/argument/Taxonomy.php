@@ -2,67 +2,15 @@
 
 namespace Drupal\taxonomy\Plugin\views\argument;
 
-use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\views\Plugin\views\argument\NumericArgument;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\views\Attribute\ViewsArgument;
+use Drupal\views\Plugin\views\argument\EntityArgument;
 
 /**
  * Argument handler for basic taxonomy tid.
  *
  * @ingroup views_argument_handlers
- *
- * @ViewsArgument("taxonomy")
  */
-class Taxonomy extends NumericArgument implements ContainerFactoryPluginInterface {
-
-  /**
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $termStorage;
-
-  /**
-   * @var \Drupal\Core\Entity\EntityRepositoryInterface
-   */
-  protected $entityRepository;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityStorageInterface $term_storage, EntityRepositoryInterface $entityRepository) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-    $this->termStorage = $term_storage;
-    $this->entityRepository = $entityRepository;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager')->getStorage('taxonomy_term'),
-      $container->get('entity.repository')
-    );
-  }
-
-  /**
-   * Override the behavior of title(). Get the title of the node.
-   */
-  public function title() {
-    // There might be no valid argument.
-    if ($this->argument) {
-      $term = $this->termStorage->load($this->argument);
-      if (!empty($term)) {
-        return $this->entityRepository->getTranslationFromContext($term)->label();
-      }
-    }
-    // TODO review text
-    return $this->t('No name');
-  }
-
-}
+#[ViewsArgument(
+  id: 'taxonomy',
+)]
+class Taxonomy extends EntityArgument {}

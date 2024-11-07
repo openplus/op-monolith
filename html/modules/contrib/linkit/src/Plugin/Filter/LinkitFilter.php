@@ -137,6 +137,16 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
               if (!empty($href_url["query"])) {
                 $parsed_query = [];
                 parse_str($href_url['query'], $parsed_query);
+                $url_query = $url->getOption('query');
+                // If something was NULL before, we need to keep it as NULL, but
+                // parse_str will convert that to an empty string. Restore those.
+                if ($url_query !== NULL) {
+                  foreach ($parsed_query as $key => $value) {
+                    if ($value === '' && array_key_exists($key, $url_query) && $url_query[$key] === NULL) {
+                      $parsed_query[$key] = NULL;
+                    }
+                  }
+                }
                 if (!empty($parsed_query)) {
                   $url->setOption('query', $parsed_query);
                 }
@@ -165,7 +175,7 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
           }
         }
         catch (\Exception $e) {
-          watchdog_exception('linkit_filter', $e);
+          \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.1.0', fn() => \Drupal\Core\Utility\Error::logException(\Drupal::logger('linkit_filter'), $e), fn() => watchdog_exception('linkit_filter', $e));
         }
       }
 

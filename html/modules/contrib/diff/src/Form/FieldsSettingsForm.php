@@ -2,17 +2,18 @@
 
 namespace Drupal\diff\Form;
 
+use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormState;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\diff\DiffBuilderManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Form\ConfigFormBase;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Core\Form\FormState;
 
 /**
  * Configure fields with their diff builder plugin settings.
@@ -53,20 +54,16 @@ class FieldsSettingsForm extends ConfigFormBase {
 
   /**
    * Constructs a FieldsSettingsForm object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $plugin_manager
-   *   The plugin manager service.
-   * @param \Drupal\diff\DiffBuilderManager $diff_builder_manager
-   *   The diff builder manager.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
-   *   The entity field manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, PluginManagerInterface $plugin_manager, DiffBuilderManager $diff_builder_manager, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager) {
-    parent::__construct($config_factory);
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    PluginManagerInterface $plugin_manager,
+    DiffBuilderManager $diff_builder_manager,
+    EntityTypeManagerInterface $entity_type_manager,
+    EntityFieldManagerInterface $entity_field_manager,
+  ) {
+    parent::__construct($config_factory, $typedConfigManager);
 
     $this->fieldTypePluginManager = $plugin_manager;
     $this->diffBuilderManager = $diff_builder_manager;
@@ -80,10 +77,11 @@ class FieldsSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('plugin.manager.field.field_type'),
       $container->get('plugin.manager.diff.builder'),
       $container->get('entity_type.manager'),
-      $container->get('entity_field.manager')
+      $container->get('entity_field.manager'),
     );
   }
 
@@ -107,18 +105,18 @@ class FieldsSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     // The table containing all the field types discovered in the system.
-    $form['fields'] = array(
+    $form['fields'] = [
       '#type' => 'table',
       '#tree' => TRUE,
       '#header' => $this->getTableHeader(),
       '#empty' => $this->t('No field types found.'),
       '#prefix' => '<div id="field-display-overview-wrapper">',
       '#suffix' => '</div>',
-      '#attributes' => array(
-        'class' => array('field-ui-overview'),
+      '#attributes' => [
+        'class' => ['field-ui-overview'],
         'id' => 'field-display-overview',
-      ),
-    );
+      ],
+    ];
 
     // Build a row in the table for each field of each entity type. Get all the
     // field plugins.
@@ -143,12 +141,12 @@ class FieldsSettingsForm extends ConfigFormBase {
 
     $this->diffBuilderManager->clearCachedDefinitions();
     // Submit button for the form.
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#button_type' => 'primary',
       '#value' => $this->t('Save'),
-    );
+    ];
     $form['#attached']['library'][] = 'field_ui/drupal.field_ui';
     $form['#attached']['library'][] = 'diff/diff.general';
 
@@ -162,7 +160,7 @@ class FieldsSettingsForm extends ConfigFormBase {
    *   The entity type.
    * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_definition
    *   Definition the field type.
-   * @param FormStateInterface $form_state
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   THe form state object.
    *
    * @return array
@@ -173,6 +171,7 @@ class FieldsSettingsForm extends ConfigFormBase {
     $field_name = $field_definition->getName();
     $field_type = $field_definition->getType();
     $field_key = $entity_type->id() . '__' . $field_name;
+    $field_machine_name = $field_definition->getName();
 
     $display_options = $this->diffBuilderManager->getSelectedPluginForFieldStorageDefinition($field_definition);
     $plugin_options = $this->diffBuilderManager->getApplicablePluginOptions($field_definition);
@@ -197,6 +196,11 @@ class FieldsSettingsForm extends ConfigFormBase {
     ];
 
     $field_type_label = $this->fieldTypePluginManager->getDefinitions()[$field_type]['label'];
+
+    $field_row['field_machine_name'] = [
+      '#markup' => $field_machine_name,
+    ];
+
     $field_row['field_type'] = [
       '#markup' => $field_type_label,
     ];
@@ -227,27 +231,27 @@ class FieldsSettingsForm extends ConfigFormBase {
       $display_options['settings'] = $plugin_settings[$field_key]['settings'];
     }
 
-    $field_row['plugin'] = array(
-      'type' => array(
+    $field_row['plugin'] = [
+      'type' => [
         '#type' => 'select',
         '#options' => $plugin_options,
         '#empty_option' => $this->t("- Don't compare -"),
         '#empty_value' => 'hidden',
         '#title_display' => 'invisible',
-        '#attributes' => array(
-          'class' => array('field-plugin-type'),
-        ),
+        '#attributes' => [
+          'class' => ['field-plugin-type'],
+        ],
         '#default_value' => $display_options,
-        '#ajax' => array(
+        '#ajax' => [
           'callback' => [$this, 'multiStepAjax'],
           'method' => 'replace',
           'wrapper' => 'field-display-overview-wrapper',
           'effect' => 'fade',
-        ),
+        ],
         '#field_key' => $field_key,
-      ),
-      'settings_edit_form' => array(),
-    );
+      ],
+      'settings_edit_form' => [],
+    ];
 
     // Get a configured instance of the plugin.
     $plugin = $this->getPlugin($display_options);
@@ -255,15 +259,17 @@ class FieldsSettingsForm extends ConfigFormBase {
     // We are currently editing this field's plugin settings. Display the
     // settings form and submit buttons.
     if ($form_state->get('plugin_settings_edit') == $field_key) {
-      $field_row['plugin']['settings_edit_form'] = array(
+      $field_row['plugin']['settings_edit_form'] = [
         '#type' => 'container',
-        '#attributes' => array('class' => array('field-plugin-settings-edit-form')),
+        '#attributes' => ['class' => ['field-plugin-settings-edit-form']],
         '#parents' => ['fields', $field_key, 'settings_edit_form'],
-        'label' => array(
-          '#markup' => $this->t('Plugin settings:' . ' <span class="plugin-name">' . $plugin_options[$display_options['type']] . '</span>'),
-        ),
-        'settings' => $plugin->buildConfigurationForm(array(), $form_state),
-        'actions' => array(
+        'label' => [
+          '#markup' => $this->t('Plugin settings: <span class="plugin-name">@name</span>', [
+            '@name' => $plugin_options[$display_options['type']],
+          ]),
+        ],
+        'settings' => $plugin->buildConfigurationForm([], $form_state),
+        'actions' => [
           '#type' => 'actions',
           'save_settings' => $base_button + [
             '#type' => 'submit',
@@ -281,16 +287,16 @@ class FieldsSettingsForm extends ConfigFormBase {
             // get the value of the 'plugin type' select.
             '#limit_validation_errors' => [['fields', $field_key, 'plugin', 'type']],
           ],
-        ),
-      );
-      $field_row['settings_edit'] = array();
+        ],
+      ];
+      $field_row['settings_edit'] = [];
       $field_row['#attributes']['class'][] = 'field-plugin-settings-editing';
     }
     else {
       $field_row['settings_edit'] = [];
       // Display the configure settings button only if a plugin is selected.
       if ($plugin) {
-        $field_row['settings_edit'] = $base_button + array(
+        $field_row['settings_edit'] = $base_button + [
           '#type' => 'image_button',
           '#name' => $field_key . '_settings_edit',
           '#src' => 'core/misc/icons/787878/cog.svg',
@@ -301,7 +307,7 @@ class FieldsSettingsForm extends ConfigFormBase {
           '#limit_validation_errors' => [['fields', $field_key, 'plugin', 'type']],
           '#prefix' => '<div class="field-plugin-settings-edit-wrapper">',
           '#suffix' => '</div>',
-        );
+        ];
       }
     }
 
@@ -367,21 +373,21 @@ class FieldsSettingsForm extends ConfigFormBase {
       switch ($op) {
         case 'edit':
           $updated_rows = [$trigger['#field_key']];
-          $updated_columns = array('plugin');
+          $updated_columns = ['plugin'];
           break;
 
         case 'update':
         case 'cancel':
           $updated_rows = [$trigger['#field_key']];
-          $updated_columns = array('plugin', 'settings_edit');
+          $updated_columns = ['plugin', 'settings_edit'];
           break;
       }
 
       foreach ($updated_rows as $name) {
         foreach ($updated_columns as $key) {
           $element = &$form['fields'][$name][$key];
-          $element['#prefix'] = '<div class="ajax-new-content">' . (isset($element['#prefix']) ? $element['#prefix'] : '');
-          $element['#suffix'] = (isset($element['#suffix']) ? $element['#suffix'] : '') . '</div>';
+          $element['#prefix'] = '<div class="ajax-new-content">' . ($element['#prefix'] ?? '');
+          $element['#suffix'] = ($element['#suffix'] ?? '') . '</div>';
         }
       }
     }
@@ -400,9 +406,10 @@ class FieldsSettingsForm extends ConfigFormBase {
     foreach ($fields as $field_key => $field_values) {
       // Validate only non-null plugins.
       if ($field_values['plugin']['type'] != 'hidden') {
-        $settings = array();
+        $settings = [];
         $key = NULL;
-        // Form submitted without pressing update button on plugin settings form.
+        // Form submitted without pressing update button on plugin settings
+        // form.
         if (isset($field_values['settings_edit_form']['settings'])) {
           $settings = $field_values['settings_edit_form']['settings'];
           $key = 1;
@@ -462,9 +469,9 @@ class FieldsSettingsForm extends ConfigFormBase {
         // Get plugin settings. They lie either directly in submitted form
         // values (if the whole form was submitted while some plugin settings
         // were being edited), or have been persisted in $form_state.
-
         $values = NULL;
-        // Form submitted without pressing update button on plugin settings form.
+        // Form submitted without pressing update button on plugin settings
+        // form.
         if (isset($field_values['settings_edit_form']['settings'])) {
           $values = $field_values['settings_edit_form']['settings'];
         }
@@ -503,10 +510,10 @@ class FieldsSettingsForm extends ConfigFormBase {
   protected function getPlugin(array $configuration) {
     if ($configuration && isset($configuration['type']) && $configuration['type'] != 'hidden') {
       if (!isset($configuration['settings'])) {
-        $configuration['settings'] = array();
+        $configuration['settings'] = [];
       }
       return $this->diffBuilderManager->createInstance(
-        $configuration['type'], $configuration['settings']
+        $configuration['type'], $configuration['settings'],
       );
     }
 
@@ -517,13 +524,14 @@ class FieldsSettingsForm extends ConfigFormBase {
    * Returns the header for the table.
    */
   protected function getTableHeader() {
-    return array(
+    return [
       'entity_type' => $this->t('Entity Type'),
       'field_name' => $this->t('Field'),
+      'field_machine_name' => $this->t('Field Machine Name'),
       'field_type' => $this->t('Field Type'),
       'plugin' => $this->t('Plugin'),
       'settings_edit' => '',
-    );
+    ];
   }
 
 }

@@ -24,7 +24,6 @@ class GroupRevisionRevertForm extends RevisionRevertForm {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    /** @var static $instance */
     $instance = parent::create($container);
     $instance->time = $container->get('datetime.time');
     return $instance;

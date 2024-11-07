@@ -1,0 +1,10 @@
+ckeditor5.plugin.ckeditor5_plugin_pack_highlight__highlight:
+  type: mapping
+  label: Custom markers
+  mapping:
+    options:
+      type: sequence
+      label: 'Markers'
+    use_default_markers:
+      type: boolean
+      label: Use default markers

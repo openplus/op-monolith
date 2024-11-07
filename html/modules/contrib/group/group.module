@@ -7,20 +7,24 @@
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\SelectInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\group\Entity\GroupContent;
+use Drupal\group\Entity\GroupRelationshipInterface;
+use Drupal\group\Entity\GroupInterface;
+use Drupal\group\Entity\Storage\ConfigWrapperStorageInterface;
+use Drupal\group\Entity\Storage\GroupRelationshipStorageInterface;
+use Drupal\group\Entity\Storage\GroupRoleStorageInterface;
 use Drupal\group\QueryAccess\EntityQueryAlter;
-use Drupal\user\RoleInterface;
+use Drupal\group\QueryAccess\GroupRelationshipQueryAlter;
+use Drupal\group\QueryAccess\GroupQueryAlter;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\views\Plugin\views\query\Sql;
 use Drupal\views\ViewExecutable;
@@ -46,10 +50,65 @@ function group_element_info_alter(array &$types) {
 }
 
 /**
+ * Implements hook_entity_bundle_info().
+ */
+function group_entity_bundle_info() {
+  $plugin_manager = _group_relation_type_manager();
+  $installed_ids = array_unique(array_merge(...array_values($plugin_manager->getGroupTypePluginMap())));
+  $installed_ids = array_combine($installed_ids, $installed_ids);
+
+  $installed_config_entity_types = [];
+  foreach (array_intersect_key($plugin_manager->getDefinitions(), $installed_ids) as $group_relation_type) {
+    if ($group_relation_type->handlesConfigEntityType()) {
+      $config_entity_type_id = $group_relation_type->getEntityTypeId();
+      $installed_config_entity_types[$config_entity_type_id] = $config_entity_type_id;
+    }
+  }
+
+  $config_entity_types = [];
+  foreach (\Drupal::entityTypeManager()->getDefinitions() as $entity_type_id => $entity_type) {
+    if ($entity_type->entityClassImplements(ConfigEntityInterface::class)) {
+      $config_entity_types[$entity_type_id] = $entity_type->getLabel();
+    }
+  }
+
+  $bundles = [];
+  foreach (array_intersect_key($config_entity_types, $installed_config_entity_types) as $entity_type_id => $entity_type_label) {
+    $bundles['group_config_wrapper'][$entity_type_id]['label'] = $entity_type_label;
+  }
+
+  return $bundles;
+}
+
+/**
  * Implements hook_config_translation_info_alter().
  */
 function group_config_translation_info_alter(&$info) {
   $info['group_role']['class'] = 'Drupal\group\ConfigTranslation\GroupRoleMapper';
+}
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function group_field_widget_info_alter(array &$info) {
+  // Anything that supports entity reference fields should also work for ours.
+  foreach ($info as $key => $widget_info) {
+    if (in_array('entity_reference', $widget_info['field_types'], TRUE)) {
+      $info[$key]['field_types'][] = 'group_relationship_target';
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function group_field_formatter_info_alter(array &$info) {
+  // Anything that supports entity reference fields should also work for ours.
+  foreach ($info as $key => $formatter_info) {
+    if (in_array('entity_reference', $formatter_info['field_types'], TRUE)) {
+      $info[$key]['field_types'][] = 'group_relationship_target';
+    }
+  }
 }
 
 /**
@@ -72,8 +131,9 @@ function group_theme() {
 function group_theme_suggestions_group(array $variables) {
   $suggestions = [];
 
-  /** @var \Drupal\group\Entity\GroupInterface $group */
   $group = $variables['elements']['#group'];
+  assert($group instanceof GroupInterface);
+
   $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
 
   $suggestions[] = 'group__' . $sanitized_view_mode;
@@ -91,16 +151,17 @@ function group_theme_suggestions_group(array $variables) {
 function group_theme_suggestions_group_content(array $variables) {
   $suggestions = [];
 
-  /** @var \Drupal\group\Entity\GroupContentInterface $group_content */
-  $group_content = $variables['elements']['#group_content'];
+  $group_relationship = $variables['elements']['#group_content'];
+  assert($group_relationship instanceof GroupRelationshipInterface);
+
   $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
-  $sanitized_bundle = strtr($group_content->bundle(), '-', '_');
+  $sanitized_bundle = strtr($group_relationship->bundle(), '-', '_');
 
   $suggestions[] = 'group_content__' . $sanitized_view_mode;
   $suggestions[] = 'group_content__' . $sanitized_bundle;
   $suggestions[] = 'group_content__' . $sanitized_bundle . '__' . $sanitized_view_mode;
-  $suggestions[] = 'group_content__' . $group_content->id();
-  $suggestions[] = 'group_content__' . $group_content->id() . '__' . $sanitized_view_mode;
+  $suggestions[] = 'group_content__' . $group_relationship->id();
+  $suggestions[] = 'group_content__' . $group_relationship->id() . '__' . $sanitized_view_mode;
 
   return $suggestions;
 }
@@ -116,25 +177,32 @@ function group_theme_suggestions_group_content(array $variables) {
  *   - view_mode: View mode; e.g., 'full', 'teaser', etc.
  */
 function template_preprocess_group(&$variables) {
-  /** @var \Drupal\group\Entity\GroupInterface $group */
   $group = $variables['elements']['#group'];
+  assert($group instanceof GroupInterface);
 
   $variables['group'] = $group;
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['label'] = $group->label();
-  $variables['url'] = $group->toUrl('canonical', ['language' => $group->language()]);
 
   $variables['attributes']['class'][] = 'group';
   $variables['attributes']['class'][] = Html::cleanCssIdentifier('group--' . $variables['view_mode']);
   $variables['attributes']['class'][] = Html::cleanCssIdentifier('group--' . $variables['group']->bundle());
 
-  // See if we are rendering the group at its canonical route.
-  $route_match = \Drupal::routeMatch();
-  if ($route_match->getRouteName() == 'entity.group.canonical') {
-    $page_group = $route_match->getParameter('group');
+  // Set variables that depend on the group being saved.
+  $variables['url'] = '';
+  $variables['page'] = FALSE;
+
+  if (!$group->isNew()) {
+    $variables['url'] = $group->toUrl('canonical', ['language' => $group->language()]);
+
+    // See if we are rendering the group at its canonical route.
+    $route_match = \Drupal::routeMatch();
+    if ($route_match->getRouteName() == 'entity.group.canonical') {
+      $page_group = $route_match->getParameter('group');
+    }
+    $is_page = !empty($page_group) && $page_group->id() == $group->id();
+    $variables['page'] = $variables['view_mode'] == 'full' && $is_page;
   }
-  $is_page = (!empty($page_group) ? $page_group->id() == $group->id() : FALSE);
-  $variables['page'] = $variables['view_mode'] == 'full' && $is_page;
 
   // Helpful $content variable for templates.
   $variables += ['content' => []];
@@ -144,23 +212,23 @@ function template_preprocess_group(&$variables) {
 }
 
 /**
- * Prepares variables for the group content template.
+ * Prepares variables for the group relationship template.
  *
  * Default template: group-content.html.twig
  *
  * @param array $variables
  *   - elements: An array of elements to display in view mode.
- *   - group_content: The group content object.
+ *   - group_content: The group relationship object.
  *   - view_mode: View mode; e.g., 'full', 'teaser', etc.
  */
 function template_preprocess_group_content(&$variables) {
-  /** @var \Drupal\group\Entity\GroupContentInterface $group_content */
-  $group_content = $variables['elements']['#group_content'];
+  $group_relationship = $variables['elements']['#group_content'];
+  assert($group_relationship instanceof GroupRelationshipInterface);
 
-  $variables['group_content'] = $group_content;
+  $variables['group_content'] = $group_relationship;
   $variables['view_mode'] = $variables['elements']['#view_mode'];
-  $variables['label'] = $group_content->label();
-  $variables['url'] = $group_content->toUrl('canonical', ['language' => $group_content->language()]);
+  $variables['label'] = $group_relationship->label();
+  $variables['url'] = $group_relationship->toUrl('canonical', ['language' => $group_relationship->language()]);
 
   $variables['attributes']['class'][] = 'group-content';
   $variables['attributes']['class'][] = Html::cleanCssIdentifier('group-content--' . $variables['view_mode']);
@@ -168,9 +236,9 @@ function template_preprocess_group_content(&$variables) {
   // See if we are rendering the group at its canonical route.
   $route_match = \Drupal::routeMatch();
   if ($route_match->getRouteName() == 'entity.group_content.canonical') {
-    $page_group_content = $route_match->getParameter('group_content');
+    $page_group_relationship = $route_match->getParameter('group_content');
   }
-  $is_page = (!empty($page_group_content) ? $page_group_content->id() == $group_content->id() : FALSE);
+  $is_page = (!empty($page_group_relationship) ? $page_group_relationship->id() == $group_relationship->id() : FALSE);
   $variables['page'] = $variables['view_mode'] == 'full' && $is_page;
 
   // Helpful $content variable for templates.
@@ -184,12 +252,7 @@ function template_preprocess_group_content(&$variables) {
  * Implements hook_rebuild().
  */
 function group_rebuild() {
-  _group_content_enabler_manager()->installEnforced();
-
-  /** @var \Drupal\group\Entity\Storage\GroupRoleStorageInterface $storage */
-  $storage = \Drupal::entityTypeManager()->getStorage('group_role');
-  $storage->createInternal();
-  $storage->createSynchronized();
+  _group_relation_type_manager()->installEnforced();
 }
 
 /**
@@ -198,12 +261,7 @@ function group_rebuild() {
 function group_modules_installed($modules) {
   // Only create config objects while config import is not in progress.
   if (!\Drupal::isConfigSyncing()) {
-    _group_content_enabler_manager()->installEnforced();
-
-    /** @var \Drupal\group\Entity\Storage\GroupRoleStorageInterface $storage */
-    $storage = \Drupal::entityTypeManager()->getStorage('group_role');
-    $storage->createInternal();
-    $storage->createSynchronized();
+    _group_relation_type_manager()->installEnforced();
   }
 }
 
@@ -240,14 +298,41 @@ function group_module_implements_alter(&$implementations, $hook) {
 /**
  * Implements hook_query_TAG_alter().
  */
-function group_query_entity_query_alter(SelectInterface $query) {
+function group_query_entity_query_alter(AlterableInterface $query) {
+  if (!$query instanceof SelectInterface) {
+    return;
+  }
+
   $entity_type_id = $query->getMetaData('entity_type');
   if ($query->hasTag($entity_type_id . '_access')) {
     $entity_type_manager = \Drupal::entityTypeManager();
     $entity_type = $entity_type_manager->getDefinition($entity_type_id);
 
+    // Add specific access checks based on the entity type. Please note that we
+    // first check for the group and relationship entity types because we have
+    // full control over those and can therefore optimize the query more. If the
+    // query is for a different entity type, we fall back to the default query
+    // alter.
+    //
+    // PLEASE KEEP IN MIND that this means that a plugin that allows you to nest
+    // groups will have no query access added for nested groups whatsoever. This
+    // is by design as those plugins should opt to use the permission calculator
+    // system, as it's way faster and automatically included in GroupQueryAlter.
+    switch ($entity_type_id) {
+      case 'group':
+        $class_name = GroupQueryAlter::class;
+        break;
+
+      case 'group_content':
+        $class_name = GroupRelationshipQueryAlter::class;
+        break;
+
+      default:
+        $class_name = EntityQueryAlter::class;
+    }
+
     \Drupal::service('class_resolver')
-      ->getInstanceFromDefinition(EntityQueryAlter::class)
+      ->getInstanceFromDefinition($class_name)
       ->alter($query, $entity_type);
   }
 }
@@ -255,7 +340,11 @@ function group_query_entity_query_alter(SelectInterface $query) {
 /**
  * Implements hook_query_TAG_alter().
  */
-function group_query_views_entity_query_alter(SelectInterface $query) {
+function group_query_views_entity_query_alter(AlterableInterface $query) {
+  if (!$query instanceof SelectInterface) {
+    return;
+  }
+
   $entity_type_id = $query->getMetaData('entity_type');
   $query->addTag($entity_type_id . '_access');
   group_query_entity_query_alter($query);
@@ -265,27 +354,29 @@ function group_query_views_entity_query_alter(SelectInterface $query) {
  * Implements hook_views_query_alter().
  */
 function group_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
-  if ($query instanceof Sql && empty($query->options['disable_sql_rewrite'])) {
-    $table_info = $query->getEntityTableInfo();
-    $base_table = reset($table_info);
-    if (empty($base_table['entity_type']) || $base_table['relationship_id'] != 'none') {
-      return;
-    }
-
-    // Add a custom tag so we don't trigger all other 'entity_query' tag alters.
-    $entity_type_id = $base_table['entity_type'];
-    $query->addTag('views_entity_query');
-
-    // Build the Views query already so we can access the DB query.
-    $query->build($view);
-    $view->built = TRUE;
-
-    // Add metadata to the DB query.
-    $query = $view->build_info['query'];
-    $count_query = $view->build_info['count_query'];
-    $query->addMetaData('entity_type', $entity_type_id);
-    $count_query->addMetaData('entity_type', $entity_type_id);
+  if (!$query instanceof Sql || !empty($query->options['disable_sql_rewrite'])) {
+    return;
   }
+
+  $table_info = $query->getEntityTableInfo();
+  $base_table = reset($table_info);
+  if (empty($base_table['entity_type']) || $base_table['relationship_id'] != 'none') {
+    return;
+  }
+
+  // Add a custom tag so we don't trigger all other 'entity_query' tag alters.
+  $entity_type_id = $base_table['entity_type'];
+  $query->addTag('views_entity_query');
+
+  // Build the Views query already so we can access the DB query.
+  $query->build($view);
+  $view->built = TRUE;
+
+  // Add metadata to the DB query.
+  $query = $view->build_info['query'];
+  $count_query = $view->build_info['count_query'];
+  $query->addMetaData('entity_type', $entity_type_id);
+  $count_query->addMetaData('entity_type', $entity_type_id);
 }
 
 /**
@@ -300,71 +391,80 @@ function group_entity_access(EntityInterface $entity, $operation, AccountInterfa
     return AccessResult::neutral();
   }
 
-  /** @var \Drupal\group\Plugin\GroupContentEnablerManagerInterface $plugin_manager */
-  $plugin_manager = \Drupal::service('plugin.manager.group_content_enabler');
+  $plugin_manager = _group_relation_type_manager();
 
-  // Find all of the group content plugins that define access.
+  // Find all of the group relations that define access.
   $plugin_ids = $plugin_manager->getPluginIdsByEntityTypeAccess($entity->getEntityTypeId());
   if (empty($plugin_ids)) {
     return AccessResult::neutral();
   }
 
-  // If any new group content entity is added using any of the retrieved
+  // If any new relationship entity is added using any of the retrieved
   // plugins, it might change access.
   $plugin_cache_tags = [];
   foreach ($plugin_ids as $plugin_id) {
     $plugin_cache_tags[] = "group_content_list:plugin:$plugin_id";
   }
+  $access = AccessResult::neutral()->addCacheTags($plugin_cache_tags);
 
-  // Load all of the group content for this entity.
-  $group_contents = \Drupal::entityTypeManager()
-    ->getStorage('group_content')
-    ->loadByEntity($entity);
-
-  // If the entity does not belong to any group, we have nothing to say.
-  //
-  // @todo There is a slight performance boost to be had here. If we have a
-  // plugin that adds content without access and one that adds the same content
-  // with access, then this check would fail for content that is only added
-  // using the non-access plugin. The loop over the plugin IDs below would then
-  // not return anything and we would still end up with a neutral result, albeit
-  // with the user.group_permissions context and slightly worse performance. We
-  // can fix this by only loading those group content entities that use the
-  // plugins retrieved above.
-  if (empty($group_contents)) {
-    return AccessResult::neutral()->addCacheTags($plugin_cache_tags);
+  // If the entity is config, we need to find the wrapper for it.
+  if ($entity instanceof ConfigEntityInterface) {
+    $wrapper_storage = \Drupal::entityTypeManager()->getStorage('group_config_wrapper');
+    assert($wrapper_storage instanceof ConfigWrapperStorageInterface);
+    $entity_id = $wrapper_storage->wrapEntity($entity)->id();
+  }
+  else {
+    $entity_id = $entity->id();
   }
 
-  $access = AccessResult::neutral();
-  foreach ($plugin_ids as $plugin_id) {
-    // For backwards compatibility reasons, if the group content enabler plugin
-    // used by the group content type does not specify an access handler, we do
-    // not check access for that group content type. In 8.2.x all group content
-    // enabler plugins will get a permission handler by default, so this check
-    // can be safely removed then.
-    if (!$plugin_manager->hasHandler($plugin_id, 'access')) {
-      continue;
-    }
+  // Reduce the plugin IDs to those that are actually in use.
+  $data_table = \Drupal::entityTypeManager()
+    ->getDefinition('group_content')
+    ->getDataTable();
 
+  $plugin_ids_used = \Drupal::database()
+    ->select($data_table, 'd')
+    ->fields('d', ['plugin_id'])
+    ->condition('entity_id', $entity_id)
+    ->condition('plugin_id', $plugin_ids, 'IN')
+    ->distinct(TRUE)
+    ->execute()
+    ->fetchCol();
+
+  // Loop over the plugin handlers and add their access check to the result.
+  foreach ($plugin_ids_used as $plugin_id) {
     $handler = $plugin_manager->getAccessControlHandler($plugin_id);
     $access = $access->orIf($handler->entityAccess($entity, $operation, $account, TRUE));
+
+    // No need to continue if access is denied.
+    if ($access->isForbidden()) {
+      break;
+    }
   }
 
-  return $access
-    ->addCacheTags($plugin_cache_tags)
-    ->addCacheContexts(['user.group_permissions']);
+  return $access;
 }
 
 /**
  * Implements hook_entity_delete().
  */
 function group_entity_delete(EntityInterface $entity) {
-  if ($entity instanceof ContentEntityInterface) {
-    if ($group_contents = GroupContent::loadByEntity($entity)) {
-      /** @var \Drupal\group\Entity\GroupContent $group_content */
-      foreach ($group_contents as $group_content) {
-        $group_content->delete();
-      }
+  $storage = \Drupal::entityTypeManager()->getStorage('group_content');
+  assert($storage instanceof GroupRelationshipStorageInterface);
+
+  // See if any relationships exist for the entity and delete them as well.
+  if ($relationships = $storage->loadByEntity($entity)) {
+    $storage->delete($relationships);
+  }
+
+  // Now that we've deleted all of the relationships, we can also see if the
+  // entity was wrapped and delete the wrapper if necessary.
+  if ($entity instanceof ConfigEntityInterface) {
+    $storage = \Drupal::entityTypeManager()->getStorage('group_config_wrapper');
+    assert($storage instanceof ConfigWrapperStorageInterface);
+
+    if ($storage->supportsEntity($entity) && $wrapper = $storage->wrapEntity($entity, FALSE)) {
+      $storage->delete([$wrapper]);
     }
   }
 }
@@ -388,23 +488,23 @@ function group_entity_field_access($operation, FieldDefinitionInterface $field_d
     return AccessResult::neutral();
   }
 
-  // We only care if it is attached to a group content entity.
+  // We only care if it is attached to a relationship type entity.
   if ($items->getEntity()->getEntityTypeId() != 'group_content') {
     return AccessResult::neutral();
   }
 
-  /** @var \Drupal\group\Entity\GroupContentInterface $group_content */
-  $group_content = $items->getEntity();
+  $group_relationship = $items->getEntity();
+  assert($group_relationship instanceof GroupRelationshipInterface);
 
-  // We only care if the group content entity is a group membership.
-  if ($group_content->getContentPlugin()->getPluginId() != 'group_membership') {
+  // We only care if the relationship entity is a group membership.
+  if ($group_relationship->getPluginId() != 'group_membership') {
     return AccessResult::neutral();
   }
 
   // Now that we know we're dealing with a group_roles field on a group
   // membership form, we need to check whether the group membership belongs to a
   // group yet. If not, we can't check for access and should always hide it.
-  if (!$group = $group_content->getGroup()) {
+  if (!$group = $group_relationship->getGroup()) {
     return AccessResult::forbidden();
   }
 
@@ -445,7 +545,7 @@ function group_user_cancel($edit, $account, $method) {
     // Run it immediately if not.
     else {
       foreach ($storage->loadMultiple($gids) as $group) {
-        /** @var \Drupal\group\Entity\GroupInterface $group */
+        assert($group instanceof GroupInterface);
         $group->set('uid', 1);
         $storage->save($group);
       }
@@ -473,7 +573,7 @@ function _group_mass_reassign_to_super_user(array $ids, &$context) {
 
   $storage = \Drupal::entityTypeManager()->getStorage('group');
   foreach ($storage->loadMultiple($ids) as $group) {
-    /** @var \Drupal\group\Entity\GroupInterface $group */
+    assert($group instanceof GroupInterface);
     $group->set('uid', 1);
     $storage->save($group);
     $context['sandbox']['progress']++;
@@ -495,8 +595,8 @@ function group_user_update(AccountInterface $account) {
   sort($old);
 
   if ($new != $old) {
-    /** @var \Drupal\group\Entity\Storage\GroupRoleStorageInterface $storage */
     $storage = \Drupal::entityTypeManager()->getStorage('group_role');
+    assert($storage instanceof GroupRoleStorageInterface);
     $storage->resetUserGroupRoleCache($account);
   }
 }
@@ -513,39 +613,12 @@ function group_user_delete(EntityInterface $account) {
 }
 
 /**
- * Implements hook_ENTITY_TYPE_insert().
- */
-function group_user_role_insert(RoleInterface $role) {
-  // Only create config objects while config import is not in progress.
-  if (!\Drupal::isConfigSyncing()) {
-    /** @var \Drupal\group\Entity\Storage\GroupRoleStorageInterface $storage */
-    $storage = \Drupal::entityTypeManager()->getStorage('group_role');
-    $storage->createSynchronized(NULL, [$role->id()]);
-  }
-}
-
-/**
- * Implements hook_ENTITY_TYPE_update().
- */
-function group_user_role_update(RoleInterface $role) {
-  /** @var \Drupal\User\RoleInterface $original */
-  $original = $role->original;
-
-  // Update the group roles if the user role label changed.
-  if ($role->label() != $original->label()) {
-    /** @var \Drupal\group\Entity\Storage\GroupRoleStorageInterface $storage */
-    $storage = \Drupal::entityTypeManager()->getStorage('group_role');
-    $storage->updateSynchronizedLabels($role);
-  }
-}
-
-/**
  * Implements hook_form_alter().
  */
 function group_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  // GroupContentController::createForm() tends to load entity forms for adding
-  // entities to a group. We need to add or alter the submit handlers of those
-  // forms for the process to work properly.
+  // GroupRelationshipController::createForm() tends to load entity forms for
+  // adding entities to a group. We need to add or alter the submit handlers of
+  // those forms for the process to work properly.
   if ($form_state->has('group_wizard') && $form_state->get('group_wizard_id') == 'group_entity') {
     if ($wizard = $form_state->get('group_wizard')) {
       $store = \Drupal::service('tempstore.private')->get($form_state->get('group_wizard_id'));
@@ -608,10 +681,9 @@ function group_form_alter(&$form, FormStateInterface $form_state, $form_id) {
  * Stores a content entity from the wizard step 1 in the temp store.
  *
  * @see group_form_alter()
- * @see \Drupal\group\Entity\Controller\GroupContentController::createForm()
+ * @see \Drupal\group\Entity\Controller\GroupRelationshipController::createForm()
  */
 function group_content_wizard_store($form, FormStateInterface $form_state) {
-  /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
   $entity = $form_state->getFormObject()->getEntity();
 
   // Store the unsaved entity in the temp store.
@@ -627,10 +699,10 @@ function group_content_wizard_store($form, FormStateInterface $form_state) {
 }
 
 /**
- * Cancels the wizard for group content creation.
+ * Cancels the wizard for relationship creation.
  *
  * @see group_form_alter()
- * @see \Drupal\group\Entity\Controller\GroupContentController::createForm()
+ * @see \Drupal\group\Entity\Controller\GroupRelationshipController::createForm()
  */
 function group_content_wizard_cancel($form, FormStateInterface $form_state) {
   $store = \Drupal::service('tempstore.private')->get($form_state->get('group_wizard_id'));
@@ -638,8 +710,8 @@ function group_content_wizard_cancel($form, FormStateInterface $form_state) {
   $store->delete("$store_id:entity");
   $store->delete("$store_id:step");
 
-  /** @var \Drupal\group\Entity\GroupInterface $group */
   $group = $form_state->get('group');
+  assert($group instanceof GroupInterface);
 
   // Redirect to the group page if no destination was set in the URL.
   $form_state->setRedirect('entity.group.canonical', ['group' => $group->id()]);
@@ -649,20 +721,18 @@ function group_content_wizard_cancel($form, FormStateInterface $form_state) {
  * Adds a newly saved entity to a group.
  *
  * @see group_form_alter()
- * @see \Drupal\group\Entity\Controller\GroupContentController::createForm()
+ * @see \Drupal\group\Entity\Controller\GroupRelationshipController::createForm()
  */
 function group_content_entity_submit($form, FormStateInterface $form_state) {
-  /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
   $entity = $form_state->getFormObject()->getEntity();
-
-  /** @var \Drupal\group\Entity\GroupInterface $group */
   $group = $form_state->get('group');
-  $group->addContent($entity, $form_state->get('group_content_enabler'));
+  assert($group instanceof GroupInterface);
+  $group->addRelationship($entity, $form_state->get('group_relation'));
 
   // This submit handler is only called when creating new content within a group
   // without using the 2-step wizard. We can therefore safely assume the user
-  // wants to see the entity itself and not the relationship (group content).
-  // This only applies if there was no destination GET parameter set in the URL.
+  // wants to see the entity itself and not the relationship. This only applies
+  // if there was no "destination" query argument.
   if ($entity->access('view')) {
     $form_state->setRedirectUrl($entity->toUrl());
   }
@@ -707,57 +777,13 @@ function group_content_entity_submit($form, FormStateInterface $form_state) {
  */
 
 /**
- * Gets the group content enabler plugin manager.
+ * Gets the group relation type manager.
  *
- * @return \Drupal\group\Plugin\GroupContentEnablerManagerInterface
- *   The group content enabler plugin manager.
- *
- * @internal Try to properly inject the service when possible.
- */
-function _group_content_enabler_manager() {
-  return \Drupal::service('plugin.manager.group_content_enabler');
-}
-
-/**
- * Gets the group role synchronizer service.
- *
- * @return \Drupal\group\GroupRoleSynchronizerInterface
- *   The group role synchronizer service.
+ * @return \Drupal\group\Plugin\Group\Relation\GroupRelationTypeManagerInterface
+ *   The group relation type manager.
  *
  * @internal Try to properly inject the service when possible.
  */
-function _group_role_synchronizer() {
-  return \Drupal::service('group_role.synchronizer');
-}
-
-/**
- * Implements hook_ENTITY_TYPE_presave().
- *
- * @todo Remove in 8.2.x if it still only fixes cache contexts by then.
- */
-function group_view_presave(EntityInterface $view) {
-  $displays = $view->get('display');
-  $update = FALSE;
-
-  // Loop over all displays and replace the group_membership.roles.permissions
-  // cache context with its safe user.group_permissions counterpart.
-  foreach ($displays as $display_name => &$display) {
-    $cache_metadata = &$display['cache_metadata'];
-    if (isset($cache_metadata['contexts'])) {
-      // Remove the deleted cache context and add the updated metadata.
-      $key = array_search('group_membership.roles.permissions', $cache_metadata['contexts'], TRUE);
-      if ($key !== FALSE) {
-        $update = TRUE;
-        unset($cache_metadata['contexts'][$key]);
-
-        $cache_metadata['max-age'] = CacheBackendInterface::CACHE_PERMANENT;
-        $cache_metadata['contexts'][] = 'route.group';
-        $cache_metadata['contexts'][] = 'user.group_permissions';
-      }
-    }
-  }
-
-  if ($update) {
-    $view->set('display', $displays);
-  }
+function _group_relation_type_manager() {
+  return \Drupal::service('group_relation_type.manager');
 }

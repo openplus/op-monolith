@@ -635,7 +635,7 @@ class Bootstrap {
    *
    * @param string $method
    *   Optional. A specific method on the file system service to check for
-   *   its existance.
+   *   its existence.
    *
    * @return \Drupal\Core\File\FileSystemInterface
    *   The File System service, if it exists and if $method exists if it was
@@ -801,15 +801,25 @@ class Bootstrap {
     // @todo Supply a specific version to _bootstrap_glyphicons() when Icon API
     // supports versioning.
     if (self::getTheme()->hasGlyphicons() && in_array($name, self::glyphicons())) {
-      $icon = [
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => '',
-        '#attributes' => [
-          'class' => ['icon', 'glyphicon', 'glyphicon-' . $name],
-          'aria-hidden' => 'true',
-        ],
-      ];
+      // Attempt to use the Icon API module, if enabled and it generates output.
+      if (\Drupal::moduleHandler()->moduleExists('icon')) {
+        $icon = [
+          '#type' => 'icon',
+          '#bundle' => 'bootstrap',
+          '#icon' => 'glyphicon-' . $name,
+        ];
+      }
+      else {
+        $icon = [
+          '#type' => 'html_tag',
+          '#tag' => 'span',
+          '#value' => '',
+          '#attributes' => [
+            'class' => ['icon', 'glyphicon', 'glyphicon-' . $name],
+            'aria-hidden' => 'true',
+          ],
+        ];
+      }
     }
 
     return $icon ?: $default;

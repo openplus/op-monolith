@@ -4,9 +4,9 @@ namespace Drupal\wxt_ext_archived\Plugin\Condition;
 
 use Drupal\Core\Condition\ConditionPluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
  * Provides a condition to check value of node field field_archive.
@@ -38,6 +38,7 @@ class ArchivedField extends ConditionPluginBase implements ContainerFactoryPlugi
    * @param mixed $plugin_definition
    *   The plugin_definition for the plugin instance.
    */
+  // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }

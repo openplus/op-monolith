@@ -192,8 +192,10 @@ var componentName = "wb-geomap",
 		// Add map layers
 		this.addMapLayers();
 
-		// If an extent was configured, fit the map to it
-		if ( viewOptions.extent ) {
+		// If an extent was configured, fit the map to it (use mapExtent property, then basemap.extent)
+		if ( this.settings.mapExtent ) {
+			this.zoomAOI( this.settings.mapExtent );
+		} else if ( viewOptions.extent ) {
 			this.map.getView().fit( viewOptions.extent, this.map.getSize() );
 		}
 
@@ -1645,7 +1647,7 @@ var componentName = "wb-geomap",
 
 						// bind events to the options
 						// TODO: do this in the wb-update event
-						$( ".al-opt a" ).on( "keydown click vclick", function( event ) {
+						$( ".al-opt a" ).on( "keydown click", function( event ) {
 							var link = event.target,
 								eventType = event.type,
 								which = event.which;
@@ -1657,8 +1659,6 @@ var componentName = "wb-geomap",
 								}
 								break;
 							case "click":
-							case "vclick":
-							case "touchstart":
 
 								// Ignore middle/right mouse buttons
 								if ( !which || which === 1 ) {

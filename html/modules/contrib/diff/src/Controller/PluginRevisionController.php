@@ -2,17 +2,17 @@
 
 namespace Drupal\diff\Controller;
 
-use Drupal\Core\Entity\ContentEntityInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Drupal\Core\Controller\ControllerBase;
-use Drupal\diff\DiffLayoutManager;
 use Drupal\diff\DiffEntityComparison;
+use Drupal\diff\DiffLayoutManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Base class for controllers that return responses on entity revision routes.
@@ -57,7 +57,11 @@ class PluginRevisionController extends ControllerBase {
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   The request stack.
    */
-  public function __construct(DiffEntityComparison $entity_comparison, DiffLayoutManager $diff_layout_manager, RequestStack $request_stack) {
+  public function __construct(
+    DiffEntityComparison $entity_comparison,
+    DiffLayoutManager $diff_layout_manager,
+    RequestStack $request_stack,
+  ) {
     $this->config = $this->config('diff.settings');
     $this->diffLayoutManager = $diff_layout_manager;
     $this->entityComparison = $entity_comparison;
@@ -71,7 +75,7 @@ class PluginRevisionController extends ControllerBase {
     return new static(
       $container->get('diff.entity_comparison'),
       $container->get('plugin.manager.diff.layout'),
-      $container->get('request_stack')
+      $container->get('request_stack'),
     );
   }
 
@@ -108,7 +112,8 @@ class PluginRevisionController extends ControllerBase {
    *   The right revision.
    * @param string $filter
    *   If $filter == 'raw' raw text is compared (including html tags)
-   *   If filter == 'raw-plain' markdown function is applied to the text before comparison.
+   *   If filter == 'raw-plain' markdown function is applied to the text before
+   *   comparison.
    *
    * @return array
    *   Table showing the diff between the two entity revisions.
@@ -157,7 +162,7 @@ class PluginRevisionController extends ControllerBase {
     $build['controls']['diff_layout'] = [
       '#type' => 'item',
       '#title' => $this->t('Layout'),
-      '#wrapper_attributes' => ['class' => 'diff-controls__item'],
+      '#wrapper_attributes' => ['class' => ['diff-controls__item']],
       'filter' => $this->buildLayoutNavigation($entity, $left_revision->getRevisionId(), $right_revision->getRevisionId(), $filter),
     ];
 
@@ -195,10 +200,10 @@ class PluginRevisionController extends ControllerBase {
     $links = [];
     $layouts = $this->diffLayoutManager->getPluginOptions();
     foreach ($layouts as $key => $value) {
-      $links[$key] = array(
+      $links[$key] = [
         'title' => $value,
         'url' => $this->diffRoute($entity, $left_revision_id, $right_revision_id, $key),
-      );
+      ];
     }
 
     // Set as the first element the current filter.
@@ -246,7 +251,7 @@ class PluginRevisionController extends ControllerBase {
       $element = [
         '#type' => 'item',
         '#title' => $this->t('Navigation'),
-        '#wrapper_attributes' => ['class' => 'diff-navigation'],
+        '#wrapper_attributes' => ['class' => ['diff-navigation']],
       ];
       $i = 0;
       // Find the previous revision.

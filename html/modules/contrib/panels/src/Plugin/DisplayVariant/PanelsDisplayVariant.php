@@ -73,6 +73,13 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
   protected $layout;
 
   /**
+   * The panel plugin.
+   *
+   * @var \Drupal\panels\Plugin\PanelsPattern\PanelsPatternInterface
+   */
+ protected $pattern;
+
+  /**
    * Constructs a new PanelsDisplayVariant.
    *
    * @param array $configuration
@@ -400,7 +407,9 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
       $this->configuration['builder'] = $form_state->getValue('builder');
     }
     $this->configuration['page_title'] = $form_state->getValue('page_title');
-    $this->configuration['css_classes'] = preg_split('/\s+/', trim($form_state->getValue('css_classes')));
+    $css_classes = $form_state->getValue('css_classes');
+    $css_classes = is_null($css_classes) ? '' : $css_classes;
+    $this->configuration['css_classes'] = preg_split('/\s+/', trim($css_classes));
     $this->configuration['html_id'] = $form_state->getValue('html_id');
     $this->configuration['css_styles'] = $form_state->getValue('css_styles');
   }

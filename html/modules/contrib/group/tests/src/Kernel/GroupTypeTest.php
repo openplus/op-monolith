@@ -15,23 +15,6 @@ use Drupal\group\Entity\GroupTypeInterface;
 class GroupTypeTest extends GroupKernelTestBase {
 
   /**
-   * The 'default' group type from the group_test_config test module.
-   *
-   * @var \Drupal\group\Entity\GroupTypeInterface
-   */
-  protected $groupType;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-    $this->groupType = $this->entityTypeManager
-      ->getStorage('group_type')
-      ->load('default');
-  }
-
-  /**
    * Tests the maximum ID length of a group type.
    *
    * @covers ::preSave
@@ -52,43 +35,44 @@ class GroupTypeTest extends GroupKernelTestBase {
   /**
    * Tests the retrieval of the collection of installed plugins.
    *
-   * @covers ::getInstalledContentPlugins
+   * @covers ::getInstalledPlugins
    */
-  public function testGetInstalledContentPlugins() {
-    $plugins = $this->groupType->getInstalledContentPlugins();
-    $this->assertInstanceOf('\Drupal\group\Plugin\GroupContentEnablerCollection', $plugins, 'Loaded the installed plugin collection.');
+  public function testGetInstalledPlugins() {
+    $plugins = $this->createGroupType()->getInstalledPlugins();
+    $this->assertInstanceOf('\Drupal\group\Plugin\Group\Relation\GroupRelationCollection', $plugins, 'Loaded the installed plugin collection.');
     $this->assertCount(1, $plugins, 'Plugin collection has one plugin instance.');
   }
 
   /**
    * Tests whether a group type can tell if it has a plugin installed.
    *
-   * @covers ::hasContentPlugin
+   * @covers ::hasPlugin
    */
-  public function testHasContentPlugin() {
-    $this->assertTrue($this->groupType->hasContentPlugin('group_membership'), 'Found the group_membership plugin.');
-    $this->assertFalse($this->groupType->hasContentPlugin('fake_plugin_id'), 'Could not find the fake_plugin_id plugin.');
+  public function testHasPlugin() {
+    $group_type = $this->createGroupType();
+    $this->assertTrue($group_type->hasPlugin('group_membership'), 'Found the group_membership plugin.');
+    $this->assertFalse($group_type->hasPlugin('fake_plugin_id'), 'Could not find the fake_plugin_id plugin.');
   }
 
   /**
    * Tests the retrieval of an installed plugin.
    *
-   * @covers ::getContentPlugin
+   * @covers ::getPlugin
    */
-  public function testGetInstalledContentPlugin() {
-    $plugin = $this->groupType->getContentPlugin('group_membership');
-    $this->assertInstanceOf('\Drupal\group\Plugin\GroupContentEnablerInterface', $plugin, 'Loaded the group_membership plugin.');
+  public function testGetInstalledPlugin() {
+    $plugin = $this->createGroupType()->getPlugin('group_membership');
+    $this->assertInstanceOf('\Drupal\group\Plugin\Group\Relation\GroupRelationInterface', $plugin, 'Loaded the group_membership plugin.');
   }
 
   /**
    * Tests the retrieval of a non-existent plugin.
    *
-   * @covers ::getContentPlugin
+   * @covers ::getPlugin
    */
-  public function testGetNonExistentContentPlugin() {
+  public function testGetNonExistentPlugin() {
     $this->expectException(PluginNotFoundException::class);
     $this->expectExceptionMessage("Plugin ID 'fake_plugin_id' was not found.");
-    $this->groupType->getContentPlugin('fake_plugin_id');
+    $this->createGroupType()->getPlugin('fake_plugin_id');
   }
 
 }

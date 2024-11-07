@@ -3,6 +3,7 @@
 namespace Drupal\toc_filter\Plugin\Block;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\filter\Entity\FilterFormat;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\toc_api\Plugin\Block\TocBlockBase;
 
@@ -25,10 +26,25 @@ class TocFilterBlock extends TocBlockBase {
 
     // If current page is not a node or does not contain a [toc] token return
     // forbidden access result.
-    if (!$node || !$node->hasField('body') || stripos((string) $node->body->value, '[toc') === FALSE) {
+    if (!$node || !$node->hasField('body')) {
       return AccessResult::forbidden();
     }
 
+    // Node should have [toc] token or filter should have auto enabled.
+    $format_id = $node->body->format;
+    if ($format_id !== NULL){
+    $format = FilterFormat::load($format_id);
+      if ( $format && $format->filters('toc_filter')) {
+        $toc_filter_config = $format->filters('toc_filter')->getConfiguration();
+        // If auto is disabled, and there is no [toc token, don't display block.
+        if (!$toc_filter_config['settings']['auto'] && stripos($node->body->value, '[toc') === FALSE) {
+          return AccessResult::forbidden();
+        }
+      }
+    } else {
+      return AccessResult::forbidden();
+    }
+    
     // Since entities (ie node) are cached we need to pass the current node's
     // body through it's filters and see if a TOC is being generated and
     // displayed in this block.

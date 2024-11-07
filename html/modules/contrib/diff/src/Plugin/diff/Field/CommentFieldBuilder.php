@@ -2,10 +2,10 @@
 
 namespace Drupal\diff\Plugin\diff\Field;
 
-use Drupal\diff\FieldDiffBuilderBase;
+use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
+use Drupal\diff\FieldDiffBuilderBase;
 
 /**
  * Plugin to diff comment fields.
@@ -24,7 +24,7 @@ class CommentFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function build(FieldItemListInterface $field_items) {
-    $result = array();
+    $result = [];
 
     // Every item from $field_items is of type FieldItemInterface.
     foreach ($field_items as $field_key => $field_item) {
@@ -64,16 +64,16 @@ class CommentFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['compare_key'] = array(
+    $form['compare_key'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Compare comment status key'),
       '#default_value' => $this->configuration['compare_key'],
-    );
-    $form['compare_string'] = array(
+    ];
+    $form['compare_string'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Compare comment status string'),
       '#default_value' => $this->configuration['compare_string'],
-    );
+    ];
 
     return parent::buildConfigurationForm($form, $form_state);
   }
@@ -92,10 +92,10 @@ class CommentFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    $default_configuration = array(
+    $default_configuration = [
       'compare_key' => 0,
       'compare_string' => 1,
-    );
+    ];
     $default_configuration += parent::defaultConfiguration();
 
     return $default_configuration;

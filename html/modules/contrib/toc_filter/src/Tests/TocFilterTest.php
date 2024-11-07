@@ -22,7 +22,7 @@ class TocFilterTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'filter',
     'toc_api',

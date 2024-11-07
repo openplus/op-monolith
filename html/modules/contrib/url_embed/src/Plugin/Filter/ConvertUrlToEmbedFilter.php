@@ -4,8 +4,11 @@ namespace Drupal\url_embed\Plugin\Filter;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\filter\Attribute\Filter;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
+use Drupal\filter\Plugin\FilterInterface;
 
 /**
  * Provides a filter to display embedded entities based on data attributes.
@@ -20,6 +23,14 @@ use Drupal\filter\Plugin\FilterBase;
  *   },
  * )
  */
+#[Filter(
+  id: "url_embed_convert_links",
+  title: new TranslatableMarkup("Convert URLs to URL embeds"),
+  type: FilterInterface::TYPE_TRANSFORM_REVERSIBLE,
+  settings: [
+    "url_prefix" => "",
+  ],
+)]
 class ConvertUrlToEmbedFilter extends FilterBase {
 
   /**
@@ -30,7 +41,7 @@ class ConvertUrlToEmbedFilter extends FilterBase {
       '#type' => 'textfield',
       '#title' => $this->t('URL prefix'),
       '#default_value' => $this->settings['url_prefix'],
-      '#description' => $this->t('Optional prefix that will be used to indicate which URLs that apply. All URLs that are supported will be converted if empty. Example: EMBED-https://twitter.com/drupal/status/735873777683320832'),
+      '#description' => $this->t('Optional prefix that will be used to indicate which URLs that apply. All URLs that are supported will be converted if empty. Example: EMBED-https://www.youtube.com/watch?v=I95hSyocMlg'),
     ];
     return $form;
   }

@@ -29,7 +29,7 @@ class DiffViewsTest extends ViewTestBase {
   /**
    * Tests the behavior of a view that uses the diff_from and diff_to fields.
    */
-  public function testDiffView() {
+  public function testDiffView(): void {
     // Make sure HTML Diff is disabled.
     $this->config('diff.settings')
       ->set('general_settings.layout_plugins.visual_inline.enabled', FALSE)
@@ -83,9 +83,9 @@ class DiffViewsTest extends ViewTestBase {
         'query' => [
           'destination' => Url::fromUri("internal:/node/{$node->id()}/diff-views")->toString(),
         ],
-      ]
+      ],
     );
-    $this->assertSession()->addressEquals($expected_url);
+    $this->assertSession()->addressEquals($expected_url->setAbsolute()->toString());
     $this->assertSession()->responseContains('<td class="diff-context diff-deletedline">Test article: <span class="diffchange">giraffe</span></td>');
     $this->assertSession()->responseContains('<td class="diff-context diff-addedline">Test article: <span class="diffchange">llama</span></td>');
   }

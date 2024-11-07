@@ -1,0 +1,34 @@
+{
+  "name": "ckeditor5-premium-features",
+  "version": "1.0.0",
+  "description": "Drupal CKEditor 5 Premium Features integration",
+  "author": "",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "watch": "webpack --watch",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "@ckeditor/ckeditor5-ai": "^41.2.0",
+    "@ckeditor/ckeditor5-autoformat": "^41.2.0",
+    "@ckeditor/ckeditor5-autosave": "^41.2.0",
+    "@ckeditor/ckeditor5-basic-styles": "^41.2.0",
+    "@ckeditor/ckeditor5-cloud-services": "^41.2.0",
+    "@ckeditor/ckeditor5-comments": "^41.2.0",
+    "@ckeditor/ckeditor5-dev-utils": "^25.4.5",
+    "@ckeditor/ckeditor5-export-pdf": "^41.2.0",
+    "@ckeditor/ckeditor5-export-word": "^41.2.0",
+    "@ckeditor/ckeditor5-import-word": "^41.2.1",
+    "@ckeditor/ckeditor5-list": "^41.2.0",
+    "@ckeditor/ckeditor5-mention": "^41.2.0",
+    "@ckeditor/ckeditor5-revision-history": "^41.2.0",
+    "@ckeditor/ckeditor5-track-changes": "^41.2.0",
+    "ckeditor5": "^41.2.0",
+    "css-loader": "^6.7.1",
+    "raw-loader": "^4.0.2",
+    "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.3.3",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0"
+  }
+}

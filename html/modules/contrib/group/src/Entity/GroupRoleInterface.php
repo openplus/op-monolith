@@ -29,12 +29,12 @@ interface GroupRoleInterface extends ConfigEntityInterface {
   public function setWeight($weight);
 
   /**
-   * Returns whether the role is tied to a group type.
+   * Returns whether the role is an admin role.
    *
    * @return bool
-   *   Whether the role is tied to a group type.
+   *   Whether the role is an admin role.
    */
-  public function isInternal();
+  public function isAdmin();
 
   /**
    * Returns whether the role is for an anonymous user.
@@ -61,6 +61,32 @@ interface GroupRoleInterface extends ConfigEntityInterface {
   public function isMember();
 
   /**
+   * Returns the scope this role belongs to.
+   *
+   * @return string
+   *   The scope this role belongs to.
+   */
+  public function getScope();
+
+  /**
+   * Returns the global role this role synchronizes with.
+   *
+   * @return \Drupal\user\RoleInterface|false
+   *   The global role this role synchronizes with or FALSE if this role belongs
+   *   to the individual scope.
+   */
+  public function getGlobalRole();
+
+  /**
+   * Returns the ID of the global role this role synchronizes with.
+   *
+   * @return string|false
+   *   The ID of the global role this role synchronizes with or FALSE if this
+   *   role belongs to the individual scope.
+   */
+  public function getGlobalRoleId();
+
+  /**
    * Returns the group type this role belongs to.
    *
    * @return \Drupal\group\Entity\GroupTypeInterface
@@ -75,14 +101,6 @@ interface GroupRoleInterface extends ConfigEntityInterface {
    *   The ID of the group type this role belongs to.
    */
   public function getGroupTypeId();
-
-  /**
-   * Returns whether the role shows up in the default permissions UI.
-   *
-   * @return bool
-   *   Whether the role shows up in the default permissions UI.
-   */
-  public function inPermissionsUI();
 
   /**
    * Returns a list of permissions assigned to the role.
@@ -126,14 +144,6 @@ interface GroupRoleInterface extends ConfigEntityInterface {
   public function grantPermissions($permissions);
 
   /**
-   * Grants all available permissions to the role.
-   *
-   * @return \Drupal\group\Entity\GroupRoleInterface
-   *   The group role this was called on.
-   */
-  public function grantAllPermissions();
-
-  /**
    * Revokes a permission from the role.
    *
    * @param string $permission
@@ -171,7 +181,7 @@ interface GroupRoleInterface extends ConfigEntityInterface {
    *   revoked.
    *   @code
    *     [
-   *       'administer group' => 0,         // Revoke 'administer group'
+   *       'view group' => 0,               // Revoke 'view group'
    *       'edit group' => FALSE,           // Revoke 'edit group'
    *       'administer members' => 1,       // Grant 'administer members'
    *       'leave group' => TRUE,           // Grant 'leave group'

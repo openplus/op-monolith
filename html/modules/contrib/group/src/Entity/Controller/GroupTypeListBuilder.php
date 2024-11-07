@@ -5,6 +5,7 @@ namespace Drupal\group\Entity\Controller;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\group\Entity\GroupTypeInterface;
 
 /**
  * Defines a class to build a listing of group type entities.
@@ -29,7 +30,7 @@ class GroupTypeListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /** @var \Drupal\group\Entity\GroupTypeInterface $entity */
+    assert($entity instanceof GroupTypeInterface);
     $row['label'] = [
       'data' => $entity->label(),
       'class' => ['menu-label'],

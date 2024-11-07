@@ -1,0 +1,12 @@
+name: CKEditor 5 Premium Features Import from Word
+type: module
+description: "Allows you to import content from a Word file directly into CKEditor 5."
+package: CKEditor 5 Premium
+core_version_requirement: ^9.4 || ^10.0
+dependencies:
+  - ckeditor5_premium_features:ckeditor5_premium_features
+
+# Information added by Drupal.org packaging script on 2024-06-13
+version: '1.2.9'
+project: 'ckeditor5_premium_features'
+datestamp: 1718272069

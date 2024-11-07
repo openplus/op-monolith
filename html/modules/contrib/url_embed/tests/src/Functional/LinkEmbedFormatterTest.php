@@ -34,10 +34,64 @@ class LinkEmbedFormatterTest extends BrowserTestBase {
   protected $fieldStorage;
 
   /**
-   * Tests the 'url_embed' formatter.
+   * Tests the default url_embed link field formatter.
    */
-  function testLinkEmbedFormatter() {
+  function testDefaultEmbedFormatter() {
     $field_name = mb_strtolower($this->randomMachineName());
+    $display_options = [
+      'type' => 'url_embed',
+      'label' => 'hidden',
+      'settings' => [
+        'enable_responsive' => FALSE,
+        'default_ratio' => '',
+      ],
+    ];
+    $this->createLinkEmbedFormatter($field_name, $display_options);
+    // Create an entity to test the embed formatter.
+    $url = UrlEmbedTestBase::FLICKR_URL;
+    $entity = EntityTest::create();
+    $entity->set($field_name, $url);
+    $entity->save();
+
+    // Render the entity and verify that the link is output as an embed.
+    $output = $this->renderTestEntity($entity->id());
+    $this->assertStringContainsString(UrlEmbedTestBase::FLICKR_OUTPUT_FIELD, $output);
+  }
+
+  /**
+   * Tests the responsive url_embed link field formatter.
+   */
+  function testResponsiveEmbedFormatter() {
+    $field_name = mb_strtolower($this->randomMachineName());
+    $display_options = [
+      'type' => 'url_embed',
+      'label' => 'hidden',
+      'settings' => [
+        'enable_responsive' => TRUE,
+        'default_ratio' => '66.669',
+      ],
+    ];
+    $this->createLinkEmbedFormatter($field_name, $display_options);
+    // Create an entity to test the embed formatter.
+    $url = UrlEmbedTestBase::FLICKR_URL;
+    $entity = EntityTest::create();
+    $entity->set($field_name, $url);
+    $entity->save();
+
+    // Render the entity and verify that the link is output as an embed.
+    $output = $this->renderTestEntity($entity->id());
+    $this->assertStringContainsString(UrlEmbedTestBase::FLICKR_OUTPUT_FIELD_RESPONSIVE, $output);
+  }
+
+  /**
+   * Provides a 'url_embed' formatter.
+   *
+   * @param string $field_name.
+   *   A machine name for a field.
+   * @param array $display_options.
+   *   Field formatter options.
+   */
+  function createLinkEmbedFormatter($field_name, $display_options) {
     // Create a field with settings to validate.
     $this->fieldStorage = FieldStorageConfig::create(array(
       'field_name' => $field_name,
@@ -59,23 +113,9 @@ class LinkEmbedFormatterTest extends BrowserTestBase {
         'type' => 'link_default',
       ))
       ->save();
-    $display_options = array(
-      'type' => 'url_embed',
-      'label' => 'hidden',
-    );
     \Drupal::service('entity_display.repository')->getViewDisplay('entity_test', 'entity_test', 'full')
       ->setComponent($field_name, $display_options)
       ->save();
-
-    // Create an entity to test the embed formatter.
-    $url = UrlEmbedTestBase::FLICKR_URL;
-    $entity = EntityTest::create();
-    $entity->set($field_name, $url);
-    $entity->save();
-
-    // Render the entity and verify that the link is output as an embed.
-    $output = $this->renderTestEntity($entity->id());
-    $this->assertStringContainsString(UrlEmbedTestBase::FLICKR_OUTPUT_FIELD, $output);
   }
 
   /**

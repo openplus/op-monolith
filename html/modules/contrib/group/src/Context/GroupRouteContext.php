@@ -59,7 +59,9 @@ class GroupRouteContext implements ContextProviderInterface {
    * {@inheritdoc}
    */
   public function getAvailableContexts() {
-    return ['group' => EntityContext::fromEntityTypeId('group', $this->t('Group from URL'))];
+    $context = EntityContext::fromEntityTypeId('group', $this->t('Group from URL'));
+    $context->getContextDefinition()->setDescription($this->t('Returns the group from the URL if there is one. E.g.: /group/1/edit will return the group with ID 1. Returns an unsaved group on the group add form.'));
+    return ['group' => $context];
   }
 
 }

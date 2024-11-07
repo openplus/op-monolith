@@ -1,0 +1,14 @@
+abbreviation:
+  css:
+    theme:
+      css/abbreviation.admin.css: { }
+  js:
+    js/build/abbreviation.js: { preprocess: false, minified: true }
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/ckeditor5
+abbreviation.admin:
+  css:
+    theme:
+      css/abbreviation.admin.css: { }

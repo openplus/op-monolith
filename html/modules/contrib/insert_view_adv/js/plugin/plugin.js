@@ -192,7 +192,7 @@
     }
     var content = editor.getData();
     var json = content.match(/{"inserted_view_adv":[^}]*}/gm);
-    if (json.length > 0) {
+    if (json && json.length > 0) {
       for (var i = 0; i < json.length; i++) {
         var dataItem = JSON.parse(json[i]);
         var rendered = Drupal.theme('advancedInsertView', dataItem);

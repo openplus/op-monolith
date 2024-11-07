@@ -2,9 +2,9 @@
 
 namespace Drupal\diff\Plugin\diff\Field;
 
-use Drupal\diff\FieldDiffBuilderBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\diff\FieldDiffBuilderBase;
 
 /**
  * Plugin to diff list fields.
@@ -25,7 +25,7 @@ class ListFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function build(FieldItemListInterface $field_items) {
-    $result = array();
+    $result = [];
 
     // Every item from $field_items is of type FieldItemInterface.
     foreach ($field_items as $field_key => $field_item) {
@@ -58,16 +58,16 @@ class ListFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['compare'] = array(
+    $form['compare'] = [
       '#type' => 'radios',
       '#title' => $this->t('Comparison method'),
-      '#options' => array(
+      '#options' => [
         'label' => $this->t('Label'),
         'key' => $this->t('Key'),
         'both' => $this->t('Label (key)'),
-      ),
+      ],
       '#default_value' => $this->configuration['compare'],
-    );
+    ];
 
     return parent::buildConfigurationForm($form, $form_state);
   }
@@ -85,9 +85,9 @@ class ListFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    $default_configuration = array(
+    $default_configuration = [
       'compare' => 'key',
-    );
+    ];
     $default_configuration += parent::defaultConfiguration();
 
     return $default_configuration;

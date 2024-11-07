@@ -92,6 +92,7 @@ class Predis extends QueueBase {
       $job = $this->client->hget($this->availableItems, $qid);
       if ($job) {
         $item = unserialize($job);
+        $item->item_id ??= $item->qid;
         $this->client->setex($this->leasedKeyPrefix . $item->item_id, $lease_time, '1');
       }
     }

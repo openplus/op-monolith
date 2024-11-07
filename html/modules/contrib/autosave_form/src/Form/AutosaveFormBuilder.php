@@ -177,7 +177,12 @@ class AutosaveFormBuilder extends FormBuilder {
       // Restore entity form.
       if ($form_object instanceof EntityFormInterface) {
         $entity = $form_object->getEntity();
-        $autosaved_state = $this->autosaveEntityFormStorage->getEntityAndFormState($form_id, $entity->getEntityTypeId(), $entity->id(), $entity->language()->getId(), $this->currentUser()->id(), NULL, $autosaved_timestamp);
+        $entity_type = $entity->getEntityType();
+        $entity_id = $entity_type->hasHandlerClass('autosave_form')
+          && ($class = $entity_type->getHandlerClass('autosave_form'))
+          ? $class::getEntityId($entity)
+          : AutosaveEntityFormHandler::getEntityId($entity);
+        $autosaved_state = $this->autosaveEntityFormStorage->getEntityAndFormState($form_id, $entity->getEntityTypeId(), $entity_id, $entity->language()->getId(), $this->currentUser()->id(), NULL, $autosaved_timestamp);
 
         if (is_null($autosaved_state)) {
           // @todo Cover the case that the autosaved state has been purged

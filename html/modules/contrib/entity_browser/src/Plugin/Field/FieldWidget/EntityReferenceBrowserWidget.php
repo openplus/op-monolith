@@ -421,7 +421,10 @@ class EntityReferenceBrowserWidget extends WidgetBase {
    * Render API callback: Processes the entity browser element.
    */
   public static function processEntityBrowser(&$element, FormStateInterface $form_state, &$complete_form) {
-    $uuid = !empty($element['#attached']['drupalSettings']['entity_browser']) ? key($element['#attached']['drupalSettings']['entity_browser']) : '';
+    if (empty($element['#attached']['drupalSettings']['entity_browser'])) {
+      return $element;
+    }
+    $uuid = key($element['#attached']['drupalSettings']['entity_browser']);
     $element['#attached']['drupalSettings']['entity_browser'][$uuid]['selector'] = '#' . $element['#custom_hidden_id'];
     return $element;
   }

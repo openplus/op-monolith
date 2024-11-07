@@ -2,8 +2,8 @@
 
 namespace Drupal\diff;
 
-use Drupal\Core\Diff\DiffFormatter as CoreDiffFormatterBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Diff\DiffFormatter as CoreDiffFormatterBase;
 
 /**
  * Diff formatter which returns output that can be rendered to a table.

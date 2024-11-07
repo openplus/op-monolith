@@ -48,4 +48,5 @@ class FieldDiffBuilder extends Plugin {
    * @var int
    */
   public $weight = 0;
+
 }

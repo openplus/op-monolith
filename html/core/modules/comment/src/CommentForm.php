@@ -7,7 +7,6 @@ use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityConstraintViolationListInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -16,8 +15,8 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -50,27 +49,6 @@ class CommentForm extends ContentEntityForm {
   protected $entityFieldManager;
 
   /**
-   * The commented entity..
-   *
-   * @var \Drupal\Core\Entity\ContentEntityBase
-   */
-  protected $commentedEntity;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * Route match interface.
-   *
-   * @var \Drupal\Core\Routing\RouteMatchInterface
-   */
-  protected $routeMatch;
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -80,9 +58,7 @@ class CommentForm extends ContentEntityForm {
       $container->get('renderer'),
       $container->get('entity_type.bundle.info'),
       $container->get('datetime.time'),
-      $container->get('entity_field.manager'),
-      $container->get('current_route_match'),
-      $container->get('entity_type.manager')
+      $container->get('entity_field.manager')
     );
   }
 
@@ -99,20 +75,21 @@ class CommentForm extends ContentEntityForm {
    *   The entity type bundle service.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
-   *   The entity field manager service.
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *   The current route match.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface|null $entity_field_manager
+   *   (optional) The entity field manager service.
    */
-  public function __construct(EntityRepositoryInterface $entity_repository, AccountInterface $current_user, RendererInterface $renderer, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL, EntityFieldManagerInterface $entity_field_manager = NULL, RouteMatchInterface $route_match, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(
+    EntityRepositoryInterface $entity_repository,
+    AccountInterface $current_user,
+    RendererInterface $renderer,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+    TimeInterface $time,
+    ?EntityFieldManagerInterface $entity_field_manager = NULL,
+  ) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->currentUser = $current_user;
     $this->renderer = $renderer;
     $this->entityFieldManager = $entity_field_manager ?: \Drupal::service('entity_field.manager');
-    $this->entityTypeManager = $entity_type_manager ?: \Drupal::service('entity_type_manager');
-    $this->routeMatch = $route_match;
   }
 
   /**
@@ -150,14 +127,8 @@ class CommentForm extends ContentEntityForm {
 
     // If not replying to a comment, use our dedicated page callback for new
     // Comments on entities.
-    $entity_url = $entity->toUrl();
-    if ($entity_url->getRouteName() === $this->routeMatch->getRouteName() &&
-      $entity_url->getRouteParameters() === $this->routeMatch->getRawParameters()) {
-      $form['#action'] = Url::fromRoute('comment.reply', [
-        'entity_type' => $entity->getEntityTypeId(),
-        'entity' => $entity->id(),
-        'field_name' => $field_name,
-      ])->toString();
+    if (!$comment->id() && !$comment->hasParentComment()) {
+      $form['#action'] = Url::fromRoute('comment.reply', ['entity_type' => $entity->getEntityTypeId(), 'entity' => $entity->id(), 'field_name' => $field_name])->toString();
     }
 
     $comment_preview = $form_state->get('comment_preview');
@@ -323,7 +294,7 @@ class CommentForm extends ContentEntityForm {
       $comment->setCreatedTime($form_state->getValue('date')->getTimestamp());
     }
     else {
-      $comment->setCreatedTime(REQUEST_TIME);
+      $comment->setCreatedTime($this->time->getRequestTime());
     }
     // Empty author ID should revert to anonymous.
     $author_id = $form_state->getValue('uid');
@@ -350,7 +321,7 @@ class CommentForm extends ContentEntityForm {
     // Validate the comment's subject. If not specified, extract from comment
     // body.
     if (trim($comment->getSubject()) == '') {
-      if ($comment->hasField('comment_body')) {
+      if ($comment->hasField('comment_body') && !$comment->comment_body->isEmpty()) {
         // The body may be in any format, so:
         // 1) Filter it into HTML
         // 2) Strip out all HTML tags
@@ -360,7 +331,7 @@ class CommentForm extends ContentEntityForm {
       }
       // Edge cases where the comment body is populated only by HTML tags will
       // require a default subject.
-      if ($comment->getSubject() == '') {
+      if (trim($comment->getSubject()) == '') {
         $comment->setSubject($this->t('(No subject)'));
       }
     }
@@ -409,6 +380,7 @@ class CommentForm extends ContentEntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     $comment = $this->entity;
     $entity = $comment->getCommentedEntity();
+    $is_new = $this->entity->isNew();
     $field_name = $comment->getFieldName();
     $uri = $entity->toUrl();
     $logger = $this->logger('comment');
@@ -422,16 +394,8 @@ class CommentForm extends ContentEntityForm {
         '%subject' => $comment->getSubject(),
         'link' => Link::fromTextAndUrl(t('View'), $comment->toUrl()->setOption('fragment', 'comment-' . $comment->id()))->toString(),
       ]);
-
-      // Explain the approval queue if necessary.
-      if (!$comment->isPublished()) {
-        if (!$this->currentUser->hasPermission('administer comments')) {
-          $this->messenger()->addStatus($this->t('Your comment has been queued for review by site administrators and will be published after approval.'));
-        }
-      }
-      else {
-        $this->messenger()->addStatus($this->t('Your comment has been posted.'));
-      }
+      // Add an appropriate message upon submitting the comment form.
+      $this->messenger()->addStatus($this->getStatusMessage($comment, $is_new));
       $query = [];
       // Find the current display page for this comment.
       $field_definition = $this->entityFieldManager->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle())[$field_name];
@@ -448,11 +412,31 @@ class CommentForm extends ContentEntityForm {
       $this->messenger()->addError($this->t('Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', ['%subject' => $comment->getSubject()]));
       // Redirect the user to the entity they are commenting on.
     }
-    $entity_url = $entity->toUrl();
-    if ($entity_url->getRouteName() === $this->routeMatch->getRouteName() &&
-      $entity_url->getRouteParameters() === $this->routeMatch->getRawParameters()) {
-      $form_state->setRedirectUrl($uri);
+    $form_state->setRedirectUrl($uri);
+  }
+
+  /**
+   * Gets an appropriate status message when a comment is saved.
+   *
+   * @param \Drupal\comment\CommentInterface $comment
+   *   The comment being saved.
+   * @param bool $is_new
+   *   TRUE if a new comment is created. $comment->isNew() cannot be used here
+   *   because the comment has already been saved by the time the message is
+   *   rendered.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A translatable string containing the appropriate status message.
+   */
+  protected function getStatusMessage(CommentInterface $comment, bool $is_new): TranslatableMarkup {
+    if (!$comment->isPublished() && !$this->currentUser->hasPermission('administer comments')) {
+      return $this->t('Your comment has been queued for review by site administrators and will be published after approval.');
     }
+    // Check whether the comment is new or not.
+    if ($is_new) {
+      return $this->t('Your comment has been posted.');
+    }
+    return $this->t('Your comment has been updated.');
   }
 
 }

@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\embed\Unit;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Component\Serialization\Json;
-use Drupal\Tests\UnitTestCase;
+use Drupal\Component\Utility\Html;
 use Drupal\embed\DomHelperTrait;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * Tests \Drupal\embed\DomHelperTrait.

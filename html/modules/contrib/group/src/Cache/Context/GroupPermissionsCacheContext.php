@@ -54,7 +54,6 @@ class GroupPermissionsCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public function getContext() {
-    // @todo Take bypass permission into account, delete permission in 8.2.x.
     return $this->permissionsHashGenerator->generateHash($this->currentUser);
   }
 
@@ -62,7 +61,6 @@ class GroupPermissionsCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public function getCacheableMetadata() {
-    // @todo Take bypass permission into account, delete permission in 8.2.x.
     return $this->permissionsHashGenerator->getCacheableMetadata($this->currentUser);
   }
 

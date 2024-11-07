@@ -2,12 +2,12 @@
 
 namespace Drupal\diff;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Base class for field diff builder plugins.
@@ -49,7 +49,13 @@ abstract class FieldDiffBuilderBase extends PluginBase implements FieldDiffBuild
    * @param \Drupal\diff\DiffEntityParser $entity_parser
    *   The entity parser.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, DiffEntityParser $entity_parser) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityTypeManagerInterface $entity_type_manager,
+    DiffEntityParser $entity_parser,
+  ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityParser = $entity_parser;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -66,7 +72,7 @@ abstract class FieldDiffBuilderBase extends PluginBase implements FieldDiffBuild
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager'),
-      $container->get('diff.entity_parser')
+      $container->get('diff.entity_parser'),
     );
   }
 
@@ -74,23 +80,23 @@ abstract class FieldDiffBuilderBase extends PluginBase implements FieldDiffBuild
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['show_header'] = array(
+    $form['show_header'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show field title'),
       '#weight' => -5,
       '#default_value' => $this->configuration['show_header'],
-    );
-    $form['markdown'] = array(
+    ];
+    $form['markdown'] = [
       '#type' => 'select',
       '#title' => $this->t('Markdown callback'),
       '#default_value' => $this->configuration['markdown'],
-      '#options' => array(
+      '#options' => [
         'drupal_html_to_text' => $this->t('Drupal HTML to Text'),
         'filter_xss' => $this->t('Filter XSS (some tags)'),
         'filter_xss_all' => $this->t('Filter XSS (all tags)'),
-      ),
+      ],
       '#description' => $this->t('These provide ways to clean markup tags to make comparisons easier to read.'),
-    );
+    ];
 
     return $form;
   }
@@ -114,10 +120,10 @@ abstract class FieldDiffBuilderBase extends PluginBase implements FieldDiffBuild
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return array(
+    return [
       'show_header' => 1,
       'markdown' => 'drupal_html_to_text',
-    );
+    ];
   }
 
   /**

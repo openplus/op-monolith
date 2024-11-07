@@ -1,0 +1,8 @@
+{# footnotes/footnote-links.html.twig #}
+{%- if footnote_links -%}
+  <span class="footnote-multiple-citations-wrapper">
+    {%- for footnote_link in footnote_links -%}
+      {{ footnote_link }}
+    {%- endfor -%}
+  </span>
+{%- endif -%}

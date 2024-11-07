@@ -3,13 +3,21 @@
 namespace Drupal\Tests\group\Kernel;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Routing\RouteObjectInterface;
 use Drupal\Core\Url;
 use Drupal\group\Entity\GroupInterface;
-use Drupal\Core\Routing\RouteObjectInterface;
+use Drupal\group\PermissionScopeInterface;
+use Drupal\user\RoleInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests the revision UI access for groups.
+ *
+ * There used to be a time where it mattered how many revisions there were for
+ * an entity. Those days have passed, but it doesn't hurt to leave the test
+ * cases in for extra hardening. This is why you'll notice some test cases
+ * being specific about there being one revision.
  *
  * @covers \Drupal\group\Entity\Access\GroupRevisionCheck
  * @group group
@@ -57,13 +65,11 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
       'creator_membership' => FALSE,
     ]);
 
-    $this->adminRole = $this->entityTypeManager->getStorage('group_role')->create([
-      'id' => 'revision_test-admin',
-      'label' => 'Revision admin',
-      'weight' => 0,
+    $this->adminRole = $this->createGroupRole([
       'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::INDIVIDUAL_ID,
+      'admin' => TRUE,
     ]);
-    $this->adminRole->grantPermission('administer group')->save();
   }
 
   /**
@@ -76,13 +82,18 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
     $member = $this->createUser();
     $admin = $this->createUser();
 
-    $this->groupType->getOutsiderRole()
-      ->grantPermissions($outsider_permissions)
-      ->save();
-
-    $this->groupType->getMemberRole()
-      ->grantPermissions($member_permissions)
-      ->save();
+    $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::OUTSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => $outsider_permissions,
+    ]);
+    $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::INSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => $member_permissions,
+    ]);
 
     $group = $this->createGroup(['type' => $this->groupType->id()]);
     $group->addMember($member);
@@ -115,10 +126,10 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
 
     $cases['view-one-rev-no-new-rev'] = [
       ['view group'],
-      ['view group', 'view group revisions'],
+      ['view group', 'view all group revisions'],
       FALSE,
-      FALSE,
-      FALSE,
+      TRUE,
+      TRUE,
       FALSE,
       FALSE,
       'Checking access to revision overview when there is one revision and new revisions are not created automatically',
@@ -126,7 +137,7 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
 
     $cases['view-one-rev-new-rev'] = [
       ['view group'],
-      ['view group', 'view group revisions'],
+      ['view group', 'view all group revisions'],
       FALSE,
       TRUE,
       TRUE,
@@ -137,7 +148,7 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
 
     $cases['view-multi-rev-no-new-rev'] = [
       ['view group'],
-      ['view group', 'view group revisions'],
+      ['view group', 'view all group revisions'],
       FALSE,
       TRUE,
       TRUE,
@@ -148,7 +159,7 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
 
     $cases['view-multi-rev-new-rev'] = [
       ['view group'],
-      ['view group', 'view group revisions'],
+      ['view group', 'view all group revisions'],
       FALSE,
       TRUE,
       TRUE,
@@ -159,9 +170,9 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
 
     $cases['no-view-one-rev-new-rev'] = [
       [],
-      ['view group revisions'],
+      ['view all group revisions'],
       FALSE,
-      FALSE,
+      TRUE,
       TRUE,
       TRUE,
       FALSE,
@@ -170,9 +181,9 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
 
     $cases['no-view-multi-rev-new-rev'] = [
       [],
-      ['view group revisions'],
+      ['view all group revisions'],
       FALSE,
-      FALSE,
+      TRUE,
       TRUE,
       TRUE,
       TRUE,
@@ -192,13 +203,18 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
     $member = $this->createUser();
     $admin = $this->createUser();
 
-    $this->groupType->getOutsiderRole()
-      ->grantPermissions($outsider_permissions)
-      ->save();
-
-    $this->groupType->getMemberRole()
-      ->grantPermissions($member_permissions)
-      ->save();
+    $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::OUTSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => $outsider_permissions,
+    ]);
+    $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::INSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => $member_permissions,
+    ]);
 
     $group = $this->createGroup(['type' => $this->groupType->id(), 'status' => $revision_published]);
     $group->addMember($member);
@@ -244,8 +260,8 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
       ['view group'],
       ['view group', 'view group revisions'],
       FALSE,
-      FALSE,
-      FALSE,
+      TRUE,
+      TRUE,
       FALSE,
       FALSE,
       FALSE,
@@ -384,8 +400,8 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
       ['view any unpublished group'],
       ['view any unpublished group', 'view group revisions'],
       FALSE,
-      FALSE,
-      FALSE,
+      TRUE,
+      TRUE,
       FALSE,
       FALSE,
       FALSE,
@@ -620,13 +636,18 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
     $member = $this->createUser();
     $admin = $this->createUser();
 
-    $this->groupType->getOutsiderRole()
-      ->grantPermissions($outsider_permissions)
-      ->save();
-
-    $this->groupType->getMemberRole()
-      ->grantPermissions($member_permissions)
-      ->save();
+    $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::OUTSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => $outsider_permissions,
+    ]);
+    $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::INSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => $member_permissions,
+    ]);
 
     $group = $this->createGroup(['type' => $this->groupType->id()]);
     $group->addMember($member);
@@ -762,13 +783,17 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
    */
   protected function createRequest($route_name, GroupInterface $group, GroupInterface $group_revision = NULL) {
     $params = ['group' => $group->id()];
-    $attributes = ['group' => $group,];
+    $attributes = ['group' => $group];
+
     if ($group_revision) {
       $params['group_revision'] = $group_revision->getRevisionId();
       $attributes['group_revision'] = $group_revision;
     }
 
+    $attributes[RouteObjectInterface::ROUTE_NAME] = $route_name;
     $attributes[RouteObjectInterface::ROUTE_OBJECT] = $this->routeProvider->getRouteByName($route_name);
+    $attributes['_raw_variables'] = new ParameterBag($params);
+
     $request = Request::create(Url::fromRoute($route_name, $params)->toString());
     $request->attributes->add($attributes);
 
@@ -789,11 +814,11 @@ class RevisionUiAccessTest extends GroupKernelTestBase {
   protected function countDefaultLanguageRevisions(GroupInterface $group) {
     return (int) $this->entityTypeManager->getStorage('group')
       ->getQuery()
-      ->accessCheck()
       ->allRevisions()
       ->condition('id', $group->id())
       ->condition('default_langcode', 1)
       ->count()
+      ->accessCheck()
       ->execute();
   }
 

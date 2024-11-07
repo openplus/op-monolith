@@ -42,7 +42,7 @@ class DiffControllerTest extends BrowserTestBase {
   /**
    * Tests the Controller.
    */
-  public function testController() {
+  public function testController(): void {
     $assert_session = $this->assertSession();
 
     $entity = EntityTestRev::create([

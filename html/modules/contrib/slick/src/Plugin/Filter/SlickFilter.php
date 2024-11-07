@@ -63,7 +63,7 @@ class SlickFilter extends BlazyFilterBase {
   protected static $navId = 'thumb';
 
   /**
-   * The slick admin service.
+   * {@inheritdoc}
    *
    * @var \Drupal\slick\Form\SlickAdminInterface
    */
@@ -77,7 +77,7 @@ class SlickFilter extends BlazyFilterBase {
   protected $formatter;
 
   /**
-   * The slick manager.
+   * {@inheritdoc}
    *
    * @var \Drupal\slick\SlickManagerInterface
    */
@@ -222,7 +222,7 @@ class SlickFilter extends BlazyFilterBase {
   /**
    * Build the slick using the DOM lookups.
    */
-  private function withDomShortcode(\DOMElement $object, array $settings): array {
+  private function withDomShortcode($object, array $settings): array {
     $text = $this->getHtml($object);
 
     if (empty($text)) {

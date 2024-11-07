@@ -1,2 +1,4 @@
-{# footnotes/footnote-link.html.twig #}
-<a class="see-footnote" id="{{ fn.ref_id }}" title="{{ fn.text_clean }}" href="#{{ fn.fn_id }}">{{ fn.value }}</a>
+{% apply spaceless %}
+  {# footnotes/footnote-link.html.twig #}
+  <a class="footnote__citation js-footnote-citation" id="{{ fn.ref_id }}" title="{{ fn.text_clean }}" href="#{{ fn.fn_id }}">{{ fn.value|render|trim }}</a>
+{% endapply %}

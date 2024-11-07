@@ -1,8 +1,20 @@
 footnotes_footnotes:
   # Configuration that will be sent to CKEditor 5 JavaScript plugins.
+  provider: footnotes
   ckeditor5:
     plugins:
       - footnotes.Footnotes
+    config:
+      footnotes:
+        openDialog:
+          func:
+            name: Drupal.ckeditor5.openDialog
+            invoke: false
+        dialogSettings:
+          height: 75%
+          width: 80%
+          dialogClass: footnotes-widget-modal
+          title: Footnote
   # Configuration that will be used directly by Drupal.
   drupal:
     label: Footnotes
@@ -10,9 +22,20 @@ footnotes_footnotes:
     library: footnotes/footnotes-ckeditor5
     # The library loaded when configuring the text format using this plugin.
     admin_library: footnotes/admin.footnotes-ckeditor5
+    # The class for the footnotes.
+    class: Drupal\footnotes\Plugin\CKEditor5Plugin\Footnotes
     toolbar_items:
-      Footnotes:
+      footnotes:
         label: Footnotes
     elements:
-      - <fn>
-      - <fn value text>
+      - <ul>
+      - <ul class>
+      - <li>
+      - <li class>
+      - <span>
+      - <span class>
+      - <a>
+      - <a href id class>
+      - <footnotes-placeholder>
+      - <footnotes>
+      - <footnotes data-text data-value>

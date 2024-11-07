@@ -2,12 +2,12 @@
 
 namespace Drupal\group\Form;
 
-use Drupal\group\Entity\Form\GroupContentDeleteForm;
+use Drupal\group\Entity\Form\GroupRelationshipDeleteForm;
 
 /**
  * Provides a form for leaving a group.
  */
-class GroupLeaveForm extends GroupContentDeleteForm {
+class GroupLeaveForm extends GroupRelationshipDeleteForm {
 
   /**
    * {@inheritdoc}

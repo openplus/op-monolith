@@ -2,9 +2,9 @@
 
 namespace Drupal\diff\Plugin\diff\Field;
 
-use Drupal\diff\FieldDiffBuilderBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\diff\FieldDiffBuilderBase;
 
 /**
  * Plugin to compare the title and the uris of two link fields.
@@ -23,7 +23,7 @@ class LinkFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function build(FieldItemListInterface $field_items) {
-    $result = array();
+    $result = [];
 
     // Every item from $field_items is of type FieldItemInterface.
     foreach ($field_items as $field_key => $field_item) {
@@ -51,16 +51,16 @@ class LinkFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['compare_title'] = array(
+    $form['compare_title'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Compare link title'),
       '#default_value' => $this->configuration['compare_title'],
-    );
-    $form['compare_uri'] = array(
+    ];
+    $form['compare_uri'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Compare URI'),
       '#default_value' => $this->configuration['compare_uri'],
-    );
+    ];
 
     return parent::buildConfigurationForm($form, $form_state);
   }
@@ -79,10 +79,10 @@ class LinkFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    $default_configuration = array(
+    $default_configuration = [
       'compare_title' => 0,
       'compare_uri' => 1,
-    );
+    ];
     $default_configuration += parent::defaultConfiguration();
 
     return $default_configuration;

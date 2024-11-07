@@ -1,0 +1,16 @@
+# Maintainer names.
+boromino
+Papp
+
+# Words for this project.
+abbrs
+ckeditor
+
+# Words used in tests.
+ARIAWG
+ATAGWG
+WHATWG
+WAWG
+
+# Spelling mistakes to correct in the future.
+tooptip

@@ -1,10 +1,11 @@
 services:
-  gnode.translation_overview_access:
-    class: Drupal\gnode\Access\GroupContentTranslationAccess
+  gnode.route_subscriber:
+    class: 'Drupal\gnode\Routing\RouteSubscriber'
     tags:
-      - { name: access_check, applies_to: _access_content_translation_overview }
+      - { name: 'event_subscriber' }
 
-  gnode.translation_manage_access:
-    class: Drupal\gnode\Access\GroupContentTranslationAccess
-    tags:
-      - { name: access_check, applies_to: _access_content_translation_manage }
+  # Group relation plugin handlers.
+  group.relation_handler.permission_provider.group_node:
+    class: 'Drupal\gnode\Plugin\Group\RelationHandler\GroupNodePermissionProvider'
+    arguments: ['@group.relation_handler.permission_provider']
+    shared: false

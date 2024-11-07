@@ -1,0 +1,24 @@
+ckeditor5.plugin.ckeditor5_plugin_pack_font__font_size:
+  type: mapping
+  label: 'Font Size'
+  mapping:
+    options:
+      type: string
+
+ckeditor5.plugin.ckeditor5_plugin_pack_font__font_family:
+  type: mapping
+  label: 'Font Family'
+  mapping:
+    options:
+      type: string
+
+ckeditor5.plugin.ckeditor5_plugin_pack_font__font_color:
+  type: mapping
+  label: Custom colors
+  mapping:
+    colors:
+      type: sequence
+      label: 'Colors'
+    use_default_colors:
+      type: boolean
+      label: Use default colors

@@ -12,16 +12,13 @@ abstract class GroupKernelTestBase extends EntityKernelTestBase {
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Refactor tests to not automatically use group_test_config unless they
-   *       have a good reason to.
    */
-  protected static $modules = ['group', 'options', 'entity', 'variationcache', 'group_test_config'];
+  protected static $modules = ['entity', 'flexible_permissions', 'group', 'options', 'variationcache'];
 
   /**
-   * The content enabler plugin manager.
+   * The group relation type manager.
    *
-   * @var \Drupal\group\Plugin\GroupContentEnablerManagerInterface
+   * @var \Drupal\group\Plugin\Group\Relation\GroupRelationTypeManagerInterface
    */
   protected $pluginManager;
 
@@ -31,11 +28,12 @@ abstract class GroupKernelTestBase extends EntityKernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->pluginManager = $this->container->get('plugin.manager.group_content_enabler');
+    $this->pluginManager = $this->container->get('group_relation_type.manager');
 
     $this->installEntitySchema('group');
     $this->installEntitySchema('group_content');
-    $this->installConfig(['group', 'group_test_config']);
+    $this->installEntitySchema('group_config_wrapper');
+    $this->installConfig(['group']);
 
     // Make sure we do not use user 1.
     $this->createUser();
@@ -64,7 +62,6 @@ abstract class GroupKernelTestBase extends EntityKernelTestBase {
   protected function createGroup(array $values = []) {
     $storage = $this->entityTypeManager->getStorage('group');
     $group = $storage->create($values + [
-      'type' => 'default',
       'label' => $this->randomString(),
     ]);
     $group->enforceIsNew();
@@ -86,9 +83,29 @@ abstract class GroupKernelTestBase extends EntityKernelTestBase {
     $group_type = $storage->create($values + [
       'id' => $this->randomMachineName(),
       'label' => $this->randomString(),
+      'creator_wizard' => FALSE,
     ]);
     $storage->save($group_type);
     return $group_type;
+  }
+
+  /**
+   * Creates a group role.
+   *
+   * @param array $values
+   *   (optional) The values used to create the entity.
+   *
+   * @return \Drupal\group\Entity\GroupRole
+   *   The created group role entity.
+   */
+  protected function createGroupRole(array $values = []) {
+    $storage = $this->entityTypeManager->getStorage('group_role');
+    $group_role = $storage->create($values + [
+      'id' => $this->randomMachineName(),
+      'label' => $this->randomString(),
+    ]);
+    $storage->save($group_role);
+    return $group_role;
   }
 
 }

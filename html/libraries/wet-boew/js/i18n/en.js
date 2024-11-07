@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Show closed captioning"
 	},
 	"cc-err": "Error loading closed captions",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Enable audio description",
 		off: "Disable audio description"
 	},
 	pos: "Current position:",
 	dur: "Total time:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Share",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

@@ -10,12 +10,12 @@ use Drupal\Core\Url;
 /**
  * Implements hook_requirements().
  */
-function diff_requirements($phase) {
+function diff_requirements(string $phase): array {
   $requirements = [];
 
   if ($phase == 'runtime') {
     $config = \Drupal::config('diff.settings');
-    $setting_enabled = $config->get('general_settings.layout_plugins.visual_inline.enabled');
+    $setting_enabled = $config->get('general_settings.layout_plugins.visual_inline.enabled') === TRUE;
     $has_htmlDiffAdvanced = class_exists('\HtmlDiffAdvanced');
 
     $requirements['html_diff_advanced'] = [
@@ -43,12 +43,12 @@ function diff_requirements($phase) {
 /**
  * Implements hook_install().
  */
-function diff_install() {
+function diff_install(): void {
   $visual_inline = \Drupal::service('plugin.manager.diff.layout')->hasDefinition('visual_inline');
   // Enable Visual Inline layout if library found.
   if ($visual_inline) {
     $config = \Drupal::configFactory()->getEditable('diff.settings');
-    $settings_enabled = $config->get('general_settings.layout_plugins.visual_inline.enabled');
+    $settings_enabled = $config->get('general_settings.layout_plugins.visual_inline.enabled') === TRUE;
     if (!$settings_enabled) {
       $config->set('general_settings.layout_plugins.visual_inline.enabled', TRUE);
     }
@@ -59,7 +59,7 @@ function diff_install() {
 /**
  * Delete stale field diff configuration. Please reconfigure diff plugins.
  */
-function diff_update_8001() {
+function diff_update_8001(): void {
   $config = \Drupal::configFactory()->getEditable('diff.settings');
   $config->clear('entity');
   $config->save();
@@ -71,7 +71,7 @@ function diff_update_8001() {
 /**
  * Update diff.settings to include general_settings.revision_pager_limit.
  */
-function diff_update_8002() {
+function diff_update_8002(): void {
   $config_factory = \Drupal::configFactory();
   $config = $config_factory->getEditable('diff.settings');
   $config->set('general_settings.revision_pager_limit', 50);
@@ -81,7 +81,7 @@ function diff_update_8002() {
 /**
  * Delete stale theme configuration.
  */
-function diff_update_8003() {
+function diff_update_8003(): void {
   $config = \Drupal::configFactory()->getEditable('diff.settings');
   $config->clear('general_settings.theme');
   $config->save();
@@ -90,11 +90,10 @@ function diff_update_8003() {
 /**
  * Enable all layout plugins to be used.
  */
-function diff_update_8004() {
+function diff_update_8004(): void {
   $config = \Drupal::configFactory()->getEditable('diff.settings');
   $plugins = \Drupal::service('plugin.manager.diff.layout')->getDefinitions();
   foreach ($plugins as $key => $value) {
-    $plugin_options[$key] = $value['label'];
     $config->set('general_settings.layout_plugins.' . $key . '.enabled', TRUE);
   }
   $config->save();
@@ -103,7 +102,7 @@ function diff_update_8004() {
 /**
  * Update settings.
  */
-function diff_update_8005() {
+function diff_update_8005(): void {
   // The original update function had a bug, it set the new configuration of
   // layout plugins using the old keys (which were changed). Update 8006 will
   // fix this issue.
@@ -112,14 +111,13 @@ function diff_update_8005() {
 /**
  * Update settings, set the new keys of layout plugins.
  */
-function diff_update_8006() {
+function diff_update_8006(): void {
   $config = \Drupal::configFactory()->getEditable('diff.settings');
   $layout_manager = \Drupal::service('plugin.manager.diff.layout');
   $layout_manager->clearCachedDefinitions();
   $plugins = $layout_manager->getDefinitions();
   $config->clear('general_settings.layout_plugins');
   foreach ($plugins as $key => $value) {
-    $plugin_options[$key] = $value['label'];
     $config->set('general_settings.layout_plugins.' . $key . '.enabled', TRUE);
   }
   $config->save();
@@ -128,7 +126,7 @@ function diff_update_8006() {
 /**
  * Update settings, renamed 'standard' to 'default'.
  */
-function diff_update_8008() {
+function diff_update_8008(): void {
   $config = \Drupal::configFactory()->getEditable('diff.settings');
   $config->set('general_settings.visual_inline_theme', 'default');
   $config->save();
@@ -137,8 +135,17 @@ function diff_update_8008() {
 /**
  * Remove content type settings.
  */
-function diff_update_8009() {
+function diff_update_8009(): void {
   $config = \Drupal::configFactory()->getEditable('diff.settings');
   $config->clear('content_type_settings');
   $config->save();
+}
+
+/**
+ * Update diff.settings to include general_settings.visual_default_view_mode.
+ */
+function diff_update_8010(): void {
+  \Drupal::configFactory()->getEditable('diff.settings')
+    ->set('general_settings.visual_default_view_mode', 'full')
+    ->save();
 }

@@ -7,6 +7,10 @@ use Drupal\group\Entity\GroupInterface;
 
 /**
  * Defines the group membership loader interface.
+ *
+ * @deprecated in group:3.2.0 and is removed from group:4.0.0. Use the static
+ *   methods on \Drupal\group\Entity\GroupMembership instead.
+ * @see https://www.drupal.org/project/group/issues/3383363
  */
 interface GroupMembershipLoaderInterface {
 
@@ -19,7 +23,7 @@ interface GroupMembershipLoaderInterface {
    *   The user to load the membership for.
    *
    * @return \Drupal\group\GroupMembership|false
-   *   The loaded GroupMembership or FALSE if none was found.
+   *   The loaded group membership or FALSE if none was found.
    */
   public function load(GroupInterface $group, AccountInterface $account);
 
@@ -33,7 +37,7 @@ interface GroupMembershipLoaderInterface {
    *   names to filter on. Valid results only need to match on one role.
    *
    * @return \Drupal\group\GroupMembership[]
-   *   The loaded GroupMemberships matching the criteria.
+   *   The loaded group memberships matching the criteria.
    */
   public function loadByGroup(GroupInterface $group, $roles = NULL);
 
@@ -48,24 +52,8 @@ interface GroupMembershipLoaderInterface {
    *   names to filter on. Valid results only need to match on one role.
    *
    * @return \Drupal\group\GroupMembership[]
-   *   The loaded GroupMemberships matching the criteria.
+   *   The loaded group memberships matching the criteria.
    */
   public function loadByUser(AccountInterface $account = NULL, $roles = NULL);
-
-  /**
-   * Reset static memberships cache for a user.
-   *
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   The user to reset the membership cache for.
-   */
-  public function resetUserStaticCache(AccountInterface $account);
-
-  /**
-   * Reset static memberships cache for a user.
-   *
-   * @param \Drupal\group\Entity\GroupInterface $group
-   *   The group to reset the membership cache for.
-   */
-  public function resetGroupStaticCache(GroupInterface $group);
 
 }

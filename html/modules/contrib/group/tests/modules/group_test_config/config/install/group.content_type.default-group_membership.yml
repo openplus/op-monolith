@@ -6,8 +6,6 @@ dependencies:
   module:
     - user
 id: default-group_membership
-label: 'Default label: Group membership'
-description: 'Adds users to groups as members.'
 group_type: default
 content_plugin: group_membership
 plugin_config:

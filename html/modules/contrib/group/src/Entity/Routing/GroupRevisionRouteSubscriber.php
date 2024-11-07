@@ -17,7 +17,7 @@ class GroupRevisionRouteSubscriber extends RouteSubscriberBase {
     if ($route = $collection->get('entity.group.revision')) {
       $requirements = $route->getRequirements();
       unset($requirements['_entity_access_revision']);
-      $requirements['_group_revision'] = 'view';
+      $requirements['_entity_access'] = 'group_revision.view revision';
       $route->setRequirements($requirements);
       $route->setOption('_group_operation_route', TRUE);
     }
@@ -25,7 +25,7 @@ class GroupRevisionRouteSubscriber extends RouteSubscriberBase {
     if ($route = $collection->get('entity.group.revision_revert_form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_entity_access_revision']);
-      $requirements['_group_revision'] = 'update';
+      $requirements['_entity_access'] = 'group_revision.revert revision';
       $route->setRequirements($requirements);
       $route->setDefault('_form', '\Drupal\group\Entity\Form\GroupRevisionRevertForm');
       $route->setOption('_group_operation_route', TRUE);
@@ -34,7 +34,7 @@ class GroupRevisionRouteSubscriber extends RouteSubscriberBase {
     if ($route = $collection->get('entity.group.version_history')) {
       $requirements = $route->getRequirements();
       unset($requirements['_entity_access_revision']);
-      $requirements['_group_revision'] = 'list';
+      $requirements['_entity_access'] = 'group.view all revisions';
       $route->setRequirements($requirements);
       $route->setDefault('_controller', '\Drupal\group\Entity\Controller\GroupRevisionOverviewController::revisionOverviewController');
       $route->setOption('_group_operation_route', TRUE);

@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "打开字幕"
 	},
 	"cc-err": "加载字母错误",
+	fs: "Enter full screen",
 	adesc: {
 		on: "使用音频描述",
 		off: "停止音频描述"
 	},
 	pos: "现在位置：",
 	dur: "总时间：",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "分享",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

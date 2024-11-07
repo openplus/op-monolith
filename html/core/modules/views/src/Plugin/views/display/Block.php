@@ -2,11 +2,14 @@
 
 namespace Drupal\views\Plugin\views\display;
 
+use Drupal\Component\Utility\Unicode;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Component\Plugin\Discovery\CachedDiscoveryInterface;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsDisplay;
 use Drupal\views\Plugin\Block\ViewsBlock;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -15,20 +18,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ingroup views_display_plugins
  *
- * @ViewsDisplay(
- *   id = "block",
- *   title = @Translation("Block"),
- *   help = @Translation("Display the view as a block."),
- *   theme = "views_view",
- *   register_theme = FALSE,
- *   uses_hook_block = TRUE,
- *   contextual_links_locations = {"block"},
- *   admin = @Translation("Block")
- * )
- *
  * @see \Drupal\views\Plugin\Block\ViewsBlock
  * @see \Drupal\views\Plugin\Derivative\ViewsBlock
  */
+#[ViewsDisplay(
+  id: "block",
+  title: new TranslatableMarkup("Block"),
+  help: new TranslatableMarkup("Display the view as a block."),
+  admin: new TranslatableMarkup("Block"),
+  theme: "views_view",
+  register_theme: FALSE,
+  uses_hook_block: TRUE,
+  contextual_links_locations: ["block"]
+)]
 class Block extends DisplayPluginBase {
 
   /**
@@ -162,12 +164,12 @@ class Block extends DisplayPluginBase {
     $options['block_description'] = [
       'category' => 'block',
       'title' => $this->t('Block name'),
-      'value' => views_ui_truncate($block_description, 24),
+      'value' => Unicode::truncate($block_description, 24, FALSE, TRUE),
     ];
     $options['block_category'] = [
       'category' => 'block',
       'title' => $this->t('Block category'),
-      'value' => views_ui_truncate($block_category, 24),
+      'value' => Unicode::truncate($block_category, 24, FALSE, TRUE),
     ];
 
     $filtered_allow = array_filter($this->getOption('allow'));
@@ -349,7 +351,7 @@ class Block extends DisplayPluginBase {
    *
    * @see \Drupal\views\Plugin\Block\ViewsBlock::blockSubmit()
    */
-  public function blockSubmit(ViewsBlock $block, array $form, FormStateInterface $form_state) {
+  public function blockSubmit(ViewsBlock $block, $form, FormStateInterface $form_state) {
     if ($items_per_page = $form_state->getValue(['override', 'items_per_page'])) {
       $block->setConfigurationValue('items_per_page', $items_per_page);
     }

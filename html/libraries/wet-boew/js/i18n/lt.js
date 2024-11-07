@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Rodyti didžiųjų raidžių įjungimą"
 	},
 	"cc-err": "Klaida kraunant didžiųjų raidžių įjungimą",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Aktyvuoti audio aprašą",
 		off: "Išjungti audio aprašą"
 	},
 	pos: "Esama pozicija:",
 	dur: "Visas laikas:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Dalytis ",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

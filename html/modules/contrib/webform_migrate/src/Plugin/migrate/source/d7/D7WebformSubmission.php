@@ -111,7 +111,8 @@ class D7WebformSubmission extends DrupalSqlBase {
         $item[$wf_submission['no']] = $wf_submission['data'];
       }
 
-      if (!empty($item)) {
+      // Cannot check !empty(), because that would exclude '0' and '' values.
+      if ($item !== NULL && $item !== []) {
         $submitted_data[$destination_form_key] = $item;
       }
     }

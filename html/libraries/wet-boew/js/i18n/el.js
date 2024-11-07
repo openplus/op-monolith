@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Εμφάνιση Κλειστό λεζάντες"
 	},
 	"cc-err": "Σφάλμα κατά τη φόρτωση κλειστά λεζάντες",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Ενεργοποίηση ήχου περιγραφή",
 		off: "Απενεργοποίηση ήχου περιγραφή"
 	},
 	pos: "Τρέχουσα θέση:",
 	dur: "Συνολικός χρόνος:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Κοινή χρήση",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

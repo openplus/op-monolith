@@ -104,11 +104,14 @@ class LinkitFormatter extends LinkFormatter {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = parent::viewElements($items, $langcode);
+    $settings = $this->getSettings();
 
     // Loop over the elements and substitute the URL.
     foreach ($elements as $delta => &$item) {
       /** @var \Drupal\link\LinkItemInterface $link_item */
       $link_item = $items->get($delta);
+      $item_url = $this->buildUrl($link_item);
+      $item_url_attributes = $item_url->getOption('attributes');
       if ($url = $this->getSubstitutedUrl($link_item)) {
         if ($url instanceof CacheableDependencyInterface) {
           $cacheable_url = $url;
@@ -129,6 +132,16 @@ class LinkitFormatter extends LinkFormatter {
         if (!empty($parsed_url['fragment'])) {
           $url->setOption('fragment', $parsed_url['fragment']);
         }
+        $attributes = (array) $url->getOption('attributes');
+        $attributes = array_merge($item_url_attributes ?: [], $attributes ?: []);
+        // Restore rel and target options.
+        if (!empty($settings['rel'])) {
+          $attributes['rel'] = $settings['rel'];
+        }
+        if (!empty($settings['target'])) {
+          $attributes['target'] = $settings['target'];
+        }
+        $url->setOption('attributes', $attributes);
         $cacheable_metadata = BubbleableMetadata::createFromRenderArray($item);
         if (isset($cacheable_url)) {
           // Add cache dependency on the URL, if supported.

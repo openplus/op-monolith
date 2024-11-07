@@ -23,12 +23,22 @@ final class OverridesSectionStorage extends CoreOverridesSectionStorage implemen
    */
   protected function handleTranslationAccess(AccessResult $result, $operation, AccountInterface $account) {
     $entity = $this->getEntity();
+    
+    // Check if the entity is not null and allows overrides before accessing its properties.
+    if (!$entity || !$entity->hasField(static::FIELD_NAME)) {
+      // Return a neutral result if the entity is null.
+      return AccessResult::neutral();
+    }
+    
     $field_config = $entity->getFieldDefinition(static::FIELD_NAME)->getConfig($entity->bundle());
-    // Access is allow if one of the following conditions is true:
+    
+    // Access is allowed if one of the following conditions is true:
     // 1. This is the default translation.
     // 2. The entity is translatable and the layout is overridden and the layout
     //    field is not translatable.
-    return $result->andIf(AccessResult::allowedIf($this->isDefaultTranslation() || ($entity instanceof TranslatableInterface && $this->isOverridden() && !$field_config->isTranslatable())))->addCacheableDependency($entity)->addCacheableDependency($field_config);
+    return $result->andIf(AccessResult::allowedIf($this->isDefaultTranslation() || ($entity instanceof TranslatableInterface && $this->isOverridden() && !$field_config->isTranslatable())))
+      ->addCacheableDependency($entity)
+      ->addCacheableDependency($field_config);
   }
 
   /**

@@ -4,19 +4,18 @@ namespace Drupal\diff;
 
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\Xss;
-use Drupal\Core\Datetime\DateFormatter;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Mail\MailFormatHelper;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Link;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\diff\Controller\PluginRevisionController;
-use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -50,7 +49,7 @@ abstract class DiffLayoutBase extends PluginBase implements DiffLayoutInterface,
   /**
    * The date service.
    *
-   * @var \Drupal\Core\Datetime\DateFormatter
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $date;
 
@@ -69,10 +68,18 @@ abstract class DiffLayoutBase extends PluginBase implements DiffLayoutInterface,
    *   The entity type manager.
    * @param \Drupal\diff\DiffEntityParser $entity_parser
    *   The entity parser.
-   * @param \Drupal\Core\DateTime\DateFormatter $date
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date
    *   The date service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config, EntityTypeManagerInterface $entity_type_manager, DiffEntityParser $entity_parser, DateFormatter $date) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ConfigFactoryInterface $config,
+    EntityTypeManagerInterface $entity_type_manager,
+    DiffEntityParser $entity_parser,
+    DateFormatterInterface $date,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->configFactory = $config;
     $this->entityTypeManager = $entity_type_manager;
@@ -92,7 +99,7 @@ abstract class DiffLayoutBase extends PluginBase implements DiffLayoutInterface,
       $container->get('config.factory'),
       $container->get('entity_type.manager'),
       $container->get('diff.entity_parser'),
-      $container->get('date.formatter')
+      $container->get('date.formatter'),
     );
   }
 
@@ -143,7 +150,7 @@ abstract class DiffLayoutBase extends PluginBase implements DiffLayoutInterface,
         'diff_revisions' => [
           '#type' => 'item',
           '#title' => $this->t('Comparing'),
-          '#wrapper_attributes' => ['class' => 'diff-revision'],
+          '#wrapper_attributes' => ['class' => ['diff-revision']],
           'items' => [
             '#prefix' => '<div class="diff-revision__items">',
             '#suffix' => '</div>',
@@ -233,7 +240,7 @@ abstract class DiffLayoutBase extends PluginBase implements DiffLayoutInterface,
         $left_revision->getRevisionId(),
         $right_revision->getRevisionId(),
         $layout,
-        ['filter' => 'raw']
+        ['filter' => 'raw'],
       ),
     ];
 
@@ -243,7 +250,7 @@ abstract class DiffLayoutBase extends PluginBase implements DiffLayoutInterface,
          $left_revision->getRevisionId(),
          $right_revision->getRevisionId(),
          $layout,
-         ['filter' => 'strip_tags']
+         ['filter' => 'strip_tags'],
       ),
     ];
 

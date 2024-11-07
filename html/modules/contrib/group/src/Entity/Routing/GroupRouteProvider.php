@@ -4,6 +4,7 @@ namespace Drupal\group\Entity\Routing;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider;
+use Symfony\Component\Routing\Route;
 
 /**
  * Provides routes for groups.
@@ -56,11 +57,20 @@ class GroupRouteProvider extends DefaultHtmlRouteProvider {
    * {@inheritdoc}
    */
   protected function getCollectionRoute(EntityTypeInterface $entity_type) {
-    // @todo Remove this method when https://www.drupal.org/node/2767025 lands.
-    if ($route = parent::getCollectionRoute($entity_type)) {
-      $route->setDefault('_title', 'Groups');
-      $route->setDefault('_title_arguments', []);
-      $route->setRequirement('_permission', 'access group overview');
+    if ($entity_type->hasLinkTemplate('collection') && $entity_type->hasListBuilderClass()) {
+      /** @var \Drupal\Core\StringTranslation\TranslatableMarkup $label */
+      $label = $entity_type->getCollectionLabel();
+
+      $route = new Route($entity_type->getLinkTemplate('collection'));
+      $route
+        ->addDefaults([
+          '_entity_list' => $entity_type->id(),
+          '_title' => $label->getUntranslatedString(),
+          '_title_arguments' => $label->getArguments(),
+          '_title_context' => $label->getOption('context'),
+        ])
+        ->setRequirement('_permission', 'access group overview');
+
       return $route;
     }
   }

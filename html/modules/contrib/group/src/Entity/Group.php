@@ -3,7 +3,7 @@
 namespace Drupal\group\Entity;
 
 use Drupal\Core\Entity\EditorialContentEntityBase;
-use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -22,6 +22,7 @@ use Drupal\user\UserInterface;
  *   label = @Translation("Group"),
  *   label_singular = @Translation("group"),
  *   label_plural = @Translation("groups"),
+ *   label_collection = @Translation("Groups"),
  *   label_count = @PluralTranslation(
  *     singular = "@count group",
  *     plural = "@count groups"
@@ -42,9 +43,7 @@ use Drupal\user\UserInterface;
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "access" = "Drupal\group\Entity\Access\GroupAccessControlHandler",
- *     "query_access" = "Drupal\group\Entity\Access\GroupQueryAccessHandler",
  *   },
- *   admin_permission = "administer group",
  *   base_table = "groups",
  *   data_table = "groups_field_data",
  *   revision_table = "groups_revision",
@@ -108,23 +107,13 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
   }
 
   /**
-   * Gets the group content storage.
+   * Gets the relationship storage.
    *
-   * @return \Drupal\group\Entity\Storage\GroupContentStorageInterface
-   *   The group content storage.
+   * @return \Drupal\group\Entity\Storage\GroupRelationshipStorageInterface
+   *   The relationship storage.
    */
-  protected function groupContentStorage() {
+  protected function relationshipStorage() {
     return $this->entityTypeManager()->getStorage('group_content');
-  }
-
-  /**
-   * Gets the group role storage.
-   *
-   * @return \Drupal\group\Entity\Storage\GroupRoleStorageInterface
-   *   The group role storage.
-   */
-  protected function groupRoleStorage() {
-    return $this->entityTypeManager()->getStorage('group_role');
   }
 
   /**
@@ -151,34 +140,35 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
   /**
    * {@inheritdoc}
    */
-  public function addContent(ContentEntityInterface $entity, $plugin_id, $values = []) {
-    $storage = $this->groupContentStorage();
-    $group_content = $storage->createForEntityInGroup($entity, $this, $plugin_id, $values);
-    $storage->save($group_content);
+  public function addRelationship(EntityInterface $entity, $plugin_id, $values = []) {
+    $storage = $this->relationshipStorage();
+    $relationship = $storage->createForEntityInGroup($entity, $this, $plugin_id, $values);
+    $storage->save($relationship);
+    return $relationship;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getContent($plugin_id = NULL, $filters = []) {
-    return $this->groupContentStorage()->loadByGroup($this, $plugin_id, $filters);
+  public function getRelationships($plugin_id = NULL) {
+    return $this->relationshipStorage()->loadByGroup($this, $plugin_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getContentByEntityId($plugin_id, $id) {
-    return $this->getContent($plugin_id, ['entity_id' => $id]);
+  public function getRelationshipsByEntity(EntityInterface $entity, $plugin_id = NULL) {
+    return $this->relationshipStorage()->loadByEntityAndGroup($entity, $this, $plugin_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getContentEntities($plugin_id = NULL, $filters = []) {
+  public function getRelatedEntities($plugin_id = NULL) {
     $entities = [];
 
-    foreach ($this->getContent($plugin_id, $filters) as $group_content) {
-      $entities[] = $group_content->getEntity();
+    foreach ($this->getRelationships($plugin_id) as $relationship) {
+      $entities[] = $relationship->getEntity();
     }
 
     return $entities;
@@ -189,9 +179,7 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
    */
   public function addMember(UserInterface $account, $values = []) {
     if (!$this->getMember($account)) {
-      $this->addContent($account, 'group_membership', $values);
-      $this->membershipLoader()->resetUserStaticCache($account);
-      $this->membershipLoader()->resetGroupStaticCache($this);
+      $this->addRelationship($account, 'group_membership', $values);
     }
   }
 
@@ -200,9 +188,7 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
    */
   public function removeMember(UserInterface $account) {
     if ($member = $this->getMember($account)) {
-      $member->getGroupContent()->delete();
-      $this->membershipLoader()->resetUserStaticCache($account);
-      $this->membershipLoader()->resetGroupStaticCache($this);
+      $member->getGroupRelationship()->delete();
     }
   }
 
@@ -346,6 +332,7 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
     // Core needs to make sure this happens for all entities as this piece of
     // code is currently copy-pasted between Node, Media, Block, etc.
     // @todo Keep an eye on this from time to time and see if we can remove it.
+    //   See: https://www.drupal.org/project/drupal/issues/2869056.
     if (!$this->isNewRevision() && isset($this->original) && empty($record->revision_log_message)) {
       // If we are updating an existing group without adding a new revision, we
       // need to make sure $entity->revision_log is reset whenever it is empty.
@@ -366,12 +353,13 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
     parent::postSave($storage, $update);
 
     // If a new group is created and the group type is configured to grant group
-    // creators a membership by default, add the creator as a member.
+    // creators a membership by default, add the creator as a member unless it
+    // is being created using the wizard.
     // @todo Deprecate in 8.x-2.x in favor of a form-only approach. API-created
     //   groups should not get this functionality because it may create
     //   incomplete group memberships.
     $group_type = $this->getGroupType();
-    if ($update === FALSE && $group_type->creatorGetsMembership()) {
+    if ($update === FALSE && $group_type->creatorGetsMembership() && !$group_type->creatorMustCompleteMembership()) {
       $values = ['group_roles' => $group_type->getCreatorRoleIds()];
       $this->addMember($this->getOwner(), $values);
     }
@@ -381,10 +369,10 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
    * {@inheritdoc}
    */
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
-    // Remove all group content from these groups as well.
+    // Remove all relationships from these groups as well.
     foreach ($entities as $group) {
-      foreach ($group->getContent() as $group_content) {
-        $group_content->delete();
+      foreach ($group->getRelationships() as $relationship) {
+        $relationship->delete();
       }
     }
   }

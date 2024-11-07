@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Hiện Đóng cửa phụ đề"
 	},
 	"cc-err": "Lỗi khi đang nạp chú thích đóng",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Kích hoạt tính năng mô tả âm thanh",
 		off: "Vô hiệu hoá mô tả âm thanh"
 	},
 	pos: "Chức vụ hiện tại:",
 	dur: "Tổng thời gian:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Chia",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

@@ -1,0 +1,6 @@
+services:
+  footnotes.upgrade_commands:
+    class: Drupal\footnotes\Upgrade\FootnotesUpgradeDrushCommand
+    tags:
+      - { name: drush.command }
+    arguments: [ '@entity_field.manager', '@entity_type.bundle.info', '@entity_type.manager', '@footnotes.batch_manager' ]

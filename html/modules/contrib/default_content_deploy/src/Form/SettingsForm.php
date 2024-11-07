@@ -22,7 +22,7 @@ class SettingsForm extends ConfigFormBase {
   /**
    * Directory config name.
    */
-  const DIRECTORY = 'default_content_deploy.content_directory';
+  const CONFIG = 'default_content_deploy.settings';
 
   /**
    * The Entity type manager.
@@ -61,7 +61,7 @@ class SettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      static::DIRECTORY,
+      static::CONFIG,
     ];
   }
 
@@ -69,27 +69,54 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config(static::DIRECTORY);
+    $config = $this->config(static::CONFIG);
 
+    $form = $this->getCommonFormElements($form, [
+      'content_directory' => $config->get('content_directory'),
+      'skip_computed_fields' => $config->get('skip_computed_fields'),
+      'skip_processed_values' => $config->get('skip_processed_values'),
+      'text_dependencies' => $config->get('text_dependencies'),
+      'skip_entity_types' => $config->get('skip_entity_types') ?? [],
+    ]);
+
+    $form['skip_computed_fields'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Skip computed fields'),
+      '#default_value' => $config->get('skip_computed_fields'),
+      '#description' => 'If selected, computed fields will not be included in the export.',
+    ];
+
+    $form['skip_processed_values'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Skip processed values'),
+      '#default_value' => $config->get('skip_processed_values'),
+      '#description' => 'If selected, processed values will not be included in the export.',
+    ];
+
+    $form['batch_ttl'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Batch TTL'),
+      '#default_value' => $config->get('batch_ttl') ?? 14400,
+      '#description' => 'TTL in seconds for batch items until the garbage collection for orphaned items removes them.',
+    ];
+
+    return parent::buildForm($form, $form_state);
+  }
+
+  public function getCommonFormElements(array $form, array $defaults) {
     $form['content_directory'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Content Directory'),
-      '#default_value' => $config->get('content_directory'),
+      '#default_value' => $defaults['content_directory'],
       '#description' => 'Specify the path relative to index.php. For example: ../content',
+      '#required' => TRUE,
     ];
 
     $form['text_dependencies'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Export processed text dependencies'),
-      '#default_value' => $config->get('text_dependencies'),
+      '#default_value' => $defaults['text_dependencies'],
       '#description' => 'If selected, embedded entities within processed text fields will be included in the export.',
-    ];
-
-    $form['support_old_content'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Support old content'),
-      '#default_value' => $config->get('support_old_content'),
-      '#description' => 'If selected, the import process with run additional processes to ensure reference integrity for older content.',
     ];
 
     $all_entity_types = $this->entityTypeManager->getDefinitions();
@@ -104,35 +131,29 @@ class SettingsForm extends ConfigFormBase {
     }
 
     // Entity types.
-    $form['enabled_entity_types'] = [
-      '#type' => 'details',
-      '#open' => FALSE,
-      '#title' => $this->t('Enabled entity types'),
-      '#description' => $this->t('Check which entity types should be exported by reference.'),
-      '#tree' => TRUE,
-    ];
-
-    $form['enabled_entity_types']['entity_types'] = [
+    $form['skip_entity_types'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Enabled entity types'),
+      '#title' => $this->t('Skip entity types to be exported indirectly by reference or in site export'),
+      '#description' => $this->t('Check which entity types should not be exported.'),
       '#options' => $content_entity_types,
       // If no custom settings exist, content entities are enabled by default.
-      '#default_value' => $config->get('enabled_entity_types') ?: array_keys($content_entity_types),
-      '#required' => TRUE,
+      '#default_value' => $defaults['skip_entity_types'] ?? [],
     ];
 
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->configFactory->getEditable(static::DIRECTORY)
+    $this->configFactory->getEditable(static::CONFIG)
       ->set('content_directory', $form_state->getValue('content_directory'))
-      ->set('enabled_entity_types', array_values(array_filter($form_state->getValue('enabled_entity_types')['entity_types'])))
-      ->set('text_dependencies', $form_state->getValue('text_dependencies'))
-      ->set('support_old_content', $form_state->getValue('support_old_content'))
+      ->set('skip_computed_fields', (bool) $form_state->getValue('skip_computed_fields'))
+      ->set('skip_processed_values', (bool) $form_state->getValue('skip_processed_values'))
+      ->set('skip_entity_types', array_values(array_filter($form_state->getValue('skip_entity_types'))))
+      ->set('text_dependencies', (bool) $form_state->getValue('text_dependencies'))
+      ->set('batch_ttl', (int) $form_state->getValue('batch_ttl'))
       ->save();
 
     parent::submitForm($form, $form_state);

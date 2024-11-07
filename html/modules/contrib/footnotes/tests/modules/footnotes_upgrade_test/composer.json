@@ -1,0 +1,8 @@
+{
+  "name": "drupal/footnotes_upgrade_test",
+  "description": "To require drush/drush in the tests.",
+  "type": "drupal-module",
+  "require-dev": {
+    "drush/drush": "^11"
+  }
+}

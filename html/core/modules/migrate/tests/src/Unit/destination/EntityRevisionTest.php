@@ -6,6 +6,7 @@ namespace Drupal\Tests\migrate\Unit\destination;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -50,6 +51,11 @@ class EntityRevisionTest extends UnitTestCase {
   protected $accountSwitcher;
 
   /**
+   * @var Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
+  protected $entityTypeBundle;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -67,6 +73,7 @@ class EntityRevisionTest extends UnitTestCase {
     $this->entityFieldManager = $this->prophesize('\Drupal\Core\Entity\EntityFieldManagerInterface');
     $this->fieldTypeManager = $this->prophesize('\Drupal\Core\Field\FieldTypePluginManagerInterface');
     $this->accountSwitcher = $this->prophesize(AccountSwitcherInterface::class);
+    $this->entityTypeBundle = $this->prophesize(EntityTypeBundleInfoInterface::class);
   }
 
   /**
@@ -74,7 +81,7 @@ class EntityRevisionTest extends UnitTestCase {
    *
    * @covers ::getEntity
    */
-  public function testGetEntityDestinationValues() {
+  public function testGetEntityDestinationValues(): void {
     $destination = $this->getEntityRevisionDestination([]);
     // Return a dummy because we don't care what gets called.
     $entity = $this->prophesize('\Drupal\Core\Entity\RevisionableInterface');
@@ -92,7 +99,7 @@ class EntityRevisionTest extends UnitTestCase {
    *
    * @covers ::getEntity
    */
-  public function testGetEntityUpdateRevision() {
+  public function testGetEntityUpdateRevision(): void {
     $destination = $this->getEntityRevisionDestination([]);
     $entity = $this->prophesize('\Drupal\Core\Entity\RevisionableInterface');
 
@@ -119,7 +126,7 @@ class EntityRevisionTest extends UnitTestCase {
    *
    * @covers ::getEntity
    */
-  public function testGetEntityNewRevision() {
+  public function testGetEntityNewRevision(): void {
     $destination = $this->getEntityRevisionDestination([]);
     $entity = $this->prophesize('\Drupal\Core\Entity\RevisionableInterface');
 
@@ -149,7 +156,7 @@ class EntityRevisionTest extends UnitTestCase {
    *
    * @covers ::getEntity
    */
-  public function testGetEntityLoadFailure() {
+  public function testGetEntityLoadFailure(): void {
     $destination = $this->getEntityRevisionDestination([]);
 
     $entity_type = $this->prophesize('\Drupal\Core\Entity\EntityTypeInterface');
@@ -172,7 +179,7 @@ class EntityRevisionTest extends UnitTestCase {
    *
    * @covers ::save
    */
-  public function testSave() {
+  public function testSave(): void {
     $entity = $this->prophesize('\Drupal\Core\Entity\ContentEntityInterface');
     $entity->save()
       ->shouldBeCalled();
@@ -208,7 +215,8 @@ class EntityRevisionTest extends UnitTestCase {
       [],
       $this->entityFieldManager->reveal(),
       $this->fieldTypeManager->reveal(),
-      $this->accountSwitcher->reveal()
+      $this->accountSwitcher->reveal(),
+      $this->entityTypeBundle->reveal(),
     );
   }
 

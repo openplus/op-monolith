@@ -30,13 +30,19 @@ class EntityOperationsTest extends GroupEntityOperationsTest {
     $scenarios['withAccess'] = [
       [],
       ['group/1/nodes' => 'Nodes'],
-      ['access group_node overview'],
+      [
+        'view group',
+        'access group_node overview'
+      ],
     ];
 
     $scenarios['withAccessAndViews'] = [
       ['group/1/nodes' => 'Nodes'],
       [],
-      ['access group_node overview'],
+      [
+        'view group',
+        'access group_node overview'
+      ],
       ['views'],
     ];
 

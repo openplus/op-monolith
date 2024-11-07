@@ -7,17 +7,18 @@ use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\editor\Ajax\EditorDialogSave;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\views\Views;
-use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\field\Entity\FieldConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class InsertViewDialog.
+ * Class InsertViewDialog contains insert view dialog form.
  *
  * @package Drupal\insert_view_adv\Form
  */
@@ -78,20 +79,36 @@ class InsertViewDialog extends FormBase {
    * @return array
    *   Argument information.
    */
-  private static function getFieldInfo(array $argument) {
+  protected function getFieldInfo(array $argument) {
     $info = [];
     $bundle_info = [];
     $argument = array_shift($argument);
     if (!empty($argument['table'])) {
-      $keys = explode('__', $argument['table']);
+      if (!empty($argument['entity_type']) && !empty($argument['entity_field'])) {
+        $keys = [$argument['entity_type'], $argument['entity_field']];
+      }
+      else {
+        $keys = explode('__', $argument['table']);
+      }
       if (!empty($keys[1])) {
-        $info = FieldStorageConfig::loadByName($keys[0], $keys[1]);
-        // If it is entity reference field try to get the target type and
-        // selector settings.
+        $field_storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($keys[0]);
+        if (!empty($field_storage_definitions[$keys[1]])) {
+          $info = $field_storage_definitions[$keys[1]];
+        }
+        else {
+          $info = FieldStorageConfig::loadByName($keys[0], $keys[1]);
+        }
+        // If it is entity reference field try to get
+        // the target type and selector settings.
         if ($info && $info->getType() == 'entity_reference') {
-          $bundles = $info->getBundles();
-          $bundles_machine_names = array_keys($bundles);
-          $bundle_info = FieldConfig::loadByName($keys[0], $bundles_machine_names[0], $keys[1]);
+          if ($info instanceof BaseFieldDefinition) {
+            $bundle_info = $info;
+          }
+          else {
+            $bundles = $info->getBundles();
+            $bundles_machine_names = array_keys($bundles);
+            $bundle_info = FieldConfig::loadByName($keys[0], $bundles_machine_names[0], $keys[1]);
+          }
         }
       }
     }
@@ -140,8 +157,13 @@ class InsertViewDialog extends FormBase {
   public function renderArgument(array &$form, FormStateInterface $form_state, $view_block, $num) {
     if (!empty($form['#view_arguments'][$view_block][$num])) {
       $argument = $form['#view_arguments'][$view_block][$num];
+      $argument_definition = reset($argument);
+      $title_extra = '';
+      if (!empty($argument_definition['not'])) {
+        $title_extra = ' (' . $this->t('Exclude this items') . ')';
+      }
       // Get field info.
-      $info = InsertViewDialog::getFieldInfo($argument);
+      $info = $this->getFieldInfo($argument);
       $field_info = $info['info'];
       $bundle_info = $info['bundle_info'];
       if ($field_info) {
@@ -173,7 +195,6 @@ class InsertViewDialog extends FormBase {
         }
       }
       else {
-        $argument_definition = reset($argument);
         if ($argument_definition['table'] == 'taxonomy_index') {
           $argument_definition['table'] = 'taxonomy_term_field_data';
         }
@@ -214,14 +235,68 @@ class InsertViewDialog extends FormBase {
             }
           }
         }
+        if ($property == 'tid' || ($property == 'parent_target_id' && !empty($argument_definition['entity_type']) && $argument_definition['entity_type'] == 'taxonomy_term')) {
+          $form['arguments']['argument'][$num] = [
+            '#type' => 'entity_autocomplete',
+            '#title' => $this->t('Taxonomy term'),
+            '#default_value' => !empty($this->getUserInput($form_state, 'arguments')[$num]) ? $this->entityTypeManager->getStorage('taxonomy_term')->load($this->getUserInput($form_state, 'arguments')[$num]) : NULL,
+            '#target_type' => 'taxonomy_term',
+            '#selection_handler' => 'default:taxonomy_term',
+            '#selection_settings' => [],
+          ];
+          $not_found = FALSE;
+        }
+        if ($property == 'term_node_tid_depth' && $argument_definition['table'] == 'node_field_data') {
+          $settings = [];
+          $bundles = !empty($argument_definition['validate_options']['bundles']) ? $argument_definition['validate_options']['bundles'] : [];
+          if ($bundles) {
+            $settings = [
+              'target_bundles' => $bundles,
+            ];
+          }
+          $form['arguments']['argument'][$num] = [
+            '#type' => 'entity_autocomplete',
+            '#title' => $this->t('Taxonomy term ID with depth'),
+            '#default_value' => !empty($this->getUserInput($form_state, 'arguments')[$num]) ? $this->entityTypeManager->getStorage('taxonomy_term')->load($this->getUserInput($form_state, 'arguments')[$num]) : NULL,
+            '#target_type' => 'taxonomy_term',
+            '#selection_handler' => 'default:taxonomy_term',
+            '#selection_settings' => $settings,
+          ];
+          $not_found = FALSE;
+        }
+        if ($property == 'nid' && $argument_definition['table'] == 'node_field_data') {
+          $form['arguments']['argument'][$num] = [
+            '#type' => 'entity_autocomplete',
+            '#title' => $this->t('Content'),
+            '#default_value' => !empty($this->getUserInput($form_state, 'arguments')[$num]) ? $this->entityTypeManager->getStorage('node')->load($this->getUserInput($form_state, 'arguments')[$num]) : NULL,
+            '#target_type' => 'node',
+            '#selection_handler' => 'default:node',
+            '#selection_settings' => [],
+          ];
+          $not_found = FALSE;
+        }
+        if ($property == 'uid') {
+          $form['arguments']['argument'][$num] = [
+            '#type' => 'entity_autocomplete',
+            '#title' => $this->t('User') . $title_extra,
+            '#default_value' => !empty($this->getUserInput($form_state, 'arguments')[$num]) ? $this->entityTypeManager->getStorage('user')->load($this->getUserInput($form_state, 'arguments')[$num]) : NULL,
+            '#target_type' => 'user',
+            '#selection_handler' => 'default:user',
+            '#selection_settings' => [],
+          ];
+          $not_found = FALSE;
+        }
         if ($not_found) {
           $default = $this->getUserInput($form_state, 'arguments');
           $form['arguments']['argument'][$num] = [
             '#type' => 'textfield',
             '#title' => $property,
-            '#default_value' => isset($default[$num]) ? $default[$num] : NULL,
+            '#default_value' => $default[$num] ?? NULL,
           ];
         }
+      }
+      if (!empty($title_extra)) {
+        $form['arguments']['argument'][$num]['#title'] .= $title_extra;
       }
     }
   }
@@ -248,10 +323,11 @@ class InsertViewDialog extends FormBase {
         if (!empty($allowed_views) && empty($allowed_views[$key])) {
           continue;
         }
-        if (empty($options[$machine_name])) {
-          $options[$machine_name] = [];
+        $group_label = $view->label() . ' (' . $machine_name . ')';
+        if (empty($options[$group_label])) {
+          $options[$group_label] = [];
         }
-        $options[$machine_name][$key] = $view->label() . ' ' . $display['display_title'];
+        $options[$group_label][$key] = $display['display_title'];
         if (empty($display['display_options']['arguments']) && $display['id'] != 'default') {
           $master_display = $view->getDisplay('default');
           if (!empty($master_display['display_options']['arguments'])) {
@@ -352,7 +428,7 @@ class InsertViewDialog extends FormBase {
    *   The default value.
    */
   protected function getUserInput(FormStateInterface $form_state, $key) {
-    return isset($form_state->getUserInput()['editor_object'][$key]) ? $form_state->getUserInput()['editor_object'][$key] : '';
+    return $form_state->getUserInput()['editor_object'][$key] ?? '';
   }
 
   /**
@@ -368,7 +444,7 @@ class InsertViewDialog extends FormBase {
     $view_id = '';
     $display_id = '';
     [$view_id, $display_id] = explode('=', $form_state->getValue('inserted_view_adv'));
-    $arguments = array_filter($form_state->getValue('argument', []));;
+    $arguments = $form_state->getValue('argument', []);
     return [
       'attributes' => [
         'data-view-id' => $view_id,

@@ -42,11 +42,11 @@ class GroupSettingsForm extends ConfigFormBase {
       '#title' => $this->t('On entity creation, redirect to'),
       '#description' => $this->t('When an entity is created via the UI, the user will, by default, be directed to the created entity or the group content entity display.'),
       '#default_value' => $config->get('redirect_to'),
-      '#options' => array(
-        'entity' => $this->t('The created entity'),
-        'group_content_entity' => $this->t('The created group content entity'),
-        'group' => $this->t('The group the entity belongs to'),
-      ),
+        '#options' => [
+          'entity' => $this->t('The created entity'),
+          'group_content_entity' => $this->t('The created group content entity'),
+          'group' => $this->t('The group the entity belongs to'),
+        ],
     ];
 
     return $form;

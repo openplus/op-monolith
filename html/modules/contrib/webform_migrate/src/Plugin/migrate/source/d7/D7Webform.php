@@ -2,14 +2,10 @@
 
 namespace Drupal\webform_migrate\Plugin\migrate\source\d7;
 
-use Drupal\migrate\Event\ImportAwareInterface;
 use Drupal\migrate\Event\RollbackAwareInterface;
-use Drupal\migrate\Event\MigrateImportEvent;
 use Drupal\migrate\Event\MigrateRollbackEvent;
 use Drupal\migrate\Row;
 use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\webform\Entity\Webform;
 use Drupal\node\Entity\Node;
 use Drupal\webform\Utility\WebformYaml;
@@ -25,7 +21,7 @@ use Drupal\Component\Utility\Bytes;
  *   destination_module = "webform"
  * )
  */
-class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackAwareInterface {
+class D7Webform extends DrupalSqlBase implements RollbackAwareInterface {
 
   /**
    * {@inheritdoc}
@@ -426,6 +422,7 @@ class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackA
           break;
 
         case 'number':
+          $extra['type'] ??= 'textfield';
           if ($extra['type'] == 'textfield') {
             $new_element = [
               '#type' => 'textfield',
@@ -433,17 +430,16 @@ class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackA
             ];
           }
           elseif ($extra['type'] == 'select') {
-            $new_element = [
-              '#type' => 'select',
-              '#options' => $options,
-            ];
-
             $min = $extra['min'];
             $max = $extra['max'];
             $step = !empty($extra['step']) ? $extra['step'] : 1;
             for ($value = $min; $value <= $max; $value += $step) {
-              $new_element[$value] = $value;
+              $select_options[] = $value;
             }
+            $new_element = [
+              '#type' => 'select',
+              '#options' => $select_options,
+            ];
           }
           foreach (['min', 'max', 'step'] as $property) {
             if (!empty($extra[$property])) {
@@ -580,7 +576,7 @@ class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackA
         }
         $new_element['#title_display'] = $title_display;
       }
-      if ($element['type'] != 'pagebreak') {
+      if (!in_array($element['type'], ['pagebreak', 'markup'])) {
         $new_element['#title'] = $element['name'];
 
         // The description key can be missing (since description is optional and
@@ -589,8 +585,14 @@ class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackA
           $new_element['#description'] = $extra['description'];
         }
       }
+      if (!empty($extra['private'])) {
+        $new_element['#private'] = TRUE;
+      }
       if (!empty($element['required'])) {
         $new_element['#required'] = TRUE;
+      }
+      if (!empty($extra['disabled'])) {
+        $new_element['#disabled'] = TRUE;
       }
 
       // Attach conditionals as Drupal #states.
@@ -762,6 +764,7 @@ class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackA
     $query->fields('we', [
       'nid',
       'eid',
+      'status',
       'email',
       'subject',
       'from_name',
@@ -790,22 +793,37 @@ class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackA
           }
         }
       }
+      // Default handler settings
+      $handler_settings = [
+        'to_mail' => str_replace('[submission:', '[webform_submission:', $email['email']),
+        'html' => $email['html'],
+        'attachments' => $email['attachments'],
+        'excluded_elements' => $excluded,
+      ];
+
+      if ($email['from_address'] != 'default') {
+        $handler_settings['from_mail'] = str_replace('[submission:', '[webform_submission:', $email['from_address']);
+      }
+
+      if ($email['from_name'] != 'default') {
+        $handler_settings['from_name'] = str_replace('[submission:', '[webform_submission:', $email['from_name']);
+      }
+
+      if ($email['subject'] != 'default') {
+        $handler_settings['subject'] = str_replace('[submission:', '[webform_submission:', $email['subject']);
+      }
+
+      if ($email['template'] != 'default') {
+        $handler_settings['body'] = str_replace('[submission:', '[webform_submission:', $email['template']);
+      }
+
       $handlers[$id] = [
         'id' => 'email',
         'label' => 'Email ' . $email['eid'],
         'handler_id' => $id,
-        'status' => 1,
+        'status' => $email['status'],
         'weight' => $email['eid'],
-        'settings' => [
-          'to_mail' => $email['email'],
-          'from_mail' => $email['from_address'],
-          'from_name' => $email['from_name'],
-          'subject' => $email['subject'],
-          'body' => str_replace('[submission:', '[webform_submission:', $email['template']),
-          'html' => $email['html'],
-          'attachments' => $email['attachments'],
-          'excluded_elements' => $excluded,
-        ],
+        'settings' => $handler_settings,
       ];
     }
     return $handlers;
@@ -898,77 +916,6 @@ class D7Webform extends DrupalSqlBase implements ImportAwareInterface, RollbackA
    */
   protected function cleanString($str) {
     return str_replace(['"', "\n", "\r"], ["'", '\n', ''], $str);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function preImport(MigrateImportEvent $event) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public function postImport(MigrateImportEvent $event) {
-    // Add the Webform field to the webform content type
-    // if it doesn't already exist.
-    $field_storage = FieldStorageConfig::loadByName('node', 'webform');
-    $field = FieldConfig::loadByName('node', 'webform', 'webform');
-    if (empty($field)) {
-      $field = \Drupal::service('entity_type.manager')->getStorage('field_config')->create([
-        'field_storage' => $field_storage,
-        'bundle' => 'webform',
-        'label' => 'Webform',
-        'settings' => [],
-      ]);
-      $field->save();
-      // Assign widget settings for the 'default' form mode.
-      $display = \Drupal::service('entity_display.repository')->getFormDisplay('node', 'webform', 'default')->getComponent('webform');
-      \Drupal::service('entity_display.repository')->getFormDisplay('node', 'webform', 'default')
-        ->setComponent('webform', [
-          'type' => $display['type'],
-        ])
-        ->save();
-      // Assign display settings for the 'default' and 'teaser' view modes.
-      $display = \Drupal::service('entity_display.repository')->getViewDisplay('node', 'webform', 'default')->getComponent('webform');
-      \Drupal::service('entity_display.repository')->getViewDisplay('node', 'webform', 'default')
-        ->setComponent('webform', [
-          'label' => $display['label'],
-          'type' => $display['type'],
-        ])
-        ->save();
-      // The teaser view mode is created by the Standard profile and therefore
-      // might not exist.
-      $view_modes = \Drupal::service('entity_display.repository')->getViewModes('node');
-      if (isset($view_modes['teaser'])) {
-        $display = \Drupal::service('entity_display.repository')->getViewDisplay('node', 'webform', 'teaser')->getComponent('webform');
-        \Drupal::service('entity_display.repository')->getViewDisplay('node', 'webform', 'teaser')
-          ->setComponent('webform', [
-            'label' => $display['label'],
-            'type' => $display['type'],
-          ])
-          ->save();
-      }
-    }
-
-    // Attach any Webform created to the relevant webforms if
-    // Webform exists and Webform exists and Webform field is empty.
-    $webforms = $this->query()->execute();
-    foreach ($webforms as $webformInfo) {
-      $webform_nid = $webformInfo['nid'];
-      $webform_id = 'webform_' . $webform_nid;
-      $webform = Webform::load($webform_id);
-      if (!empty($webform)) {
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::load($webform_nid);
-        if (!empty($node) && $node->getType() == 'webform') {
-          if (empty($node->webform->target_id)) {
-            $node->webform->target_id = $webform_id;
-            $node->webform->status = $webformInfo['status'] ? 'open' : 'closed';
-            $node->save();
-          }
-        }
-      }
-    }
   }
 
   /**

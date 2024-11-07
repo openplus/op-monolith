@@ -2,10 +2,10 @@
 
 namespace Drupal\insert_view_adv_bueditor\Plugin\BUEditorPlugin;
 
-use Drupal\editor\Entity\Editor;
 use Drupal\bueditor\BUEditorPluginBase;
-use Drupal\bueditor\Entity\BUEditorEditor;
 use Drupal\bueditor\BUEditorToolbarWrapper;
+use Drupal\bueditor\Entity\BUEditorEditor;
+use Drupal\editor\Entity\Editor;
 
 /**
  * Defines BUEditor Embedded Views plugin.
@@ -29,6 +29,7 @@ class DrupalViews extends BUEditorPluginBase {
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore
   public function alterEditorJS(array &$js, BUEditorEditor $bueditor_editor, Editor $editor = NULL) {
     $toolbar = BUEditorToolbarWrapper::set($js['settings']['toolbar']);
     // Check drupal views button.

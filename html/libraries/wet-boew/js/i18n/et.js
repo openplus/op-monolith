@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Näita subtiitreid"
 	},
 	"cc-err": "Viga subtiitrite avamisel",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Luba audio kirjeldus",
 		off: "Sulge audio kirjeldus"
 	},
 	pos: "Praegune asukoht",
 	dur: "Kogu kestvus:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Jaga seda lehekülge",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

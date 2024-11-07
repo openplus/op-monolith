@@ -30,7 +30,7 @@ libraries-extend:
   bootstrap/framework:
     - 'wxt_bootstrap/drupal.wxt_bootstrap'
 
-# Information added by Drupal.org packaging script on 2024-01-18
-version: '8.x-8.0'
+# Information added by Drupal.org packaging script on 2024-07-02
+version: '8.x-8.5'
 project: 'wxt_bootstrap'
-datestamp: 1705612068
+datestamp: 1719888218

@@ -3,7 +3,8 @@ import { findAttributeRange } from 'ckeditor5/src/typing';
 
 export default class LinkitEditing extends Plugin {
   init() {
-    this.attrs = ['data-entity-type', 'data-entity-uuid', 'data-entity-substitution'];
+    this.attrs = ['linkDataEntityType', 'linkDataEntityUuid', 'linkDataEntitySubstitution'];
+    this.attrsView = ['data-entity-type', 'data-entity-uuid', 'data-entity-substitution'];
     this._allowAndConvertExtraAttributes();
     this._removeExtraAttributesOnUnlinkCommandExecute();
     this._refreshExtraAttributeValues();
@@ -16,12 +17,12 @@ export default class LinkitEditing extends Plugin {
     editor.model.schema.extend('$text', { allowAttributes: this.attrs });
 
     // Model -> View (DOM)
-    this.attrs.forEach((attribute) => {
+    this.attrs.forEach((attribute, i) => {
       editor.conversion.for('downcast').attributeToElement({
         model: attribute,
         view: (value, { writer }) => {
           const linkViewElement = writer.createAttributeElement('a', {
-            [attribute]: value
+            [this.attrsView[i]]: value
           }, { priority: 5 });
 
           // Without it the isLinkElement() will not recognize the link and the UI will not show up
@@ -38,12 +39,12 @@ export default class LinkitEditing extends Plugin {
           view: {
             name: 'a',
             attributes: {
-              [attribute]: true,
+              [this.attrsView[i]]: true,
             }
           },
           model: {
             key: attribute,
-            value: viewElement => viewElement.getAttribute(attribute),
+            value: viewElement => viewElement.getAttribute(this.attrsView[i]),
           }
         });
     });

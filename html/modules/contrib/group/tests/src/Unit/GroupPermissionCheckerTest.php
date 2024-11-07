@@ -3,12 +3,13 @@
 namespace Drupal\Tests\group\Unit;
 
 use Drupal\Core\Session\AccountInterface;
-use Drupal\group\Access\CalculatedGroupPermissionsItem;
-use Drupal\group\Access\CalculatedGroupPermissionsItemInterface;
-use Drupal\group\Access\ChainGroupPermissionCalculatorInterface;
+use Drupal\flexible_permissions\CalculatedPermissionsItem;
+use Drupal\flexible_permissions\RefinableCalculatedPermissions;
+use Drupal\group\Access\GroupPermissionCalculatorInterface;
 use Drupal\group\Access\GroupPermissionChecker;
-use Drupal\group\Access\RefinableCalculatedGroupPermissions;
 use Drupal\group\Entity\GroupInterface;
+use Drupal\group\GroupMembershipLoaderInterface;
+use Drupal\group\PermissionScopeInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -22,9 +23,16 @@ class GroupPermissionCheckerTest extends UnitTestCase {
   /**
    * The group permission calculator.
    *
-   * @var \Drupal\group\Access\ChainGroupPermissionCalculatorInterface|\Prophecy\Prophecy\ProphecyInterface
+   * @var \Drupal\group\Access\GroupPermissionCalculatorInterface|\Prophecy\Prophecy\ProphecyInterface
    */
   protected $permissionCalculator;
+
+  /**
+   * The group membership loader.
+   *
+   * @var \Drupal\group\GroupMembershipLoaderInterface|\Prophecy\Prophecy\ProphecyInterface
+   */
+  protected $membershipLoader;
 
   /**
    * The group permission checker.
@@ -36,23 +44,30 @@ class GroupPermissionCheckerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp(): void{
+  public function setUp(): void {
     parent::setUp();
-    $this->permissionCalculator = $this->prophesize(ChainGroupPermissionCalculatorInterface::class);
-    $this->permissionChecker = new GroupPermissionChecker($this->permissionCalculator->reveal());
+    $this->permissionCalculator = $this->prophesize(GroupPermissionCalculatorInterface::class);
+    $this->membershipLoader = $this->prophesize(GroupMembershipLoaderInterface::class);
+    $this->permissionChecker = new GroupPermissionChecker($this->permissionCalculator->reveal(), $this->membershipLoader->reveal());
   }
 
   /**
    * Tests checking whether a user has a permission in a group.
    *
-   * @param bool $can_bypass
-   *   Whether the user can bypass group access.
-   * @param bool $is_anon
-   *   Whether the user is anonymous.
-   * @param array $group_type_permissions
-   *   The permissions the user has in the group type scope.
-   * @param array $group_permissions
-   *   The permissions the user has in the group scope.
+   * @param bool $is_member
+   *   Whether the user is a member.
+   * @param array $outsider_permissions
+   *   The permissions the user has in the outsider scope.
+   * @param bool $outsider_admin
+   *   Whether the user is an admin in the outsider scope.
+   * @param array $insider_permissions
+   *   The permissions the user has in the insider scope.
+   * @param bool $insider_admin
+   *   Whether the user is an admin in the insider scope.
+   * @param array $individual_permissions
+   *   The permissions the user has in the individual scope.
+   * @param bool $individual_admin
+   *   Whether the user is an admin in the individual scope.
    * @param string $permission
    *   The permission to check for.
    * @param bool $has_permission
@@ -63,30 +78,33 @@ class GroupPermissionCheckerTest extends UnitTestCase {
    * @covers ::hasPermissionInGroup
    * @dataProvider provideHasPermissionInGroupScenarios
    */
-  public function testHasPermissionInGroup($can_bypass, $is_anon, $group_type_permissions, $group_permissions, $permission, $has_permission, $message) {
-    $account = $this->prophesize(AccountInterface::class);
-    $account->hasPermission('bypass group access')->willReturn($can_bypass);
-    $account->isAnonymous()->willReturn($is_anon);
-
+  public function testHasPermissionInGroup($is_member, $outsider_permissions, $outsider_admin, $insider_permissions, $insider_admin, $individual_permissions, $individual_admin, $permission, $has_permission, $message) {
+    $account = $this->prophesize(AccountInterface::class)->reveal();
     $group = $this->prophesize(GroupInterface::class);
     $group->id()->willReturn(1);
     $group->bundle()->willReturn('foo');
+    $group = $group->reveal();
 
-    $scope_gt = CalculatedGroupPermissionsItemInterface::SCOPE_GROUP_TYPE;
-    $scope_g = CalculatedGroupPermissionsItemInterface::SCOPE_GROUP;
-    $calculated_permissions = new RefinableCalculatedGroupPermissions();
-    foreach ($group_type_permissions as $identifier => $permissions) {
-      $calculated_permissions->addItem(new CalculatedGroupPermissionsItem($scope_gt, $identifier, $permissions));
+    $calculated_permissions = new RefinableCalculatedPermissions();
+    foreach ($outsider_permissions as $identifier => $permissions) {
+      $calculated_permissions->addItem(new CalculatedPermissionsItem(PermissionScopeInterface::OUTSIDER_ID, $identifier, $permissions, $outsider_admin));
     }
-    foreach ($group_permissions as $identifier => $permissions) {
-      $calculated_permissions->addItem(new CalculatedGroupPermissionsItem($scope_g, $identifier, $permissions));
+    foreach ($insider_permissions as $identifier => $permissions) {
+      $calculated_permissions->addItem(new CalculatedPermissionsItem(PermissionScopeInterface::INSIDER_ID, $identifier, $permissions, $insider_admin));
+    }
+    foreach ($individual_permissions as $identifier => $permissions) {
+      $calculated_permissions->addItem(new CalculatedPermissionsItem(PermissionScopeInterface::INDIVIDUAL_ID, $identifier, $permissions, $individual_admin));
     }
 
     $this->permissionCalculator
-      ->calculatePermissions($account->reveal())
+      ->calculateFullPermissions($account)
       ->willReturn($calculated_permissions);
 
-    $result = $this->permissionChecker->hasPermissionInGroup($permission, $account->reveal(), $group->reveal());
+    $this->membershipLoader
+      ->load($group, $account)
+      ->willReturn($is_member);
+
+    $result = $this->permissionChecker->hasPermissionInGroup($permission, $account, $group);
     $this->assertSame($has_permission, $result, $message);
   }
 
@@ -96,114 +114,160 @@ class GroupPermissionCheckerTest extends UnitTestCase {
    * All scenarios assume group ID 1 and type 'foo'.
    */
   public function provideHasPermissionInGroupScenarios() {
-    $scenarios['anonymousWithBypass'] = [
-      TRUE,
-      TRUE,
-      [],
-      [],
-      'view group',
-      TRUE,
-      'An anonymous user with the bypass permission can view the group.'
-    ];
-
-    $scenarios['authenticatedWithBypass'] = [
-      TRUE,
-      FALSE,
-      [],
-      [],
-      'view group',
-      TRUE,
-      'An authenticated user with the bypass permission can view the group.'
-    ];
-
-    $scenarios['anonymousWithAdmin'] = [
-      FALSE,
-      TRUE,
-      ['foo' => ['administer group']],
-      [],
-      'view group',
-      TRUE,
-      'An anonymous user with the group admin permission can view the group.'
-    ];
-
     $scenarios['outsiderWithAdmin'] = [
-      FALSE,
-      FALSE,
-      ['foo' => ['administer group']],
-      [],
-      'view group',
-      TRUE,
-      'An outsider with the group admin permission can view the group.'
+      'is_member' => FALSE,
+      'outsider_permissions' => ['foo' => []],
+      'outsider_admin' => TRUE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An outsider with the group admin permission can view the group.',
     ];
 
-    $scenarios['memberWithAdmin'] = [
-      FALSE,
-      FALSE,
-      [],
-      [1 => ['administer group']],
-      'view group',
-      TRUE,
-      'A member with the group admin permission can view the group.'
+    $scenarios['insiderWithAdmin'] = [
+      'is_member' => TRUE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => ['foo' => []],
+      'insider_admin' => TRUE,
+      'individual_permissions' => [],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An insider with the group admin permission can view the group.',
     ];
 
-    $scenarios['anonymousWithPermission'] = [
-      FALSE,
-      TRUE,
-      ['foo' => ['view group']],
-      [],
-      'view group',
-      TRUE,
-      'An anonymous user with the right permission can view the group.'
+    $scenarios['individualOutsiderWithAdmin'] = [
+      'is_member' => FALSE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [1 => []],
+      'individual_admin' => TRUE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An individual outsider with the group admin permission can view the group.',
+    ];
+
+    $scenarios['individualInsiderWithAdmin'] = [
+      'is_member' => TRUE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [1 => []],
+      'individual_admin' => TRUE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An individual insider with the group admin permission can view the group.',
     ];
 
     $scenarios['outsiderWithPermission'] = [
-      FALSE,
-      FALSE,
-      ['foo' => ['view group']],
-      [],
-      'view group',
-      TRUE,
-      'An outsider with the right permission can view the group.'
+      'is_member' => FALSE,
+      'outsider_permissions' => ['foo' => ['view group']],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An outsider with the right permission can view the group.',
     ];
 
-    $scenarios['memberWithPermission'] = [
-      FALSE,
-      FALSE,
-      [],
-      [1 => ['view group']],
-      'view group',
-      TRUE,
-      'A member with the right permission can view the group.'
+    $scenarios['insiderWithPermission'] = [
+      'is_member' => TRUE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => ['foo' => ['view group']],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An insider with the right permission can view the group.',
     ];
 
-    $scenarios['anonymousWithoutPermission'] = [
-      FALSE,
-      TRUE,
-      ['foo' => []],
-      [],
-      'view group',
-      FALSE,
-      'An anonymous user without the right permission can not view the group.'
+    $scenarios['individualOutsiderWithPermission'] = [
+      'is_member' => FALSE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [1 => ['view group']],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An individual outsider with the right permission can view the group.',
+    ];
+
+    $scenarios['individualInsiderWithPermission'] = [
+      'is_member' => TRUE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [1 => ['view group']],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => TRUE,
+      'An individual insider with the right permission can view the group.',
     ];
 
     $scenarios['outsiderWithoutPermission'] = [
-      FALSE,
-      FALSE,
-      ['foo' => []],
-      [],
-      'view group',
-      FALSE,
-      'An outsider without the right permission can not view the group.'
+      'is_member' => FALSE,
+      'outsider_permissions' => ['foo' => []],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => FALSE,
+      'An outsider without the right permission cannot view the group.',
     ];
 
-    $scenarios['memberWithoutPermission'] = [
-      FALSE,
-      FALSE,
-      [],
-      [1 => []],
-      'view group',
-      FALSE,
-      'A member without the right permission can not view the group.'
+    $scenarios['insiderWithoutPermission'] = [
+      'is_member' => TRUE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => ['foo' => []],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => FALSE,
+      'An insider without the right permission cannot view the group.',
+    ];
+
+    $scenarios['individualOutsiderWithoutPermission'] = [
+      'is_member' => FALSE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [1 => []],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => FALSE,
+      'An individual outsider without the right permission can not view the group.',
+    ];
+
+    $scenarios['individualInsiderWithoutPermission'] = [
+      'is_member' => TRUE,
+      'outsider_permissions' => [],
+      'outsider_admin' => FALSE,
+      'insider_permissions' => [],
+      'insider_admin' => FALSE,
+      'individual_permissions' => [1 => []],
+      'individual_admin' => FALSE,
+      'permission' => 'view group',
+      'has_permission' => FALSE,
+      'An individual insider without the right permission can not view the group.',
     ];
 
     return $scenarios;

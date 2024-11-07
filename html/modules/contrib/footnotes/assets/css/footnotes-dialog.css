@@ -1,0 +1,48 @@
+/*
+ * Sample starter CSS for the Footnotes Dialog.
+*/
+
+/* Have the dialog be positioned at the bottom across the width of the site */
+.footnotes__dialog {
+  box-sizing: border-box;
+  width: auto;
+  max-width: 100%;
+  margin: auto 0 0 0;
+  border: 0;
+}
+
+.footnotes__dialog-form {
+  display: grid;
+  grid-template-columns: minmax(auto, 3rem) 1fr minmax(auto, 3rem);
+}
+
+/* Animation for showing the dialog */
+.footnotes__dialog[open] {
+  animation: show 0.5s ease normal;
+}
+@keyframes show {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Animation for closing the dialog */
+.footnotes__dialog.hide {
+  animation: hide 0.5s ease normal;
+}
+@keyframes hide {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Remove animation when the user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .footnotes__dialog[open],
+  .footnotes__dialog.hide {
+    animation: none;
+  }
+}

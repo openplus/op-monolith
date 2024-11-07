@@ -22,6 +22,9 @@ use Drupal\editor\EditorInterface;
  *     library = "ckeditor_codemirror/source_editing_code_mirror",
  *     admin_library = "ckeditor_codemirror/admin",
  *     elements = false,
+ *     conditions = {
+ *       "plugins" = {"ckeditor5_sourceEditing"}
+ *     }
  *   )
  * )
  */

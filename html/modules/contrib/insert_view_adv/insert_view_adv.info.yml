@@ -8,7 +8,7 @@ dependencies:
 package: 'Input filters'
 core_version_requirement: ^8.8.0 || ^9 || ^10
 
-# Information added by Drupal.org packaging script on 2022-10-10
-version: '2.0.0-alpha2'
+# Information added by Drupal.org packaging script on 2024-03-02
+version: '2.0.0-alpha3'
 project: 'insert_view_adv'
-datestamp: 1665433822
+datestamp: 1709368751

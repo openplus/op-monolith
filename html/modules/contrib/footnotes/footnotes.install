@@ -2,44 +2,143 @@
 
 /**
  * @file
- * Install, update and uninstall functions for the Footnotes module.
+ * Install file for footnotes.
  */
+
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
- * Implements hook_requirements().
+ * Install the footnotes text format.
  */
-function footnotes_requirements($phase) {
-  if ($phase != 'runtime') {
-    return [];
+function footnotes_update_10001() {
+
+  // Find formats that contain the 'filter_footnotes' key.
+  $format_configs = \Drupal::configFactory()->listAll('filter.format.');
+  $text_formats_with_footnotes = [];
+  $has_footnote_format_installed = FALSE;
+  foreach ($format_configs as $format_config) {
+    $config = \Drupal::configFactory()->getEditable($format_config);
+    $filters = $config->get('filters');
+    $format = $config->get('format');
+    if (isset($filters['filter_footnotes']) || isset($filters['filter_footnotes_modal'])) {
+      $text_formats_with_footnotes[] = $format;
+    }
+
+    // General flag to know if we need to install the footnote
+    // text format still.
+    if ($format == 'footnote') {
+      $has_footnote_format_installed = TRUE;
+    }
+
+    // Update filters from original to footnotes.
+    if (isset($filters['filter_footnotes'])) {
+      if (isset($filters['filter_footnotes']['settings']['footnotes_html'])) {
+        unset($filters['filter_footnotes']['settings']['footnotes_html']);
+      }
+    }
+
+    // In case user had the temporary filter_footnotes in place.
+    if (isset($filters['filter_footnotes_modal'])) {
+      $filters['filter_footnotes'] = $filters['filter_footnotes_modal'];
+      if (isset($filters['filter_footnotes']['settings']['footnotes_html'])) {
+        unset($filters['filter_footnotes']['settings']['footnotes_html']);
+      }
+      unset($filters['filter_footnotes']);
+    }
+
+    // Save the changes.
+    $config->set('filters', $filters);
+    $config->save();
   }
 
-  // Check if fakeobjects module is enabled and properly configured.
-  $fakeobjects_exist = \Drupal::moduleHandler()->moduleExists('fakeobjects');
-  if ($fakeobjects_exist) {
-    $fakeobjects_requirements = fakeobjects_requirements($phase);
-    if ($fakeobjects_requirements['fakeobjects']['severity'] === REQUIREMENT_OK) {
-      $requirements['footnotes'] = [
-        'title' => t('Footnotes'),
-        'value' => t('Footnotes requirements are OK.'),
-        'severity' => REQUIREMENT_OK,
-      ];
+  // Update editor toolbar to use footnotes.
+  $editor_configs = \Drupal::configFactory()->listAll('editor.editor.');
+  foreach ($editor_configs as $editor_config) {
+    $config = \Drupal::configFactory()->getEditable($editor_config);
+    $toolbar_items = $config->get('settings.toolbar.items');
+    if (empty($toolbar_items)) {
+      continue;
     }
-    else {
-      $requirements['footnotes'] = [
-        'title' => t('Footnotes'),
-        'value' => t('Footnotes requirements are not properly configured. Please check Fakeobjects module requirements.'),
-        'severity' => REQUIREMENT_ERROR,
-      ];
+
+    $replacements = ['Footnotes', 'footnotesModal'];
+    foreach ($replacements as $replacement) {
+      $index = array_search($replacement, $toolbar_items);
+      if ($index !== FALSE) {
+        $toolbar_items[$index] = 'footnotes';
+        $config->set('settings.toolbar.items', $toolbar_items);
+        $config->save();
+      }
     }
-  }
-  else {
-    $requirements['footnotes'] = [
-      'title' => t('Footnotes'),
-      'value' => t("<a href=':href'>Fakeobjects module</a> isn't installed/enabled.", [':href' => 'https://www.drupal.org/project/fakeobjects']),
-      'severity' => REQUIREMENT_ERROR,
-      'description' => t('Footnotes module has a dependency on Fakeobjects module. Ensure that Fakeobjects module is enabled and configured.'),
-    ];
   }
 
-  return $requirements;
+  // Install the footnote configuration.
+  if (!$has_footnote_format_installed) {
+    $path = \Drupal::service('extension.list.module')->getPath('footnotes');
+    $config_factory = \Drupal::configFactory();
+    $config_ids = ['filter.format.footnote', 'editor.editor.footnote'];
+    foreach ($config_ids as $config_id) {
+      $config_path = DRUPAL_ROOT . '/' . $path . '/config/optional/' . $config_id . '.yml';
+      $data = Yaml::parseFile($config_path);
+      $config_factory->getEditable($config_id)
+        ->setData($data)
+        ->save(TRUE);
+    }
+  }
+
+  // Check permissions for each role.
+  $config_factory = \Drupal::configFactory();
+  $role_ids = $config_factory->listAll('user.role.');
+  foreach ($role_ids as $role_id) {
+    $role_config = $config_factory->getEditable($role_id);
+    $role_permissions = $role_config->get('permissions');
+    foreach ($text_formats_with_footnotes as $text_format_with_footnotes) {
+
+      // If the user already has permission for a text format with footnotes,
+      // maintain the status quo by granting permission to the footnotes
+      // text format used within the WYSIWYG.
+      if (in_array('use text format ' . $text_format_with_footnotes, $role_permissions)) {
+        $role = Role::load($role_config->get('id'));
+        if ($role instanceof RoleInterface) {
+          $role->grantPermission('use text format footnote');
+          $role->save();
+        }
+      }
+    }
+  }
+
+  return t('Footnotes configuration has been updated to 4x branch using the Modal window. IMPORTANT: Please see the module homepage for instructions on using the Drush Commands to update the stored content as well.');
+}
+
+/**
+ * Ensure that footer disable is set to its default false.
+ */
+function footnotes_update_10002() {
+  $format_configs = \Drupal::configFactory()->listAll('filter.format.');
+  foreach ($format_configs as $format_config) {
+    $config = \Drupal::configFactory()->getEditable($format_config);
+    $settings = $config->get('filters.filter_footnotes.settings');
+    if (!isset($settings['footnotes_footer_disable'])) {
+      $settings['footnotes_footer_disable'] = FALSE;
+      $config->set('filters.filter_footnotes.settings', $settings);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Ensure that footer dialog has its default set to false.
+ */
+function footnotes_update_10003() {
+  $format_configs = \Drupal::configFactory()->listAll('filter.format.');
+  foreach ($format_configs as $format_config) {
+    $config = \Drupal::configFactory()->getEditable($format_config);
+    $settings = $config->get('filters.filter_footnotes.settings');
+    if (!isset($settings['footnotes_dialog'])) {
+      $settings['footnotes_dialog'] = FALSE;
+      $config->set('filters.filter_footnotes.settings', $settings);
+      $config->save();
+    }
+  }
 }

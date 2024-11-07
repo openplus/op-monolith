@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Override the template(s) from the footnote's module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function footnotes_test_theme() {
+  $theme['footnote_links'] = [
+    'template' => 'footnotes-links--test',
+  ];
+
+  return $theme;
+}

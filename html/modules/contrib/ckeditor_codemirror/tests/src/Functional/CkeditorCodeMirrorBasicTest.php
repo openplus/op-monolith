@@ -59,6 +59,11 @@ class CkeditorCodeMirrorBasicTest extends BrowserTestBase {
     $editor = Editor::create([
       'format' => 'full_html',
       'editor' => 'ckeditor5',
+      'settings' => [
+        'toolbar' => [
+          'items' => ['sourceEditing'],
+        ],
+      ],
     ]);
     $editor->save();
 

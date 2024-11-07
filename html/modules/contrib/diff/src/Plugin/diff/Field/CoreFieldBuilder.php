@@ -2,12 +2,11 @@
 
 namespace Drupal\diff\Plugin\diff\Field;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\diff\DiffEntityParser;
 use Drupal\diff\FieldDiffBuilderBase;
-use Drupal\Core\Field\FieldItemListInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -40,8 +39,6 @@ class CoreFieldBuilder extends FieldDiffBuilderBase {
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
-   *   The configuration factory object.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\diff\DiffEntityParser $entity_parser
@@ -49,7 +46,14 @@ class CoreFieldBuilder extends FieldDiffBuilderBase {
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, DiffEntityParser $entity_parser, RendererInterface $renderer) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityTypeManagerInterface $entity_type_manager,
+    DiffEntityParser $entity_parser,
+    RendererInterface $renderer,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $entity_parser);
     $this->renderer = $renderer;
   }
@@ -64,7 +68,7 @@ class CoreFieldBuilder extends FieldDiffBuilderBase {
       $plugin_definition,
       $container->get('entity_type.manager'),
       $container->get('diff.entity_parser'),
-      $container->get('renderer')
+      $container->get('renderer'),
     );
   }
 
@@ -72,7 +76,7 @@ class CoreFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function build(FieldItemListInterface $field_items) {
-    $result = array();
+    $result = [];
 
     // Every item from $field_items is of type FieldItemInterface.
     foreach ($field_items as $field_key => $field_item) {
@@ -80,7 +84,10 @@ class CoreFieldBuilder extends FieldDiffBuilderBase {
         $values = $field_item->getValue();
         if (isset($values['value'])) {
           $value = $field_item->view(['label' => 'hidden']);
-          $result[$field_key][] = $this->renderer->renderPlain($value);
+          // @see https://www.drupal.org/node/3407994
+          // Added a suggested method renderInIsolation().
+          // @phpstan-ignore-next-line
+          $result[$field_key][] = version_compare(\Drupal::VERSION, '10.3', '<') ? $this->renderer->renderPlain($value) : $this->renderer->renderInIsolation($value);
         }
       }
     }

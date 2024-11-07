@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Afficher le sous-titrage"
 	},
 	"cc-err": "Erreur dans le chargement des sous-titres",
+	fs: "Ouvrir plein écran",
 	adesc: {
 		on: "Activer l'audiodescription",
 		off: "Désactiver l'audiodescription"
 	},
 	pos: "Position actuelle :",
 	dur: "Temps total :",
+	msgYoutubeNotLoad: "La vidéo a éprouvé des problèmes de chargement",
+	msgYoutubeVdLoad: "Chargement de la vidéo Youtube",
 
 	/* Share widget */
 	"shr-txt": "Partagez",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filtrer<span class=\"wb-inv\"> le contenu: Les résultats s'afficherons au moment même de la saisie.</span>",
-	"fltr-info": "Affiche _NBITEM_ de _TOTAL_ éléments filtrés."
+	"fltr-info": "Affiche <span data-nbitem></span> de <span data-total></span> éléments filtrés."
 };
 
 } )( wb );

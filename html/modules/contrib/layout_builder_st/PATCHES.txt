@@ -5,3 +5,11 @@ Patches applied to this directory:
 Source: https://www.drupal.org/files/issues/2019-07-24/isTranslation-null-given.patch
 
 
+3420063 - Call to a member function getConfig() OverridesSectionStorage.php
+Source: https://git.drupalcode.org/project/layout_builder_st/-/merge_requests/6.diff
+
+
+3411037 - Fix core removing contextual translation links
+Source: https://git.drupalcode.org/project/layout_builder_st/-/merge_requests/5.patch
+
+

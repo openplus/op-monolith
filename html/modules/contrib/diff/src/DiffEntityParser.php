@@ -40,7 +40,10 @@ class DiffEntityParser {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration factory.
    */
-  public function __construct(DiffBuilderManager $diff_builder_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(
+    DiffBuilderManager $diff_builder_manager,
+    ConfigFactoryInterface $config_factory,
+  ) {
     $this->config = $config_factory->get('diff.settings');
     $this->pluginsConfig = $config_factory->get('diff.plugins');
     $this->diffBuilderManager = $diff_builder_manager;
@@ -60,7 +63,7 @@ class DiffEntityParser {
    *   Array of strings resulted by parsing the entity.
    */
   public function parseEntity(ContentEntityInterface $entity) {
-    $result = array();
+    $result = [];
     $langcode = \Drupal::languageManager()->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId();
     // Load entity of current language, otherwise fields are always compared by
     // their default language.

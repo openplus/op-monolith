@@ -2,9 +2,9 @@
 
 namespace Drupal\diff_test\Plugin\diff\Field;
 
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\diff\FieldDiffBuilderBase;
-use Drupal\Core\Field\FieldItemListInterface;
 
 /**
  * Test diff builder with light weight.

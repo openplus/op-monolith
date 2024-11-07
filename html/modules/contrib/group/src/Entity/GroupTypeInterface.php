@@ -23,74 +23,26 @@ interface GroupTypeInterface extends ConfigEntityInterface, EntityDescriptionInt
   /**
    * Gets the group roles.
    *
-   * @param bool $include_internal
-   *   (optional) Whether to include internal roles in the result. Defaults to
-   *   TRUE.
+   * @param bool $include_synchronized
+   *   (optional) Whether to include roles that synchronize to a global role in
+   *   the result. Defaults to TRUE.
    *
    * @return \Drupal\group\Entity\GroupRoleInterface[]
    *   The group roles this group type uses.
    */
-  public function getRoles($include_internal = TRUE);
+  public function getRoles($include_synchronized = TRUE);
 
   /**
    * Gets the role IDs.
    *
-   * @param bool $include_internal
-   *   (optional) Whether to include internal roles in the result. Defaults to
-   *   TRUE.
+   * @param bool $include_synchronized
+   *   (optional) Whether to include roles that synchronize to a global role in
+   *   the result. Defaults to TRUE.
    *
    * @return string[]
    *   The ids of the group roles this group type uses.
    */
-  public function getRoleIds($include_internal = TRUE);
-
-  /**
-   * Gets the generic anonymous group role for this group type.
-   *
-   * @return \Drupal\group\Entity\GroupRoleInterface
-   *   The anonymous group role this group type uses.
-   */
-  public function getAnonymousRole();
-
-  /**
-   * Gets the generic anonymous role ID.
-   *
-   * @return string
-   *   The ID of the anonymous group role this group type uses.
-   */
-  public function getAnonymousRoleId();
-
-  /**
-   * Gets the generic outsider group role for this group type.
-   *
-   * @return \Drupal\group\Entity\GroupRoleInterface
-   *   The outsider group role this group type uses.
-   */
-  public function getOutsiderRole();
-
-  /**
-   * Gets the generic outsider role ID.
-   *
-   * @return string
-   *   The ID of the outsider group role this group type uses.
-   */
-  public function getOutsiderRoleId();
-
-  /**
-   * Gets the generic member group role for this group type.
-   *
-   * @return \Drupal\group\Entity\GroupRoleInterface
-   *   The generic member group role this group type uses.
-   */
-  public function getMemberRole();
-
-  /**
-   * Gets the generic member role ID.
-   *
-   * @return string
-   *   The ID of the generic member group role this group type uses.
-   */
-  public function getMemberRoleId();
+  public function getRoleIds($include_synchronized = TRUE);
 
   /**
    * Sets whether a new revision should be created by default.
@@ -119,43 +71,43 @@ interface GroupTypeInterface extends ConfigEntityInterface, EntityDescriptionInt
   /**
    * Gets the IDs of the group roles a group creator should receive.
    *
-   * @return string
+   * @return string[]
    *   The IDs of the group role the group creator should receive.
    */
   public function getCreatorRoleIds();
 
   /**
-   * Returns the installed content enabler plugins for this group type.
+   * Returns the installed group relations for this group type.
    *
-   * @return \Drupal\group\Plugin\GroupContentEnablerCollection
-   *   The group content plugin collection.
+   * @return \Drupal\group\Plugin\Group\Relation\GroupRelationCollection
+   *   The group relation collection.
    */
-  public function getInstalledContentPlugins();
+  public function getInstalledPlugins();
 
   /**
-   * Checks whether a content enabler plugin is installed for this group type.
+   * Checks whether a group relation is installed for this group type.
    *
    * @param string $plugin_id
-   *   The ID of the content enabler plugin to check for.
+   *   The group relation type ID to check for.
    *
    * @return bool
-   *   Whether the content enabler plugin is installed.
+   *   Whether the group relation is installed.
    */
-  public function hasContentPlugin($plugin_id);
+  public function hasPlugin($plugin_id);
 
   /**
-   * Gets an installed content enabler plugin for this group type.
+   * Gets an installed group relation for this group type.
    *
    * Warning: In places where the plugin may not be installed on the group type,
-   * you should always run ::hasContentPlugin() first or you may risk ending up
-   * with crashes or unreliable data.
+   * you should always run ::hasPlugin() first or you may risk ending up with
+   * crashes or unreliable data.
    *
    * @param string $plugin_id
-   *   The ID of the content enabler plugin.
+   *   The group relation type ID.
    *
-   * @return \Drupal\group\Plugin\GroupContentEnablerInterface
-   *   The installed content enabler plugin for the group type.
+   * @return \Drupal\group\Plugin\Group\Relation\GroupRelationInterface
+   *   The installed group relation for the group type.
    */
-  public function getContentPlugin($plugin_id);
+  public function getPlugin($plugin_id);
 
 }

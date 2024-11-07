@@ -27,6 +27,7 @@ function ckeditor_abbreviation_help($route_name, RouteMatchInterface $route_matc
       $output .= '<dd>' . t('To remove an abbreviation title attribute, delete the explanation in the ckeditor abbreviation dialog. In order to untag an abbreviation, delete the abbreviation in the ckeditor abbreviation dialog.') . '</dd>';
       $output .= '</dl>';
       return $output;
+
     default:
   }
 }

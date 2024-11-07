@@ -50,14 +50,14 @@ class DiffPluginFileTest extends DiffPluginTestBase {
    *
    * @see \Drupal\diff\Plugin\diff\Field\FileFieldBuilder
    */
-  public function testFilePlugin() {
+  public function testFilePlugin(): void {
     // Add file field to the article content type.
     $file_field_name = 'field_file';
-    $field_storage = FieldStorageConfig::create(array(
+    $field_storage = FieldStorageConfig::create([
       'field_name' => $file_field_name,
       'entity_type' => 'node',
       'type' => 'file',
-    ));
+    ]);
     $field_storage->save();
     FieldConfig::create([
       'entity_type' => 'node',
@@ -66,7 +66,7 @@ class DiffPluginFileTest extends DiffPluginTestBase {
       'label' => 'File',
     ])->save();
 
-    // Make the field visible in the form and desfault display.
+    // Make the field visible in the form and default display.
     $this->viewDisplay->load('node.article.default')
       ->setComponent('test_field')
       ->setComponent($file_field_name)
@@ -89,19 +89,18 @@ class DiffPluginFileTest extends DiffPluginTestBase {
     $this->drupalGet('node/' . $node->id() . '/edit');
     $this->submitForm($edit, 'Upload');
     $edit['revision'] = TRUE;
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save and keep published');
+    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save');
     $node = $this->drupalGetNodeByTitle('Test article', TRUE);
-    $revision2 = $node->getRevisionId();
 
     // Replace the file by a different one.
     $this->drupalGet('node/' . $node->id() . '/edit');
     $this->submitForm([], 'Remove');
-    $this->drupalPostNodeForm(NULL, ['revision' => FALSE], 'Save and keep published');
+    $this->submitForm(['revision' => FALSE], 'Save');
     $edit['files[field_file_0]'] = $this->fileSystem->realpath($test_files['1']->uri);
-    $this->drupalGet('node/' . $node->id() . '/edit');
+    $this->drupalGet($node->toUrl('edit-form'));
     $this->submitForm($edit, 'Upload');
     $edit['revision'] = TRUE;
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save and keep published');
+    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save');
     $node = $this->drupalGetNodeByTitle('Test article', TRUE);
     $revision3 = $node->getRevisionId();
 
@@ -129,7 +128,7 @@ class DiffPluginFileTest extends DiffPluginTestBase {
    *
    * @see \Drupal\diff\Plugin\diff\Field\ImageFieldBuilder
    */
-  public function testImagePlugin() {
+  public function testImagePlugin(): void {
     // Add image field to the article content type.
     $image_field_name = 'field_image';
     FieldStorageConfig::create([
@@ -174,31 +173,30 @@ class DiffPluginFileTest extends DiffPluginTestBase {
     // Upload an image to the article.
     $test_files = $this->drupalGetTestFiles('image');
     $edit = ['files[field_image_0]' => $this->fileSystem->realpath($test_files['1']->uri)];
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save and keep published');
+    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save');
     $edit = [
       'field_image[0][alt]' => 'Image alt',
       'revision' => TRUE,
     ];
-    $this->drupalPostNodeForm(NULL, $edit, 'Save and keep published');
+    $this->submitForm($edit, 'Save');
     $node = $this->drupalGetNodeByTitle('Test article', TRUE);
-    $revision2 = $node->getRevisionId();
 
     // Replace the image by a different one.
     $this->drupalGet('node/' . $node->id() . '/edit');
     $this->submitForm([], 'Remove');
-    $this->drupalPostNodeForm(NULL, ['revision' => FALSE], 'Save and keep published');
+    $this->submitForm(['revision' => FALSE], 'Save');
     $edit = ['files[field_image_0]' => $this->fileSystem->realpath($test_files['1']->uri)];
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save and keep published');
+    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save');
     $edit = [
       'field_image[0][alt]' => 'Image alt updated',
       'revision' => TRUE,
     ];
-    $this->drupalPostNodeForm(NULL, $edit, 'Save and keep published');
+    $this->submitForm($edit, 'Save');
     $node = $this->drupalGetNodeByTitle('Test article', TRUE);
     $revision3 = $node->getRevisionId();
 
     // Check differences between revisions.
-    $this->clickLink(t('Revisions'));
+    $this->clickLink('Revisions');
     $edit = [
       'radios_left' => $revision1,
       'radios_right' => $revision3,
@@ -221,10 +219,9 @@ class DiffPluginFileTest extends DiffPluginTestBase {
       'revision' => TRUE,
       'field_image[0][title]' => 'Image title updated',
     ];
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save and keep published');
+    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save');
     $this->drupalGet('node/' . $node->id() . '/revisions');
     $this->submitForm([], 'Compare selected revisions');
-
 
     // Image title and alternative text must be shown.
     $assert_session = $this->assertSession();
@@ -269,7 +266,7 @@ class DiffPluginFileTest extends DiffPluginTestBase {
       'fields[node__field_image][settings_edit_form][settings][compare_title_field]' => FALSE,
     ];
     $this->submitForm($edit, 'node__field_image_plugin_settings_update');
-    $this->submitForm([], t('Save'));
+    $this->submitForm([], 'Save');
     $this->drupalGet('node/' . $node->id() . '/revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->pageTextContains('Alt: Image alt updated');

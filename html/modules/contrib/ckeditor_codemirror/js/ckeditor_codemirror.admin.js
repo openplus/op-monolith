@@ -3,53 +3,46 @@
  * CKEditor CodeMirror plugin admin behavior.
  */
 
-(function ($, Drupal, drupalSettings) {
-
-  'use strict';
-
+(($, Drupal) => {
   /**
    * Provides the summary for the CodeMirror plugin settings vertical tab.
    *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches summary behaviour to the CodeMirror settings vertical tab.
+   *   Attaches summary behavior to the CodeMirror settings vertical tab.
    */
 
   Drupal.behaviors.ckeditorCodeMirrorSettingsSummary = {
-    attach: function () {
-      $('[data-ckeditor5-plugin-id="ckeditor_codemirror_source_editing"]').drupalSetSummary(function (context) {
-        var $enable = $('input[name="editor[settings][plugins][ckeditor_codemirror_source_editing][enable]"]');
-        var $mode = $('select[name="editor[settings][plugins][ckeditor_codemirror_source_editing][enable]"]');
+    attach(context) {
+      const $context = $(context);
+      $context
+        .find('[data-ckeditor5-plugin-id="ckeditor_codemirror_source_editing"]')
+        .drupalSetSummary((summaryContext) => {
+          const $summaryContext = $(summaryContext);
+          const mode = $summaryContext.find(
+            'select[name="editor[settings][plugins][ckeditor_codemirror_source_editing][mode]"]',
+          );
 
-        if (!$enable.is(':checked')) {
-          return Drupal.t('Syntax highlighting <strong>disabled</strong>.');
-        }
-
-        var output = '';
-        output += Drupal.t('Syntax highlighting <strong>enabled</strong>.');
-
-        if ($mode.length) {
-          var mode_name = 'Unknown';
-          switch ($mode.val()) {
-            case 'htmlmixed':
-              mode_name = 'HTML';
-              break;
-
-            case 'application/x-httpd-php':
-              mode_name = 'PHP';
-              break;
-
-            case 'text/javascript':
-              mode_name = 'Javascript';
-              break;
+          if (
+            $summaryContext.find(
+              'input[name="editor[settings][plugins][ckeditor_codemirror_source_editing][enable]"]:checked',
+            ).length === 0
+          ) {
+            return Drupal.t('Syntax highlighting <strong>disabled</strong>.');
           }
-          output += '<br />' + Drupal.t('Mode: ') + mode_name;
-        }
 
-        return output;
-      });
-    }
+          let output = '';
+          output += Drupal.t('Syntax highlighting <strong>enabled</strong>.');
+
+          if (mode.length) {
+            const { selectedIndex } = mode[0];
+            const modeName = mode[0].options[selectedIndex].label ?? 'Unknown';
+            output += `<br />${Drupal.t('Mode: ')}${modeName}`;
+          }
+
+          return output;
+        });
+    },
   };
-
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal);

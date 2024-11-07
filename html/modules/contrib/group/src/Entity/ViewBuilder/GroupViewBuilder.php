@@ -5,6 +5,7 @@ namespace Drupal\group\Entity\ViewBuilder;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
+use Drupal\group\Entity\GroupInterface;
 
 /**
  * View builder handler for groups.
@@ -17,7 +18,7 @@ class GroupViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   protected function alterBuild(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-    /** @var \Drupal\group\Entity\GroupInterface $entity */
+    assert($entity instanceof GroupInterface);
     parent::alterBuild($build, $entity, $display, $view_mode);
     if ($entity->id()) {
       $build['#contextual_links']['group'] = [

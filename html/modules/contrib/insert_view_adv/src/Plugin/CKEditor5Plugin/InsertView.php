@@ -24,7 +24,8 @@ class InsertView extends CKEditor5PluginDefault {
     $dynamic_plugin_config['insertViewAdv']['libraryURL'] = Url::fromRoute('insert_view_adv.editor_dialog')
       ->setRouteParameter('filter_format', $editor->getFilterFormat()->id())
       ->toString(TRUE)
-      ->getGeneratedUrl();;
+      ->getGeneratedUrl();
+    ;
     $dynamic_plugin_config['insertViewAdv']['previewURL'] = Url::fromRoute('insert_view_adv.editor_preview')
       ->setRouteParameter('filter_format', $editor->getFilterFormat()->id())
       ->toString(TRUE)

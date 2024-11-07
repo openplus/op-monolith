@@ -6,7 +6,7 @@ use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
@@ -257,10 +257,9 @@ class LinkCheckerService {
         $link->setFailCount($link->getFailCount() + 1);
         $link->setLastCheckTime($this->time->getCurrentTime());
         $link->save();
-        $this->logger->notice('Link %link has changed and needs to be updated.', [
+        linkchecker_watchdog_log('linkchecker', 'Link %link has changed and needs to be updated.', [
           '%link' => $link->getUrl(),
-          'link' => $this->getReportLink(),
-        ]);
+        ], RfcLogLevel::NOTICE, $this->getReportLink());
         break;
 
       case 404:
@@ -270,10 +269,9 @@ class LinkCheckerService {
         $link->setLastCheckTime($this->time->getCurrentTime());
         $link->save();
 
-        $this->logger->notice('Broken link %link has been found.', [
+        linkchecker_watchdog_log('linkchecker', 'Broken link %link has been found.', [
           '%link' => $link->getUrl(),
-          'link' => $this->getReportLink(),
-        ]);
+        ], RfcLogLevel::NOTICE, $this->getReportLink());
         break;
 
       case 405:
@@ -286,10 +284,9 @@ class LinkCheckerService {
         $link->setLastCheckTime($this->time->getCurrentTime());
         $link->save();
 
-        $this->logger->notice('Method HEAD is not allowed for link %link. Method has been changed to GET.', [
+        linkchecker_watchdog_log('linkchecker', 'Method HEAD is not allowed for link %link. Method has been changed to GET.', [
           '%link' => $link->getUrl(),
-          'link' => $this->getReportLink(),
-        ]);
+        ], RfcLogLevel::NOTICE, $this->getReportLink());
         break;
 
       case 500:
@@ -302,10 +299,9 @@ class LinkCheckerService {
           $link->setLastCheckTime($this->time->getCurrentTime());
           $link->save();
 
-          $this->logger->notice('Broken link %link has been found.', [
+          linkchecker_watchdog_log('linkchecker', 'Broken link %link has been found.', [
             '%link' => $link->getUrl(),
-            'link' => $this->getReportLink(),
-          ]);
+          ], RfcLogLevel::NOTICE, $this->getReportLink());
         }
         else {
           $link->setRequestMethod('GET');
@@ -315,10 +311,9 @@ class LinkCheckerService {
           $link->setLastCheckTime($this->time->getCurrentTime());
           $link->save();
 
-          $this->logger->notice('Internal server error for link %link. Method has been changed to GET.', [
+          linkchecker_watchdog_log('linkchecker', 'Internal server error for link %link. Method has been changed to GET.', [
             '%link' => $link->getUrl(),
-            'link' => $this->getReportLink(),
-          ]);
+          ], RfcLogLevel::NOTICE, $this->getReportLink());
         }
         break;
 
@@ -338,10 +333,9 @@ class LinkCheckerService {
           $link->setLastCheckTime($this->time->getCurrentTime());
           $link->save();
 
-          $this->logger->error('Unhandled link error %link has been found.', [
+          linkchecker_watchdog_log('linkchecker', 'Unhandled link error %link has been found.', [
             '%link' => $link->getUrl(),
-            'link' => $this->getReportLink(),
-          ]);
+          ], RfcLogLevel::ERROR, $this->getReportLink());
         }
     }
 
@@ -371,11 +365,10 @@ class LinkCheckerService {
     $link->setLastCheckTime($this->time->getCurrentTime());
     $link->save();
 
-    $this->logger->error('Unhandled link error %link has been found: : %message.', [
+    linkchecker_watchdog_log('linkchecker', 'Unhandled link error %link has been found: : %message.', [
       '%link' => $link->getUrl(),
       '%message' => $e->getMessage(),
-      'link' => $this->getReportLink(),
-    ]);
+    ], RfcLogLevel::ERROR, $this->getReportLink());
 
     $this->updateSameLinks($link);
   }

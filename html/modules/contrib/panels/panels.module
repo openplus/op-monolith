@@ -27,7 +27,7 @@ define('PANELS_TITLE_PANE', 2);
 /**
  * Implements hook_ENTITY_TYPE_create().
  *
- * We need to set the storage information on Panels displays being storaged
+ * We need to set the storage information on Panels displays being stored
  * in Page Manager as early as possible, to signal to Panels that features
  * requiring Panels storage (like the IPE) are supported.
  *

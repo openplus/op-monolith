@@ -7,9 +7,9 @@
   "homepage": "https://www.drupal.org/project/config_rewrite",
   "authors": [
     {
-      "name": "Brant Wynn (brantwynn)",
-      "homepage": "https://www.drupal.org/u/brantwynn",
-      "role": "Maintainer"
+      "name": "Diana Wynn (saltednut)",
+      "homepage": "https://www.drupal.org/u/saltednut",
+      "role": "Co-Maintainer"
     }
   ],
   "support": {
@@ -18,6 +18,6 @@
   },
   "require": {
     "php": ">=7.1",
-    "drupal/core": "^8.6 || ^9 || ^10"
+    "drupal/core": "^8.6 || ^9 || ^10 || ^11"
   }
 }

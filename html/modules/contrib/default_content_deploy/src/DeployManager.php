@@ -83,7 +83,7 @@ class DeployManager {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function getEntityUuidById($entity_type, $id) {
+  public function getEntityUuidById(string $entity_type, string|int $id): string {
     $entity = $this->entityTypeManager->getStorage($entity_type)->load($id);
 
     return $entity->uuid();
@@ -96,7 +96,7 @@ class DeployManager {
    *   Array of available content entity definitions keyed by type ID.
    *   [entity_type => \Drupal\Core\Entity\EntityTypeInterface]
    */
-  public function getContentEntityTypes() {
+  public function getContentEntityTypes(): array {
     $types = [];
     $entity_types = $this->entityTypeManager->getDefinitions();
 
@@ -125,20 +125,13 @@ class DeployManager {
    * @return string|null
    *   Return path to the content folder or NULL if none is configured.
    *
-   * @example Backward compatibility usage:
-   *   $config_directories['content_directory'] = '../content';
-   *   $config['content_directory'] = '../content';
-   *
-   * @example Recommended usage:
-   *   $settings['default_content_deploy_content_directory'] = '../content';
+   * @example override:
+   *   $config['default_content_deploy.settings']['content_directory'] = '../content';
    */
   public function getContentFolder(): ?string {
-    $config = $this->config->get('default_content_deploy.content_directory');
+    $config = $this->config->get('default_content_deploy.settings');
 
     if ($directory = $config->get('content_directory')) {
-      return $directory;
-    }
-    elseif ($directory = $this->settings->get('default_content_deploy_content_directory')) {
       return $directory;
     }
 
@@ -150,7 +143,7 @@ class DeployManager {
    *
    * @return string
    */
-  public function getCurrentHost() {
+  public function getCurrentHost(): string {
     $protocol = $this->request->getScheme();
     $host = $this->request->getHttpHost();
 
@@ -159,10 +152,8 @@ class DeployManager {
 
   /**
    * Compress the content files to an archive.
-   *
-   * @return $this
    */
-  public function compressContent() {
+  public function compressContent(): void {
     $folder = $this->fileSystem->getTempDirectory() . '/dcd';
     $content_folder = $folder . '/content';
 
@@ -171,8 +162,6 @@ class DeployManager {
 
     $archive = new ArchiveTar($folder . '/content.tar.gz', 'gz');
     $archive->addModify($content_folder, basename($content_folder), $content_folder);
-
-    return $this;
   }
 
   /**
@@ -180,11 +169,9 @@ class DeployManager {
    *
    * @param $file
    *
-   * @return $this
-   *
    * @throws \Exception
    */
-  public function uncompressContent($file) {
+  public function uncompressContent(string $file): void {
     $folder = $this->fileSystem->getTempDirectory() . '/dcd';
     $content_folder = $folder . '/content';
 
@@ -201,8 +188,6 @@ class DeployManager {
     else {
       throw new \Exception('The wrong folder structure');
     }
-
-    return $this;
   }
 
 }

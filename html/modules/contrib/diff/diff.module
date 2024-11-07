@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @file
- * This is the diff module to compare revisions.
- */
+declare(strict_types=1);
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
@@ -12,7 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 /**
  * Implements hook_help().
  */
-function diff_help($route_name, RouteMatchInterface $route_match) {
+function diff_help($route_name, RouteMatchInterface $route_match): string {
   switch ($route_name) {
     case 'help.page.diff':
       $output = '';
@@ -38,6 +35,7 @@ function diff_help($route_name, RouteMatchInterface $route_match) {
     case 'diff.fields_list':
       return '<p>' . t('This table provides a summary of the field support found on the system. For every field, a diff plugin can be selected and configured. These settings are applied to Unified and Split fields layouts.') . '</p>';
   }
+  return '';
 }
 
 /**
@@ -53,7 +51,7 @@ function diff_help($route_name, RouteMatchInterface $route_match) {
  * @return array
  *   Array of labels used for the field sorted by the most used.
  */
-function _diff_field_label($entity_type, $field_name) {
+function _diff_field_label(string $entity_type, string $field_name): array {
   $labels = [];
   // Count the amount of instances of each label per field storage.
   $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);

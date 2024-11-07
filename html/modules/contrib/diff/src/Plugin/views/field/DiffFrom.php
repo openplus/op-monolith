@@ -68,9 +68,9 @@ class DiffFrom extends DiffPluginBase {
       $diff_to = $form_state->getValue($this->getToFieldId());
       $diff_to_entity = $this->loadEntityFromDiffFormKey($diff_to);
 
-      $options = array(
+      $options = [
         'query' => $this->getDestinationArray(),
-      );
+      ];
       $entity_type_id = $diff_from_entity->getEntityTypeId();
 
       $filter = \Drupal::service('plugin.manager.diff.layout')->getDefaultLayout();

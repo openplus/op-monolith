@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Class AdvancedInsertViewController.
+ * Class AdvancedInsertViewController contains ajax view render.
  *
  * @package Drupal\insert_view_adv\Controller
  */

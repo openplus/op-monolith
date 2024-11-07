@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Feliratozás bekapcsolása"
 	},
 	"cc-err": "Hiba a felirat betöltése közben",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Narráció bekapcsolása",
 		off: "Narráció kikapcsolása"
 	},
 	pos: "Jelenlegi pozíció:",
 	dur: "Összidő:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Oszd",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

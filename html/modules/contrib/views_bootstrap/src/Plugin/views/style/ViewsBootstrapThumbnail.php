@@ -189,19 +189,19 @@ class ViewsBootstrapThumbnail extends StylePluginBase {
     }
 
     foreach (['xs', 'sm', 'md', 'lg'] as $size) {
-      $form["col_${size}"] = [
+      $form["col_{$size}"] = [
         '#type' => 'select',
         '#title' => $this->t("Number of columns (col-@size)", ['@size' => $size]),
         '#description' => $this->t("This adds col-@size to the div.", ['@size' => $size]),
         '#required' => TRUE,
-        '#default_value' => isset($this->options["col_${size}"]) ? $this->options["col_${size}"] : NULL,
+        '#default_value' => isset($this->options["col_{$size}"]) ? $this->options["col_{$size}"] : NULL,
         '#options' => [
-          "col-${size}-12" => 1,
-          "col-${size}-6" => 2,
-          "col-${size}-4" => 3,
-          "col-${size}-3" => 4,
-          "col-${size}-2" => 6,
-          "col-${size}-1" => 12,
+          "col-{$size}-12" => 1,
+          "col-{$size}-6" => 2,
+          "col-{$size}-4" => 3,
+          "col-{$size}-3" => 4,
+          "col-{$size}-2" => 6,
+          "col-{$size}-1" => 12,
         ],
       ];
     }

@@ -4,19 +4,20 @@ namespace Drupal\views\Plugin\views\row;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\views\Attribute\ViewsRow;
 
 /**
  * Renders an RSS item based on fields.
- *
- * @ViewsRow(
- *   id = "rss_fields",
- *   title = @Translation("Fields"),
- *   help = @Translation("Display fields as RSS items."),
- *   theme = "views_view_row_rss",
- *   display_types = {"feed"}
- * )
  */
+#[ViewsRow(
+  id: "rss_fields",
+  title: new TranslatableMarkup("Fields"),
+  help: new TranslatableMarkup("Display fields as RSS items."),
+  theme: "views_view_row_rss",
+  display_types: ["feed"]
+)]
 class RssFields extends RowPluginBase {
 
   /**

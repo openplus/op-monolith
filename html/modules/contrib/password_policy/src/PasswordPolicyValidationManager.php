@@ -77,7 +77,7 @@ class PasswordPolicyValidationManager implements PasswordPolicyValidationManager
     $role_applies = $this->passwordPolicyStorage->getQuery()
       ->condition('roles.*', $this->currentUser->getRoles(), 'IN')
       ->condition('show_policy_table', TRUE)
-      ->accessCheck(TRUE)
+      ->accessCheck(FALSE)
       ->execute();
     return !empty($role_applies);
   }
@@ -97,7 +97,7 @@ class PasswordPolicyValidationManager implements PasswordPolicyValidationManager
     $current_user_roles[] = "authenticated";
     $role_applies = $this->passwordPolicyStorage->getQuery()
       ->condition('roles.*', $current_user_roles, 'IN')
-      ->accessCheck(TRUE)
+      ->accessCheck(FALSE)
       ->execute();
     return !empty($role_applies);
   }

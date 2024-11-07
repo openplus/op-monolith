@@ -2,9 +2,9 @@
 
 namespace Drupal\diff\Plugin\diff\Field;
 
-use Drupal\diff\FieldDiffBuilderBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\diff\FieldDiffBuilderBase;
 
 /**
  * Plugin to diff file fields.
@@ -23,7 +23,7 @@ class FileFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function build(FieldItemListInterface $field_items) {
-    $result = array();
+    $result = [];
     $fileManager = $this->entityTypeManager->getStorage('file');
 
     // Every item from $field_items is of type FieldItemInterface.
@@ -86,35 +86,35 @@ class FileFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['show_id'] = array(
+    $form['show_id'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show file ID'),
       '#default_value' => $this->configuration['show_id'],
-    );
-    $form['compare_description_field'] = array(
+    ];
+    $form['compare_description_field'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Compare description field'),
       '#default_value' => $this->configuration['compare_description_field'],
       '#description' => $this->t('This is only used if the "Enable <em>Description</em> field" is checked in the instance settings.'),
-    );
-    $form['compare_display_field'] = array(
+    ];
+    $form['compare_display_field'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Compare display state field'),
       '#default_value' => $this->configuration['compare_display_field'],
       '#description' => $this->t('This is only used if the "Enable <em>Display</em> field" is checked in the field settings.'),
-    );
-    $form['property_separator'] = array(
+    ];
+    $form['property_separator'] = [
       '#type' => 'select',
       '#title' => $this->t('Property separator'),
       '#default_value' => $this->configuration['property_separator'],
       '#description' => $this->t('Provides the ability to show properties inline or across multiple lines.'),
-      '#options' => array(
+      '#options' => [
         ', ' => $this->t('Comma (,)'),
         '; ' => $this->t('Semicolon (;)'),
         ' ' => $this->t('Space'),
         'nl' => $this->t('New line'),
-      ),
-    );
+      ],
+    ];
 
     return parent::buildConfigurationForm($form, $form_state);
   }
@@ -135,12 +135,12 @@ class FileFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    $default_configuration = array(
+    $default_configuration = [
       'show_id' => 1,
       'compare_description_field' => 0,
       'compare_display_field' => 0,
       'property_separator' => 'nl',
-    );
+    ];
     $default_configuration += parent::defaultConfiguration();
 
     return $default_configuration;

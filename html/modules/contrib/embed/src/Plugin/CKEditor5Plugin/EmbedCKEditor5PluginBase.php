@@ -38,7 +38,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     },
  *   ),
  * @endcode
- * 
+ *
  * @see \Drupal\ckeditor5\Annotation\CKEditor5Plugin
  */
 abstract class EmbedCKEditor5PluginBase extends CKEditor5PluginDefault implements ContainerFactoryPluginInterface {

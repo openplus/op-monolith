@@ -56,7 +56,7 @@ class GroupInstalledContentAccessCheck implements AccessInterface {
       $access = TRUE;
 
       foreach ($plugin_ids as $plugin_id) {
-        if (!$group->getGroupType()->hasContentPlugin($plugin_id)) {
+        if (!$group->getGroupType()->hasPlugin($plugin_id)) {
           $access = FALSE;
           break;
         }
@@ -65,7 +65,7 @@ class GroupInstalledContentAccessCheck implements AccessInterface {
     else {
       $plugin_ids = explode('+', $access_string);
       foreach ($plugin_ids as $plugin_id) {
-        if ($group->getGroupType()->hasContentPlugin($plugin_id)) {
+        if ($group->getGroupType()->hasPlugin($plugin_id)) {
           $access = TRUE;
           break;
         }

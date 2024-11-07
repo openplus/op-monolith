@@ -131,7 +131,12 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       return NULL;
     }
 
-    $parent = \Drupal::entityTypeManager()->getStorage($this->get('parent_type')->value)->load($this->get('parent_id')->value);
+    $entityTypeManager = \Drupal::entityTypeManager();
+    if ($entityTypeManager->hasDefinition($this->get('parent_type')->value)) {
+      $parent = $entityTypeManager
+        ->getStorage($this->get('parent_type')->value)
+        ->load($this->get('parent_id')->value);
+    }
 
     // Return current translation of parent entity, if it exists.
     if ($parent != NULL && ($parent instanceof TranslatableInterface) && $parent->hasTranslation($this->language()->getId())) {
@@ -502,7 +507,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
         foreach ($referenced_entities as $referenced_entity) {
           if ($referenced_entity->access('view label')) {
             // Switch to the entity translation in the current context.
-            $entity = \Drupal::service('entity.repository')->getTranslationFromContext($referenced_entity, $this->activeLangcode);
+            $entity = \Drupal::service('entity.repository')->getTranslationFromContext($referenced_entity, $this->language()->getId());
             $summary['content'][] = $entity->label();
           }
         }
@@ -703,7 +708,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
         $entity = $item->entity;
         if ($entity instanceof ParagraphInterface) {
           // Switch to the entity translation in the current context if exists.
-          $entity = \Drupal::service('entity.repository')->getTranslationFromContext($entity, $this->activeLangcode);
+          $entity = \Drupal::service('entity.repository')->getTranslationFromContext($entity, $this->language()->getId());
           $content_summary_items = $entity->getSummaryItems($options)['content'];
           $summary_content = array_merge($summary_content, array_values($content_summary_items));
           $this->summaryCount++;
@@ -757,5 +762,4 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
 
     return $summary;
   }
-
 }

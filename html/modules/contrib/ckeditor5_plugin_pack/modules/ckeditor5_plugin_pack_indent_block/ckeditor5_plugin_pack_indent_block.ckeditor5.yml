@@ -1,0 +1,10 @@
+ckeditor5_plugin_pack_indent_block__indent_block:
+  ckeditor5:
+    plugins:
+      - indent.IndentBlock
+  drupal:
+    label: Indent block
+    elements: false
+    conditions:
+      plugins:
+        - ckeditor5_indent

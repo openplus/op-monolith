@@ -2,14 +2,12 @@
 
 namespace Drupal\default_content_deploy\Event;
 
-use Drupal\Component\EventDispatcher\Event;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Defines a pre save entity event.
  */
-class PreSaveEntityEvent extends Event {
+class PreSaveEntityEvent extends IndexAwareEvent {
 
   /**
    * The entity to be created on import.

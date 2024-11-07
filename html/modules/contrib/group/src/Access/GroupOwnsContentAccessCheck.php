@@ -3,7 +3,7 @@
 namespace Drupal\group\Access;
 
 use Drupal\group\Entity\GroupInterface;
-use Drupal\group\Entity\GroupContentInterface;
+use Drupal\group\Entity\GroupRelationshipInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -11,8 +11,8 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
 
 /**
- * Determines access to routes based on whether a piece of group content belongs
- * to the group that was also specified in the route.
+ * Determines access to routes based on whether a relationship belongs to the
+ * group that was also specified in the route.
  */
 class GroupOwnsContentAccessCheck implements AccessInterface {
 
@@ -32,7 +32,7 @@ class GroupOwnsContentAccessCheck implements AccessInterface {
   public function access(Route $route, RouteMatchInterface $route_match, AccountInterface $account) {
     $must_own_content = $route->getRequirement('_group_owns_content') === 'TRUE';
 
-    // Don't interfere if no group or group content was specified.
+    // Don't interfere if no group or relationship was specified.
     $parameters = $route_match->getParameters();
     if (!$parameters->has('group') || !$parameters->has('group_content')) {
       return AccessResult::neutral();
@@ -44,16 +44,16 @@ class GroupOwnsContentAccessCheck implements AccessInterface {
       return AccessResult::neutral();
     }
 
-    // Don't interfere if the group content isn't a real group content entity.
-    $group_content = $parameters->get('group_content');
-    if (!$group_content instanceof GroupContentInterface) {
+    // Don't interfere if the relationship isn't a real relationship entity.
+    $group_relationship = $parameters->get('group_content');
+    if (!$group_relationship instanceof GroupRelationshipInterface) {
       return AccessResult::neutral();
     }
 
-    // If we have a group and group content, see if the owner matches.
-    $group_owns_content = $group_content->getGroup()->id() == $group->id();
+    // If we have a group and relationship, see if the owner matches.
+    $group_owns_content = $group_relationship->getGroupId() == $group->id();
 
-    // Only allow access if the group content is owned by the group and
+    // Only allow access if the relationship is owned by the group and
     // _group_owns_content is set to TRUE or the other way around.
     return AccessResult::allowedIf($group_owns_content xor !$must_own_content);
   }

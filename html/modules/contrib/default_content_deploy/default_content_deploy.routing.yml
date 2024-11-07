@@ -29,8 +29,9 @@ default_content_deploy.export:
     _admin_route: TRUE
 
 default_content_deploy.export.download:
-  path: '/admin/config/development/dcd/export/download'
+  path: '/admin/config/development/dcd/export/download/{file_name}'
   defaults:
     _controller: 'Drupal\default_content_deploy\Controller\DownloadController::downloadCompressedContent'
+    file_name: NULL
   requirements:
     _permission: 'default content deploy export'

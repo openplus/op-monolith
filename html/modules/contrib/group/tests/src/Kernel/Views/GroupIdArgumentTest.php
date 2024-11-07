@@ -2,10 +2,6 @@
 
 namespace Drupal\Tests\group\Kernel\Views;
 
-use Drupal\group\Entity\Group;
-use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
-use Drupal\user\Entity\User;
-use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
 
 /**
@@ -15,12 +11,7 @@ use Drupal\views\Views;
  *
  * @group group
  */
-class GroupIdArgumentTest extends ViewsKernelTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['group', 'options', 'entity', 'variationcache', 'field', 'text', 'group_test_config', 'group_test_views'];
+class GroupIdArgumentTest extends GroupViewsKernelTestBase {
 
   /**
    * Views used by this test.
@@ -30,46 +21,14 @@ class GroupIdArgumentTest extends ViewsKernelTestBase {
   public static $testViews = ['test_group_id_argument'];
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE): void {
-    parent::setUp($import_test_views);
-
-    $this->installEntitySchema('user');
-    $this->installEntitySchema('group');
-    $this->installEntitySchema('group_type');
-    $this->installEntitySchema('group_content');
-    $this->installEntitySchema('group_content_type');
-    $this->installConfig(['group', 'field', 'group_test_config']);
-
-    // Set the current user so group creation can rely on it.
-    $account = User::create(['name' => $this->randomString()]);
-    $account->save();
-    $this->container->get('current_user')->setAccount($account);
-
-    ViewTestData::createTestViews(get_class($this), ['group_test_views']);
-  }
-
-  /**
    * Tests the group_id argument.
    */
   public function testGroupIdArgument() {
     $view = Views::getView('test_group_id_argument');
     $view->setDisplay();
 
-    /* @var \Drupal\group\Entity\GroupInterface $group1 */
-    $group1 = Group::create([
-      'type' => 'default',
-      'label' => $this->randomMachineName(),
-    ]);
-    $group1->save();
-
-    /* @var \Drupal\group\Entity\GroupInterface $group2 */
-    $group2 = Group::create([
-      'type' => 'default',
-      'label' => $this->randomMachineName(),
-    ]);
-    $group2->save();
+    $this->createGroup();
+    $group2 = $this->createGroup();
 
     $view->preview();
     $this->assertEquals(2, count($view->result), 'Found the expected number of results.');

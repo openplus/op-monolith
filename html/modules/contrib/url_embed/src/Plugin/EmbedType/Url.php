@@ -23,6 +23,6 @@ class Url extends EmbedTypeBase {
    * {@inheritdoc}
    */
   public function getDefaultIconUrl() {
-    return \Drupal::service('file_url_generator')->generateAbsoluteString(\Drupal::service('extension.list.module')->getPath('url_embed') . '/js/plugins/drupalurl/urlembed.png');
+    return \Drupal::service('file_url_generator')->generateAbsoluteString(\Drupal::service('extension.list.module')->getPath('url_embed') . '/js/ckeditor5_plugins/urlembed/urlembed.svg');
   }
 }

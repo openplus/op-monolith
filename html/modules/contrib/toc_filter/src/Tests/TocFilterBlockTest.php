@@ -16,7 +16,7 @@ class TocFilterBlockTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'node',
     'block',

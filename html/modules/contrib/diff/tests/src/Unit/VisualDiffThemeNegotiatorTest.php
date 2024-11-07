@@ -43,7 +43,7 @@ class VisualDiffThemeNegotiatorTest extends UnitTestCase {
   /**
    * @covers ::determineActiveTheme
    */
-  public function testDetermineActiveTheme() {
+  public function testDetermineActiveTheme(): void {
     $config = $this->prophesize(ImmutableConfig::class);
     $config->get('default')->willReturn('the_default_theme');
     $this->configFactory->get('system.theme')->willReturn($config->reveal());
@@ -70,7 +70,7 @@ class VisualDiffThemeNegotiatorTest extends UnitTestCase {
    *
    * @dataProvider providerTestApplies
    */
-  public function testApplies($filter_parameter, $route_name, $config_value, $expected) {
+  public function testApplies($filter_parameter, $route_name, $config_value, $expected): void {
     $route_match = $this->prophesize(RouteMatchInterface::class);
     $route_match->getParameter('filter')->willReturn($filter_parameter);
 
@@ -96,7 +96,7 @@ class VisualDiffThemeNegotiatorTest extends UnitTestCase {
   /**
    * Provides test data to ::testApplies().
    */
-  public function providerTestApplies() {
+  public function providerTestApplies(): array {
     $data = [];
     $data[] = [
       'unexpected_filter_parameter',

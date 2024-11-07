@@ -7,7 +7,7 @@ dependencies:
   - 'drupal:node'
   - 'group:group'
 
-# Information added by Drupal.org packaging script on 2023-08-30
-version: '8.x-1.6'
+# Information added by Drupal.org packaging script on 2023-12-06
+version: '2.2.2'
 project: 'group'
-datestamp: 1693382495
+datestamp: 1701876478

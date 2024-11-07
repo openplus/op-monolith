@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Trego Mbyllur captioning"
 	},
 	"cc-err": "Captions Gabim gjatë ngarkimit të mbyllura",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Aktivizo përshkrimin audio",
 		off: "Disable përshkrimin audio"
 	},
 	pos: "Pozicioni aktual:",
 	dur: "Koha totale:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Share",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

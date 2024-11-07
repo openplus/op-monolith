@@ -36,7 +36,7 @@ abstract class BlazyStyleBase extends BlazyStyleVanilla implements BlazyStyleBas
     ContainerInterface $container,
     array $configuration,
     $plugin_id,
-    $plugin_definition
+    $plugin_definition,
   ) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
 
@@ -299,14 +299,12 @@ abstract class BlazyStyleBase extends BlazyStyleVanilla implements BlazyStyleBas
       if ($tn_style && !Internals::isSvg($tn_uri)) {
         if ($style = $this->manager->load($tn_style, 'image_style')) {
           $sets['thumbnail_style'] = $tn_style;
-          $tn_uri = $style->buildUri($tn_uri);
+          // @todo recheck and remove $tn_uri = $style->buildUri($tn_uri);
         }
       }
 
       $tn_url = Blazy::url($tn_uri, $style);
 
-      // @todo remove the first here.
-      $sets['thumbnail_uri'] = $tn_uri;
       $blazies->set('thumbnail.id', $tn_style)
         ->set('thumbnail.uri', $tn_uri)
         ->set('thumbnail.url', $tn_url)

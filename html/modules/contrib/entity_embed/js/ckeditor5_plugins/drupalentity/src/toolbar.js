@@ -58,49 +58,51 @@ export default class EntityEmbedToolbar extends Plugin {
     })
 
     editor.ui.componentFactory.add('editEmbeddedEntity', (locale) => {
-      const button = new ButtonView(locale);
-      const element = editor.model.document.selection.getSelectedElement();
-      if (!element) {
-        return null;
-      }
-      if (!element.hasAttribute('drupalEntityEntityUuid')) {
-        console.warn(Drupal.t('Unable to create edit link. There must be a value for data-entity-uuid.'));
-        return null;
-      }
-      if (!element.hasAttribute('drupalEntityEntityType')) {
-        console.warn(Drupal.t('Unable to create edit link. There must be a value for data-entity-type.'));
-        return null;
-      }
-      const uuid = element.getAttribute('drupalEntityEntityUuid');
-      const type = element.getAttribute('drupalEntityEntityType');
-      const editUrl = Drupal.url(`entity-embed/edit-embedded/${type}/${uuid}`)
+      let buttonView = new ButtonView(locale);
 
-      button.set({
+      buttonView.set({
         isEnabled: true,
         label: Drupal.t('Edit the embedded entity (opens in new tab)'),
         icon: icons.cog,
         tooltip: true,
       });
 
-      // Ping the edit url and disable the button if the user does not have
-      // access. Because this is async, there's a moment where the button is
-      // clickable even if they don't have access, but the destination will
-      // remain inaccessible.
-      fetch(editUrl)
-        .then((res) => {
-          if (!res.ok) {
-            button.set({
-              label: Drupal.t(`You do not have the permissions needed to edit this ${type}.`),
-              isEnabled: false,
-            });
-          }
-      });
+      this.listenTo(buttonView, 'execute', (eventInfo) => {
+        const element = editor.model.document.selection.getSelectedElement();
+        if (!element) {
+          return null;
+        }
+        if (!element.hasAttribute('drupalEntityEntityUuid')) {
+          console.warn(Drupal.t('Unable to create edit link. There must be a value for data-entity-uuid.'));
+          return null;
+        }
+        if (!element.hasAttribute('drupalEntityEntityType')) {
+          console.warn(Drupal.t('Unable to create edit link. There must be a value for data-entity-type.'));
+          return null;
+        }
+        const uuid = element.getAttribute('drupalEntityEntityUuid');
+        const type = element.getAttribute('drupalEntityEntityType');
+        const editUrl = Drupal.url(`entity-embed/edit-embedded/${type}/${uuid}`)
 
-      this.listenTo(button, 'execute', () => {
+        // Ping the edit url and disable the button if the user does not have
+        // access. Because this is async, there's a moment where the button is
+        // clickable even if they don't have access, but the destination will
+        // remain inaccessible.
+        fetch(editUrl)
+          .then((res) => {
+            if (!res.ok) {
+              buttonView.set({
+                label: Drupal.t(`You do not have the permissions needed to edit this ${type}.`),
+                isEnabled: false,
+              });
+            }
+          });
+
         window.open(editUrl, '_blank');
+
       });
 
-      return button;
+      return buttonView;
     });
   }
 

@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "أغلقت تظهر السفلية"
 	},
 	"cc-err": "خطأ في تحميل تعليق مغلق",
+	fs: "Enter full screen",
 	adesc: {
 		on: "تمكين الوصف السمعي",
 		off: "تعطيل الوصف السمعي"
 	},
 	pos: "الوظيفة الحالية:",
 	dur: "إجمالي الوقت:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "مشاركة",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

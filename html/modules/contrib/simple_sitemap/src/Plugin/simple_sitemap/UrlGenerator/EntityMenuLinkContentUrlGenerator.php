@@ -3,6 +3,7 @@
 namespace Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator;
 
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Menu\MenuLinkManagerInterface;
@@ -88,7 +89,7 @@ class EntityMenuLinkContentUrlGenerator extends EntityUrlGeneratorBase {
     EntityHelper $entity_helper,
     EntityManager $entities_manager,
     MenuLinkTreeInterface $menu_link_tree,
-    MenuLinkManagerInterface $menu_link_manager
+    MenuLinkManagerInterface $menu_link_manager,
   ) {
     parent::__construct(
       $configuration,
@@ -112,7 +113,8 @@ class EntityMenuLinkContentUrlGenerator extends EntityUrlGeneratorBase {
     ContainerInterface $container,
     array $configuration,
     $plugin_id,
-    $plugin_definition): SimpleSitemapPluginBase {
+    $plugin_definition,
+  ): SimpleSitemapPluginBase {
     return new static(
       $configuration,
       $plugin_id,
@@ -228,7 +230,7 @@ class EntityMenuLinkContentUrlGenerator extends EntityUrlGeneratorBase {
         : NULL,
       'priority' => $entity_settings['priority'] ?? NULL,
       'changefreq' => !empty($entity_settings['changefreq']) ? $entity_settings['changefreq'] : NULL,
-      'images' => !empty($entity_settings['include_images']) && !empty($entity)
+      'images' => !empty($entity_settings['include_images']) && !empty($entity) && $entity instanceof ContentEntityInterface
         ? $this->getEntityImageData($entity)
         : [],
 

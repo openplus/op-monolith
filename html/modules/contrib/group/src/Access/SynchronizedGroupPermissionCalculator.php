@@ -4,18 +4,15 @@ namespace Drupal\group\Access;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\group\GroupRoleSynchronizerInterface;
+use Drupal\flexible_permissions\CalculatedPermissionsItem;
+use Drupal\flexible_permissions\PermissionCalculatorBase;
+use Drupal\group\Entity\GroupRoleInterface;
+use Drupal\group\PermissionScopeInterface;
 
 /**
- * Calculates group permissions for an account.
+ * Calculates synchronized group permissions for an account.
  */
-class SynchronizedGroupPermissionCalculator extends GroupPermissionCalculatorBase {
-
-  /**
-   * The synchronized roles depend on which user roles you have, so we need to
-   * vary the calculated permissions by the user.roles cache context.
-   */
-  const OUTSIDER_CACHE_CONTEXTS = ['user.roles'];
+class SynchronizedGroupPermissionCalculator extends PermissionCalculatorBase {
 
   /**
    * The entity type manager.
@@ -25,61 +22,59 @@ class SynchronizedGroupPermissionCalculator extends GroupPermissionCalculatorBas
   protected $entityTypeManager;
 
   /**
-   * The group role synchronizer service.
-   *
-   * @var \Drupal\group\GroupRoleSynchronizerInterface
-   */
-  protected $groupRoleSynchronizer;
-
-  /**
    * Constructs a SynchronizedGroupPermissionCalculator object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\group\GroupRoleSynchronizerInterface $group_role_synchronizer
-   *   The group role synchronizer service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, GroupRoleSynchronizerInterface $group_role_synchronizer) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
-    $this->groupRoleSynchronizer = $group_role_synchronizer;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function calculateOutsiderPermissions(AccountInterface $account) {
-    $calculated_permissions = new RefinableCalculatedGroupPermissions();
-    $group_type_storage = $this->entityTypeManager->getStorage('group_type');
-    $group_role_storage = $this->entityTypeManager->getStorage('group_role');
-    $roles = $account->getRoles(TRUE);
+  public function calculatePermissions(AccountInterface $account, $scope) {
+    $calculated_permissions = parent::calculatePermissions($account, $scope);
 
-    foreach ($group_type_storage->getQuery()->accessCheck(FALSE)->execute() as $group_type_id) {
-      $permission_sets = [];
+    if ($scope !== PermissionScopeInterface::OUTSIDER_ID && $scope !== PermissionScopeInterface::INSIDER_ID) {
+      return $calculated_permissions;
+    }
 
-      $group_role_ids = [];
-      foreach ($roles as $role_id) {
-        $group_role_ids[] = $this->groupRoleSynchronizer->getGroupRoleId($group_type_id, $role_id);
-      }
+    // @todo Introduce config:group_role_list:scope:SCOPE cache tag.
+    // If a new group role is introduced, we need to recalculate the permissions
+    // for the provided scope.
+    $calculated_permissions->addCacheTags(['config:group_role_list']);
 
-      if (!empty($group_role_ids)) {
-        /** @var \Drupal\group\Entity\GroupRoleInterface $group_role */
-        foreach ($group_role_storage->loadMultiple($group_role_ids) as $group_role) {
-          $permission_sets[] = $group_role->getPermissions();
-          $calculated_permissions->addCacheableDependency($group_role);
-        }
-      }
+    $roles = $account->getRoles();
+    $group_roles = $this->entityTypeManager->getStorage('group_role')->loadByProperties([
+      'scope' => $scope,
+      'global_role' => $roles,
+    ]);
 
-      $permissions = $permission_sets ? array_merge(...$permission_sets) : [];
-      $item = new CalculatedGroupPermissionsItem(
-        CalculatedGroupPermissionsItemInterface::SCOPE_GROUP_TYPE,
-        $group_type_id,
-        $permissions
+    foreach ($group_roles as $group_role) {
+      assert($group_role instanceof GroupRoleInterface);
+      $item = new CalculatedPermissionsItem(
+        $group_role->getScope(),
+        $group_role->getGroupTypeId(),
+        $group_role->getPermissions(),
+        $group_role->isAdmin()
       );
-
       $calculated_permissions->addItem($item);
+      $calculated_permissions->addCacheableDependency($group_role);
     }
 
     return $calculated_permissions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPersistentCacheContexts($scope) {
+    if ($scope === PermissionScopeInterface::OUTSIDER_ID || $scope === PermissionScopeInterface::INSIDER_ID) {
+      return ['user.roles'];
+    }
+    return [];
   }
 
 }

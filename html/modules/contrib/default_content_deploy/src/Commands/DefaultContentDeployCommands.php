@@ -2,9 +2,14 @@
 
 namespace Drupal\default_content_deploy\Commands;
 
+use Consolidation\AnnotatedCommand\CommandData;
+use Drupal\Core\Session\AccountSwitcherInterface;
+use Drupal\default_content_deploy\AdministratorTrait;
 use Drupal\default_content_deploy\DeployManager;
 use Drupal\default_content_deploy\Exporter;
+use Drupal\default_content_deploy\ExporterInterface;
 use Drupal\default_content_deploy\Importer;
+use Drupal\default_content_deploy\ImporterInterface;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Helper\Table;
 
@@ -15,17 +20,19 @@ use Symfony\Component\Console\Helper\Table;
  */
 class DefaultContentDeployCommands extends DrushCommands {
 
+  use AdministratorTrait;
+
   /**
    * DCD Exporter.
    *
-   * @var \Drupal\default_content_deploy\Exporter
+   * @var ExporterInterface
    */
   private $exporter;
 
   /**
    * DCD Importer.
    *
-   * @var \Drupal\default_content_deploy\Importer
+   * @var ImporterInterface
    */
   private $importer;
 
@@ -37,19 +44,44 @@ class DefaultContentDeployCommands extends DrushCommands {
   protected $deployManager;
 
   /**
+   * The account switcher service.
+   *
+   * @var \Drupal\Core\Session\AccountSwitcherInterface
+   */
+  protected $accountSwitcher;
+
+  /**
    * DefaultContentDeployCommands constructor.
    *
-   * @param \Drupal\default_content_deploy\Exporter $exporter
+   * @param ExporterInterface $exporter
    *   DCD Exporter.
-   * @param \Drupal\default_content_deploy\Importer $importer
+   * @param ImporterInterface $importer
    *   DCD Importer.
    * @param \Drupal\default_content_deploy\DeployManager $deploy_manager
    *   DCD manager.
+   * @param \Drupal\Core\Session\AccountSwitcherInterface $account_switcher
+   *   The account switching service.
    */
-  public function __construct(Exporter $exporter, Importer $importer, DeployManager $deploy_manager) {
+  public function __construct(ExporterInterface $exporter, ImporterInterface $importer, DeployManager $deploy_manager, AccountSwitcherInterface $account_switcher) {
+    parent::__construct();
     $this->exporter = $exporter;
     $this->importer = $importer;
     $this->deployManager = $deploy_manager;
+    $this->accountSwitcher = $account_switcher;
+  }
+
+  /**
+   * @hook pre-command
+   */
+  public function preCommand(CommandData $commandData): void {
+    $this->accountSwitcher->switchTo($this->getAdministrator());
+  }
+
+  /**
+   * @hook post-command
+   */
+  public function postCommand($result, CommandData $commandData) {
+    $this->accountSwitcher->switchBack();
   }
 
   /**
@@ -64,18 +96,21 @@ class DefaultContentDeployCommands extends DrushCommands {
    *
    * @command default-content-deploy:export
    *
-   * @option entity_id The ID of the entity to export.
+   * @option entity_ids The IDs of the entities to export (comma-separated list).
    * @option bundle Write out the exported bundle of entity
    * @option skip_entities The ID of the entity to skip.
-   * @option force-update Deletes configurations files that are not used on the site.
+   * @option force-update Deletes configurations files that are not used on the
+   *   site.
    * @option folder Path to the export folder.
+   * @option changes-since Only export entities that have been changed since a
+   *   given date.
    * @usage drush dcde node
    *   Export all nodes
    * @usage drush dcde node --folder='../content'
    *   Export all nodes from the specified folder.
    * @usage drush dcde node --bundle=page
    *   Export all nodes with bundle page
-   * @usage drush dcde node --bundle=page,article --entity_id=2,3,4
+   * @usage drush dcde node --bundle=page,article --entity_ids=2,3,4
    *   Export all nodes with bundle page or article plus nodes with entities id
    *   2, 3 and 4.
    * @usage drush dcde node --bundle=page,article --skip_entities=5,7
@@ -86,42 +121,38 @@ class DefaultContentDeployCommands extends DrushCommands {
    * @aliases dcde,default-content-deploy-export
    *
    * @throws \Exception
-   *
    */
-  public function contentDeployExport($entity_type, array $options = ['entity_id' => NULL, 'bundle' => NULL, 'skip_entities' => NULL, 'force-update'=> FALSE, 'folder' => self::OPT]) {
-    try {
-      $entity_ids = $this->processingArrayOption($options['entity_id']);
-      $skip_ids = $this->processingArrayOption($options['skip_entities']);
+  public function contentDeployExport($entity_type, array $options = ['entity_ids' => NULL, 'bundle' => NULL, 'skip_entities' => NULL, 'force-update'=> FALSE, 'folder' => self::OPT, 'changes-since' => self::OPT]): void {
+    $this->exporter->setVerbose($this->output()->isVerbose());
 
-      $this->exporter->setEntityTypeId($entity_type);
-      $this->exporter->setEntityBundle($options['bundle']);
+    $entity_ids = $this->processingArrayOption($options['entity_ids']);
+    $skip_ids = $this->processingArrayOption($options['skip_entities']);
+    $skip_type_ids = $this->processingArrayOption($options['skip_entity_type']);
 
-      if (!empty($options['folder'])) {
-        $this->exporter->setFolder($options['folder']);
-      }
+    $this->exporter->setEntityTypeId($entity_type);
+    $this->exporter->setEntityBundle($options['bundle']);
 
-      $this->exporter->setMode('default');
-      $this->exporter->setForceUpdate($options['force-update']);
-
-      if ($entity_ids) {
-        $this->exporter->setEntityIds($entity_ids);
-      }
-
-      if ($skip_ids) {
-        $this->exporter->setSkipEntityIds($skip_ids);
-      }
-
-      $result = $this->exporter->export()->getResult();
-      $this->displayExportResult($result);
+    if (!empty($options['folder'])) {
+      $this->exporter->setFolder($options['folder']);
     }
-    catch (\InvalidArgumentException $e) {
-      $content_entity_list = $this->getAvailableEntityTypes();
 
-      $this->logger->error($e->getMessage());
-      $this->logger->notice(dt('List of available content entity types:@types', [
-        '@types' => PHP_EOL . $content_entity_list,
-      ]));
+    $this->exporter->setMode('default');
+    $this->exporter->setForceUpdate($options['force-update']);
+
+    if ($entity_ids) {
+      $this->exporter->setEntityIds($entity_ids);
     }
+
+    if ($skip_ids) {
+      $this->exporter->setSkipEntityIds($skip_ids);
+    }
+
+    if (!empty($options['changes-since'])) {
+      $this->exporter->setDateTime(new \DateTime($options['changes-since']));
+    }
+
+    $this->exporter->export();
+    drush_backend_batch_process();
   }
 
   /**
@@ -136,19 +167,24 @@ class DefaultContentDeployCommands extends DrushCommands {
    *
    * @command default-content-deploy:export-with-references
    *
-   * @option entity_id The ID of the entity to export.
+   * @option entity_ids The IDs of the entities to export (comma-separated list).
    * @option bundle Write out the exported bundle of entity
    * @option skip_entities The ID of the entity to skip.
-   * @option force-update Deletes configurations files that are not used on the site.
+   * @option force-update Deletes configurations files that are not used on the
+   *   site.
    * @option folder Path to the export folder.
-   * @option text_dependencies Whether or not to include processed text dependencies.
+   * @option text_dependencies Whether to include processed text dependencies.
+   * @option skip_entity_type The referenced entity types to skip.
+   *   Use 'drush dcd-entity-list' for list of all content entities.
+   * @option changes-since Only export entities that have been changed since a
+   *   given date.
    * @usage drush dcder node
    *   Export all nodes with references
    * @usage drush dcder node  --folder='../content'
    *   Export all nodes with references from the specified folder.
    * @usage drush dcder node --bundle=page
    *   Export all nodes with references with bundle page
-   * @usage drush dcder node --bundle=page,article --entity_id=2,3,4
+   * @usage drush dcder node --bundle=page,article --entity_ids=2,3,4
    *   Export all nodes with references with bundle page or article plus nodes
    *   with entitiy id 2, 3 and 4.
    * @usage drush dcder node --bundle=page,article --skip_entities=5,7
@@ -162,49 +198,50 @@ class DefaultContentDeployCommands extends DrushCommands {
    *
    * @throws \Exception
    */
-  public function contentDeployExportWithReferences($entity_type, array $options = ['entity_id' => NULL, 'bundle' => NULL, 'skip_entities' => NULL, 'force-update'=> FALSE, 'folder' => self::OPT, 'text_dependencies' => NULL]) {
-    try {
-      $entity_ids = $this->processingArrayOption($options['entity_id']);
-      $skip_ids = $this->processingArrayOption($options['skip_entities']);
+  public function contentDeployExportWithReferences($entity_type, array $options = ['entity_ids' => NULL, 'bundle' => NULL, 'skip_entities' => NULL, 'skip_entity_type' => NULL, 'force-update'=> FALSE, 'folder' => self::OPT, 'text_dependencies' => NULL, 'changes-since' => self::OPT]): void {
+    $this->exporter->setVerbose($this->output()->isVerbose());
 
-      $this->exporter->setEntityTypeId($entity_type);
-      $this->exporter->setEntityBundle($options['bundle']);
+    $entity_ids = $this->processingArrayOption($options['entity_ids']);
+    $skip_ids = $this->processingArrayOption($options['skip_entities']);
+    $skip_type_ids = $this->processingArrayOption($options['skip_entity_type']);
 
-      if (!empty($options['folder'])) {
-        $this->exporter->setFolder($options['folder']);
-      }
+    $this->exporter->setEntityTypeId($entity_type);
+    $this->exporter->setEntityBundle($options['bundle']);
 
-      // Set text_dependencies option.
-      $text_dependencies = $options['text_dependencies'];
-
-      if (!is_null($text_dependencies)) {
-        $text_dependencies = filter_var($text_dependencies, FILTER_VALIDATE_BOOLEAN);
-      }
-
-      $this->exporter->setTextDependencies($text_dependencies);
-
-      $this->exporter->setMode('reference');
-      $this->exporter->setForceUpdate($options['force-update']);
-
-      if ($entity_ids) {
-        $this->exporter->setEntityIds($entity_ids);
-      }
-
-      if ($skip_ids) {
-        $this->exporter->setSkipEntityIds($skip_ids);
-      }
-
-      $result = $this->exporter->export()->getResult();
-      $this->displayExportResult($result);
+    if (!empty($options['folder'])) {
+      $this->exporter->setFolder($options['folder']);
     }
-    catch (\InvalidArgumentException $e) {
-      $content_entity_list = $this->getAvailableEntityTypes();
 
-      $this->logger->error($e->getMessage());
-      $this->logger->notice(dt('List of available content entity types:@types', [
-        '@types' => PHP_EOL . $content_entity_list,
-      ]));
+    // Set text_dependencies option.
+    $text_dependencies = $options['text_dependencies'];
+
+    if (!is_null($text_dependencies)) {
+      $text_dependencies = filter_var($text_dependencies, FILTER_VALIDATE_BOOLEAN);
     }
+
+    $this->exporter->setTextDependencies($text_dependencies);
+
+    $this->exporter->setMode('reference');
+    $this->exporter->setForceUpdate($options['force-update']);
+
+    if ($entity_ids) {
+      $this->exporter->setEntityIds($entity_ids);
+    }
+
+    if ($skip_ids) {
+      $this->exporter->setSkipEntityIds($skip_ids);
+    }
+
+    if ($skip_type_ids) {
+      $this->exporter->setSkipEntityTypeIds($skip_type_ids);
+    }
+
+    if (!empty($options['changes-since'])) {
+      $this->exporter->setDateTime(new \DateTime($options['changes-since']));
+    }
+
+    $this->exporter->export();
+    drush_backend_batch_process();
   }
 
   /**
@@ -223,11 +260,13 @@ class DefaultContentDeployCommands extends DrushCommands {
    *
    * @option add_entity_type DEPRECATED. Will be removed in beta. The dcdes
    *   command exports all entity types.
-   * @option force-update Deletes configurations files that are not used on the site.
+   * @option force-update Deletes configurations files that are not used on the
+   *   site.
    * @option folder Path to the export folder.
    * @option skip_entity_type The entity types to skip.
    *   Use 'drush dcd-entity-list' for list of all content entities.
-   * @option changes-since Only export entities that have been changed since a given date.
+   * @option changes-since Only export entities that have been changed since a
+   *   given date.
    * @usage drush dcdes
    *   Export complete website.
    * @usage drush dcdes --folder='../content'
@@ -240,8 +279,10 @@ class DefaultContentDeployCommands extends DrushCommands {
    *
    * @throws \Exception
    */
-  public function contentDeployExportSite(array $options = ['skip_entity_type' => NULL, 'force-update'=> FALSE, 'folder' => self::OPT, 'changes-since' => self::OPT]) {
-    $skip_ids = $this->processingArrayOption($options['skip_entity_type']);
+  public function contentDeployExportSite(array $options = ['skip_entity_type' => NULL, 'force-update'=> FALSE, 'folder' => self::OPT, 'changes-since' => self::OPT]): void {
+    $this->exporter->setVerbose($this->output()->isVerbose());
+
+    $skip_type_ids = $this->processingArrayOption($options['skip_entity_type']);
 
     if (!empty($options['folder'])) {
       $this->exporter->setFolder($options['folder']);
@@ -254,12 +295,12 @@ class DefaultContentDeployCommands extends DrushCommands {
     $this->exporter->setMode('all');
     $this->exporter->setForceUpdate($options['force-update']);
 
-    if ($skip_ids) {
-      $this->exporter->setSkipEntityIds($skip_ids);
+    if ($skip_type_ids) {
+      $this->exporter->setSkipEntityTypeIds($skip_type_ids);
     }
 
-    $result = $this->exporter->export()->getResult();
-    $this->displayExportResult($result);
+    $this->exporter->export();
+    drush_backend_batch_process();
   }
 
   /**
@@ -274,8 +315,10 @@ class DefaultContentDeployCommands extends DrushCommands {
    * @option force-override
    *   All existing content will be overridden to the state
    *   defined in a content directory.
-   * @option preserve-password
-   *   Preserve existing user password.
+   * @option folder Path to the export folder.
+   * @option preserve-ids
+   *   Skip correction of IDs of referenced entities. You must be sure that
+   *   there are no conflicts with existing entities.
    * @usage drush dcdi
    *   Import content. Existing older content with matching UUID will be
    *   updated. Newer content and existing content with different UUID will be
@@ -283,8 +326,8 @@ class DefaultContentDeployCommands extends DrushCommands {
    * @usage drush dcdi --folder='../content'
    *   Import content from the specified folder.
    * @usage drush dcdi --force-override
-   *   All existing content will be overridden (locally updated default content
-   *   will be reverted to the state defined in a content directory).
+   *   All existing content will be overridden (locally updated content will be
+   *   reverted to the state defined in a content directory).
    * @usage drush dcdi --verbose
    *   Print detailed information about importing entities.
    * @aliases dcdi,default-content-deploy-import
@@ -293,7 +336,9 @@ class DefaultContentDeployCommands extends DrushCommands {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function contentDeployImport(array $options = ['force-override' => FALSE, 'folder' => self::OPT]) {
+  public function contentDeployImport(array $options = ['force-override' => FALSE, 'folder' => self::OPT, 'preserve-ids' => FALSE, 'incremental' => FALSE]): void {
+    $this->importer->setVerbose($this->output()->isVerbose());
+
     // Perform read only update.
     $this->importer->setForceOverride($options['force-override']);
 
@@ -301,8 +346,32 @@ class DefaultContentDeployCommands extends DrushCommands {
       $this->importer->setFolder($options['folder']);
     }
 
-    if ($this->io()->confirm(dt('Do you really want to continue?'))) {
+    $this->importer->setPreserveIds($options['preserve-ids']);
+
+    $this->importer->setIncremental($options['incremental']);
+
+    $this->importer->prepareForImport();
+
+    $result = $this->importer->getResult();
+
+    if ($this->output()->isVerbose()) {
+      $table = new Table($this->output());
+      $table->setHeaders(['Entity Type', 'UUID']);
+      foreach ($result as $uuid => $file) {
+        $table->addRow([$file->entity_type_id, $uuid]);
+      }
+      $table->render();
+    }
+
+    $count = count($result);
+    $this->output()->writeln(dt('Content entities to be imported: @count', [
+      '@count' => $count,
+    ]));
+
+    if ($count && $this->io()->confirm(dt('Do you really want to continue?'))) {
       $this->importer->import();
+      drush_backend_batch_process();
+      $this->io()->success(dt('Content has been imported.'));
     }
   }
 
@@ -355,21 +424,6 @@ class DefaultContentDeployCommands extends DrushCommands {
         '@entity_type' => $entity_type,
       ]));
     }
-  }
-
-  /**
-   * Is update or create not exist.
-   *
-   * @return bool
-   */
-  private function isAllSkip() {
-    $result = $this->importer->getResult();
-    $array_column = array_column($result, 'status');
-    $count = array_count_values($array_column);
-    $create_count =  isset($count['create']) ? $count['create'] : 0;
-    $update_count = isset($count['update']) ? $count['update'] : 0;
-
-    return ($create_count == 0 && $update_count == 0);
   }
 
   /**

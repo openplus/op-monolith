@@ -1,0 +1,5 @@
+admin.content_templates:
+  version: 20240325
+  css:
+    theme:
+      css/content-templates.admin.css: { }

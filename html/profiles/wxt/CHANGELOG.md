@@ -1,6 +1,160 @@
 # CHANGELOG
 
-## v5.2.0 (In Development)
+## v5.2.4 (In Development)
+
+- Build Infrastructure
+  - N/A
+- Security Updates for Drupal Core
+  - N/A
+- Updates for Drupal Core
+  - N/A
+- Updates for Drupal Contrib + WxT
+  - N/A
+- Updated for WxT Bootstrap
+  - N/A
+- Updates for WxT Library
+  - N/A
+
+Upgrade path:
+
+> **Important**: Please backup your database before running the upgrade process for this release.
+
+- Update your codebase:
+  - `composer update`
+
+- Run database updates:
+  - `drush cache:rebuild`
+  - `drush updatedb`
+
+- Run WxT configuration updates:
+  - `drush cache:rebuild`
+  - `drush update:wxt`
+
+**Note(s)**:
+
+N/A
+
+## v5.2.3
+
+- Build Infrastructure
+  - N/A
+- Security Updates for Drupal Core
+  - N/A
+- Updates for Drupal Core
+    Patch (bugfix) release of Drupal Core to `v10.2.7`
+- Updates for Drupal Contrib + WxT
+  - wxt_ext_layout deprecations in Panels 4.8 [3457046](https://www.drupal.org/node/3457046)
+  - LB inline blocks are no longer translatable [3456872](https://www.drupal.org/node/3456872)
+  - Layout Builder ST not listed in modules list [3456863](https://www.drupal.org/node/3456863)
+  - PHP deprecation issues with AutoSaveFormBuilder [3444515](https://www.drupal.org/node/3444515)
+  - Split contextual footer menu migration [3456754](https://www.drupal.org/node/3456754)
+  - Update file_entity in composer.json [3445800](https://www.drupal.org/node/3445800)
+  - SKAUGHT: Security advisory for group module [3406903](https://www.drupal.org/node/3406903)
+- Updated for WxT Bootstrap
+  - Use Bootstrap to v3.31
+  - Use content language for footer menu visibility conditions [3456827](https://www.drupal.org/node/3456827)
+- Updates for WxT Library
+  - Add latest releases of wet-boew and gcweb (v4.0.75 and v14.6.0)
+
+Upgrade path:
+
+> **Important**: Please backup your database before running the upgrade process for this release.
+
+- Update your codebase:
+  - `composer update`
+
+- Run database updates:
+  - `drush cache:rebuild`
+  - `drush updatedb`
+
+- Run WxT configuration updates:
+  - `drush cache:rebuild`
+  - `drush update:wxt`
+
+**Note(s)**:
+
+The Group module has been updated to the 2.2.x branch as an intermediate step required to get to the recommended 3.2.x branch.
+
+## v5.2.2
+
+- Build Infrastructure
+  - N/A
+- Security Updates for Drupal Core
+  - N/A
+- Updates for Drupal Core
+    Patch (bugfix) release of Drupal Core to `v10.2.5`
+- Updates for Drupal Contrib + WxT
+  - N/A
+- Updated for WxT Bootstrap
+  - Make gc-thickline default for H1  [3403484](https://www.drupal.org/node/3403484)
+  - Fix for duplicate footer in update GCWeb theme [3436553](https://www.drupal.org/node/3436553)
+- Updates for WxT Library
+  - Add latest releases of wet-boew and gcweb [3422762](https://www.drupal.org/node/3422762)
+  - WxT Library (language block) warning when viewing the latest version node page in some cases [3403484](https://www.drupal.org/node/3403484)
+
+Upgrade path:
+
+> **Important**: Please backup your database before running the upgrade process for this release.
+
+- Update your codebase:
+  - `composer update`
+
+- Run database updates:
+  - `drush cache:rebuild`
+  - `drush updatedb`
+
+- Run WxT configuration updates:
+  - `drush cache:rebuild`
+  - `drush update:wxt`
+
+**Note(s)**:
+
+The Group module has been downgraded to the 8.x-1.6 release + alongside the flexible permissions module which has been added.
+
+This is needed for an immediate upgrade path for groups and the next release will have groups using again the 2.2.x branch.
+
+## v5.2.1
+
+- Build Infrastructure
+  - N/A
+- Security Updates for Drupal Core
+  - N/A
+- Updates for Drupal Core
+    Patch (bugfix) release of Drupal Core to `v10.2.3`
+- Updates for Drupal Contrib + WxT
+  - Deprecated function: str_contains(): Passing null to parameter #1 [3415945](https://www.drupal.org/node/3415945)
+  - Security advisory for group module [3406903](https://www.drupal.org/node/3406903
+  - Allow setting GC Adobe Analytics metatag attributes [3415924](https://www.drupal.org/node/3415924)
+  - Patch for 3107212 no longer applies in 5.2.0 [3418450](https://www.drupal.org/node/3418450)
+  - Patch identified as "Temporary" has been in use for approximately 6 years [3421777](https://www.drupal.org/node/3421777)
+  - Remove unnecessary usort patch from WxT build [3421776](https://www.drupal.org/node/3421776)
+- Updated for WxT Bootstrap
+  - Starterkit fixes and add some README.md instructions [3420710](https://www.drupal.org/node/3420710)
+  - Lead title styling still displays even if field is empty [3420910](https://www.drupal.org/node/3420910)
+  - Menu Block doesn't reflect expand state correctly [3419328](https://www.drupal.org/node/3419328)
+- Updates for WxT Library
+  - SearchApiBlockForm missing title [3418164](https://www.drupal.org/node/3418164)
+
+Upgrade path:
+
+> **Important**: Please backup your database before running the upgrade process for this release.
+
+- Update your codebase:
+  - `composer update`
+
+- Run database updates:
+  - `drush cache:rebuild`
+  - `drush updatedb`
+
+- Run WxT configuration updates:
+  - `drush cache:rebuild`
+  - `drush update:wxt`
+
+**Note(s)**:
+
+The Group module has been updated to the 2.2.x branch as an intermediate step required to get to the recommended 3.2.x branch.
+
+## v5.2.0
 
 - Build Infrastructure
   - N/A

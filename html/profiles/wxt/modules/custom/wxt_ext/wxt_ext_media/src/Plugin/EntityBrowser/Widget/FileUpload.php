@@ -5,10 +5,10 @@ namespace Drupal\wxt_ext_media\Plugin\EntityBrowser\Widget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Plugin\Field\FieldType\FileItem;
 use Drupal\image\Plugin\Field\FieldType\ImageItem;
-use Drupal\wxt_ext_media\Element\AjaxUpload;
-use Drupal\wxt_ext_media\MediaHelper;
 use Drupal\media\MediaInterface;
 use Drupal\media\MediaTypeInterface;
+use Drupal\wxt_ext_media\Element\AjaxUpload;
+use Drupal\wxt_ext_media\MediaHelper;
 
 /**
  * An Entity Browser widget for creating media entities from uploaded files.
@@ -171,7 +171,9 @@ class FileUpload extends EntityFormProxy {
         ];
       }
     }
-    return file_validate($item->entity, $validators);
+
+    $file_validator = \Drupal::service('file.validator');
+    return $file_validator->file_validate($item->entity, $validators);
   }
 
   /**

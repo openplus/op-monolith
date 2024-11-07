@@ -2,9 +2,9 @@
 
 namespace Drupal\diff\Plugin\diff\Field;
 
-use Drupal\diff\FieldDiffBuilderBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\diff\FieldDiffBuilderBase;
 
 /**
  * Plugin to diff text fields.
@@ -25,7 +25,7 @@ class TextFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function build(FieldItemListInterface $field_items) {
-    $result = array();
+    $result = [];
     // Every item from $field_items is of type FieldItemInterface.
     foreach ($field_items as $field_key => $field_item) {
       $values = $field_item->getValue();
@@ -40,7 +40,7 @@ class TextFieldBuilder extends FieldDiffBuilderBase {
             $result[$field_key][] = $label . ": " . $format->label();
           }
           else {
-            $result[$field_key][] = $label . ": " . $this->t('Missing format @format', array('@format' => $values[$field_key]));
+            $result[$field_key][] = $label . ": " . $this->t('Missing format @format', ['@format' => $values[$field_key]]);
           }
         }
       }
@@ -69,12 +69,12 @@ class TextFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['compare_format'] = array(
+    $form['compare_format'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Compare format'),
       '#default_value' => $this->configuration['compare_format'],
       '#description' => $this->t('This is only used if the "Text processing" instance settings are set to <em>Filtered text (user selects text format)</em>.'),
-    );
+    ];
 
     return parent::buildConfigurationForm($form, $form_state);
   }
@@ -92,9 +92,9 @@ class TextFieldBuilder extends FieldDiffBuilderBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    $default_configuration = array(
+    $default_configuration = [
       'compare_format' => 0,
-    );
+    ];
     $default_configuration += parent::defaultConfiguration();
 
     return $default_configuration;

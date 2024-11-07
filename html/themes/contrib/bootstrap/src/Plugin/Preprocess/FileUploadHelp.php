@@ -41,19 +41,54 @@ class FileUploadHelp extends PreprocessBase implements PreprocessInterface {
     }
 
     $upload_validators = $variables['upload_validators'];
-    if (isset($upload_validators['file_validate_size'])) {
-      $descriptions[] = t('@size limit.', ['@size' => format_size($upload_validators['file_validate_size'][0])]);
+    $unformatted_size = NULL;
+    if (isset($upload_validators['FileSizeLimit'])) {
+      $unformatted_size = $upload_validators['FileSizeLimit']['fileLimit'];
     }
-    if (isset($upload_validators['file_validate_extensions'])) {
-      $extensions = new FormattableMarkup('<code>@extensions</code>', [
-        '@extensions' => implode(', ', explode(' ', $upload_validators['file_validate_extensions'][0])),
+    // @todo The following condition maintains backward compatibility for
+    // versions of Drupal Core older than 10.2.0. Remove it when 10.1.x becomes
+    // unsupported.
+    elseif (isset($upload_validators['file_validate_size'])) {
+      $unformatted_size = $upload_validators['file_validate_size'][0];
+    }
+    if ($unformatted_size) {
+      $descriptions[] = t('@size limit.', [
+        '@size' => format_size($unformatted_size),
       ]);
-      $descriptions[] = t('Allowed types: @extensions.', ['@extensions' => $extensions]);
+    }
+    $unformatted_extensions = NULL;
+    if (isset($upload_validators['FileExtension'])) {
+      $unformatted_extensions = $upload_validators['FileExtension']['extensions'];
+    }
+    // @todo The following condition maintains backward compatibility for
+    // versions of Drupal Core older than 10.2.0. Remove it when 10.1.x becomes
+    // unsupported.
+    elseif (isset($upload_validators['file_validate_extensions'])) {
+      $unformatted_extensions = $upload_validators['file_validate_extensions'][0];
+    }
+    if ($unformatted_extensions) {
+      $extensions = new FormattableMarkup('<code>@extensions</code>', [
+        '@extensions' => implode(', ', explode(' ', $unformatted_extensions)),
+      ]);
+      $descriptions[] = t('Allowed types: @extensions.', [
+        '@extensions' => $extensions,
+      ]);
     }
 
-    if (isset($upload_validators['file_validate_image_resolution'])) {
+    $max = NULL;
+    $min = NULL;
+    if (isset($upload_validators['FileImageDimensions'])) {
+      $max = $upload_validators['FileImageDimensions']['maxDimensions'];
+      $min = $upload_validators['FileImageDimensions']['minDimensions'];
+    }
+    // @todo The following condition maintains backward compatibility for
+    // versions of Drupal Core older than 10.2.0. Remove it when 10.1.x becomes
+    // unsupported.
+    elseif (isset($upload_validators['file_validate_image_resolution'])) {
       $max = $upload_validators['file_validate_image_resolution'][0];
       $min = $upload_validators['file_validate_image_resolution'][1];
+    }
+    if ($max || $min) {
       if ($min && $max && $min == $max) {
         $descriptions[] = t('Images must be exactly <strong>@size</strong> pixels.', ['@size' => $max]);
       }

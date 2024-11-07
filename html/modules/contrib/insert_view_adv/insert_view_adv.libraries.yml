@@ -11,3 +11,8 @@ ckeditor5:
   css:
     theme:
       css/insert_view_adv.ckeditor5.css: {  }
+
+admin:
+  css:
+    theme:
+      css/insert_view_adv.ckeditor5.css: {  }

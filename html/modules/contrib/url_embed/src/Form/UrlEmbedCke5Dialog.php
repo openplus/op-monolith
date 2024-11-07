@@ -7,12 +7,14 @@
 
 namespace Drupal\url_embed\Form;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Utility\Error;
 use Drupal\editor\Ajax\EditorDialogSave;
 use Drupal\editor\EditorInterface;
 use Drupal\url_embed\UrlEmbedHelperTrait;
@@ -72,7 +74,7 @@ class UrlEmbedCke5Dialog extends FormBase {
    * @param \Drupal\editor\EditorInterface $editor
    *   The editor to which this dialog corresponds.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, EditorInterface $editor = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, EditorInterface|null $editor = NULL) {
     $values = $form_state->getValues();
     $input = $form_state->getUserInput();
     // Populate value from existing CKEditor attribute.
@@ -89,10 +91,10 @@ class UrlEmbedCke5Dialog extends FormBase {
       $form_state->set('url_element', isset($input['editor_object']) ? $input['editor_object'] : array());
     }
     $url_element += $form_state->get('url_element');
-    $url_element += array(
+    $url_element += [
       'data-embed-url' => $url,
       'data-url-provider' => '',
-    );
+    ];
     $form_state->set('url_element', $url_element);
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'editor/drupal.editor.dialog';
@@ -110,7 +112,7 @@ class UrlEmbedCke5Dialog extends FormBase {
       }
     }
     catch (\Exception $e) {
-      watchdog_exception('url_embed', $e);
+      DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.1.0', fn() => Error::logException(\Drupal::logger('url_embed'), $e), fn() => watchdog_exception('url_embed', $e));
     }
     $form['attributes']['data-url-provider'] = array(
       '#type' => 'value',

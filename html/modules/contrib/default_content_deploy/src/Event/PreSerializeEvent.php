@@ -2,51 +2,50 @@
 
 namespace Drupal\default_content_deploy\Event;
 
-use Drupal\Component\EventDispatcher\Event;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
  * PreSerializeEvent.
  */
-class PreSerializeEvent extends Event {
+class PreSerializeEvent extends IndexAwareEvent {
 
-  /**
-   * @var \Drupal\Core\Entity\ContentEntityInterface
-   */
-  protected $entity;
-
-  /**
-   * @var string
-   */
-  protected $mode;
+  protected ?ContentEntityInterface $entity = NULL;
+  protected string $mode;
+  protected string $folder;
 
   /**
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    * @param string $mode
    */
-  public function __construct(ContentEntityInterface $entity, $mode) {
+  public function __construct(ContentEntityInterface $entity, string $mode, string $folder) {
     $this->entity = $entity;
     $this->mode = $mode;
+    $this->folder = $folder;
   }
 
   /**
    * @return \Drupal\Core\Entity\ContentEntityInterface|null
    */
-  public function getEntity() {
+  public function getEntity(): ?ContentEntityInterface {
     return $this->entity;
   }
 
   /**
    * @param \Drupal\Core\Entity\ContentEntityInterface|null $entity
    */
-  public function setEntity($entity = NULL) {
+  public function setEntity(?ContentEntityInterface $entity = NULL): void {
     $this->entity = $entity;
   }
 
-  /**
-   * @return string
-   */
-  public function getMode() {
+  public function unsetEntity(): void {
+    $this->setEntity();
+  }
+
+  public function getMode(): string {
     return $this->mode;
+  }
+
+  public function getFolder(): string {
+    return $this->folder;
   }
 }

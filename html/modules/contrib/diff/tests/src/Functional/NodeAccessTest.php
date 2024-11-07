@@ -39,7 +39,7 @@ class NodeAccessTest extends BrowserTestBase {
   /**
    * Tests that the revision overview form still works with node access.
    */
-  public function testOverview() {
+  public function testOverview(): void {
     // Create an unpublished node with 3 revisions.
     $node = $this->createNode([
       'type' => 'article',
@@ -68,7 +68,7 @@ class NodeAccessTest extends BrowserTestBase {
     $this->assertCount(3, $rows, 'Did not find 3 diff rows.');
 
     // Compare selected revisions should not time out.
-    $this->drupalGet('/node/' . $node->id(). '/revisions');
+    $this->drupalGet('/node/' . $node->id() . '/revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->statusCodeEquals(200);
   }

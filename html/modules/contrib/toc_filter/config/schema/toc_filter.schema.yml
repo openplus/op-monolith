@@ -1,0 +1,11 @@
+filter_settings.toc_filter:
+  type: mapping
+  mapping:
+    type:
+      type: string
+    auto:
+      type: string
+    block:
+      type: boolean
+    exclude_above:
+      type: boolean

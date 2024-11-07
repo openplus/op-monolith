@@ -78,10 +78,7 @@ class Thumbnail {
       ?: $settings['thumbnail_style'] ?? $blazies->get('thumbnail.fallback');
 
     // @todo remove if against previous convention with core thumbnail fallback.
-    // We are here from Views style which may set just thumbnail.uri without
-    // thumbnail_style, unlike field formatters which set thumbnail_style,
-    // hardly thumbnail URI. Shortly, Views style offers Thumbnail image,
-    // field formatters Thumbnail style.
+    // Thumbnail URI may be provided via Views style, but not thumbnail_style.
     if (!$style && !$tn_uri) {
       return [];
     }
@@ -103,6 +100,7 @@ class Thumbnail {
     // sure no unknown edge cases get in the way.
     $alt = $blazies->get('image.alt');
     $alt = $alt ? Attributes::escape($alt) : t('Thumbnail');
+    $delta = $blazies->get('thumbnail.lazy_delta', 4);
 
     $content = [
       '#theme'      => $unstyled ? 'image' : 'image_style',
@@ -110,6 +108,10 @@ class Thumbnail {
       '#uri'        => $valid ? $uri : UrlHelper::stripDangerousProtocols($uri),
       '#item'       => $item,
       '#alt'        => $alt,
+      '#attributes' => [
+        'decoding' => 'async',
+        'loading'  => $blazies->get('delta', 0) < $delta ? 'eager' : 'lazy',
+      ],
     ];
 
     return Internals::toHtml($content, 'div', $class);

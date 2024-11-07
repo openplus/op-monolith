@@ -10,6 +10,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RedirectDestinationInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\group\Entity\GroupInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -122,7 +123,7 @@ class GroupListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /** @var \Drupal\group\Entity\GroupInterface $entity */
+    assert($entity instanceof GroupInterface);
     $row['id'] = $entity->id();
     // EntityListBuilder sets the table rows using the #rows property, so we
     // need to add the render array using the 'data' key.
@@ -164,9 +165,9 @@ class GroupListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   protected function getDefaultOperations(EntityInterface $entity) {
+    assert($entity instanceof GroupInterface);
     $operations = parent::getDefaultOperations($entity);
 
-    /** @var \Drupal\group\Entity\GroupInterface $entity */
     if ($this->moduleHandler->moduleExists('views') && $entity->hasPermission('administer members', $this->currentUser)) {
       if ($this->router->getRouteCollection()->get('view.group_members.page_1') !== NULL) {
         $operations['members'] = [

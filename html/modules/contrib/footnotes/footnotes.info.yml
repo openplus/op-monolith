@@ -1,13 +1,13 @@
 name: Footnotes
 description: 'Add automatically numbered footnotes to your posts.'
 type: module
-core_version_requirement: ^8 || ^9 || ^10
+core_version_requirement: ^10 | ^11
 dependencies:
-  - 'fakeobjects:fakeobjects'
-test_dependencies:
-  - 'fakeobjects:fakeobjects'
+  - drupal:media
+  - drupal:ckeditor5
+  - drupal:editor
 
-# Information added by Drupal.org packaging script on 2023-08-11
-version: '3.1.0'
+# Information added by Drupal.org packaging script on 2024-07-23
+version: '4.0.0-beta5'
 project: 'footnotes'
-datestamp: 1691752663
+datestamp: 1721752684

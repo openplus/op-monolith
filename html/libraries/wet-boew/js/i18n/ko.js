@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "쇼는 캡션 휴무"
 	},
 	"cc-err": "로드하는 중 오류가 발생 자막",
+	fs: "Enter full screen",
 	adesc: {
 		on: "오디오 설명을 사용",
 		off: "오디오 설명을 해제합니다"
 	},
 	pos: "현재 위치 :",
 	dur: "총 시간",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "공유",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

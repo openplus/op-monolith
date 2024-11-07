@@ -28,6 +28,11 @@ function _ckeditor_codemirror_get_library_path(string $library): bool|string {
  */
 function _ckeditor_codemirror_get_library_version(string $library): string {
   $library_path = _ckeditor_codemirror_get_library_path($library);
-  $data = json_decode(file_get_contents("$library_path/package.json"));
-  return $data?->version ?? '';
+
+  if (file_exists("$library_path/package.json")) {
+    $data = json_decode(file_get_contents("$library_path/package.json"));
+    return $data?->version ?? '';
+  }
+
+  return '';
 }

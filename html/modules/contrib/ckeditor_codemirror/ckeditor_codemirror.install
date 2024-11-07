@@ -17,7 +17,7 @@ function ckeditor_codemirror_requirements($phase): array {
 
   // Check for CodeMirror library.
   $library_path = _ckeditor_codemirror_get_library_path('codemirror');
-  if (file_exists("/$library_path/lib/codemirror.js") && file_exists("/$library_path/package.json")) {
+  if (file_exists("/$library_path/lib/codemirror.js")) {
     $return['codemirror_library'] = [
       'title' => t('CodeMirror'),
       'severity' => REQUIREMENT_OK,
@@ -40,7 +40,7 @@ function ckeditor_codemirror_requirements($phase): array {
 
   // Check for CKEditor 5 CodeMirror plugin library.
   $library_path = _ckeditor_codemirror_get_library_path('ckeditor5-source-editing-codemirror');
-  if (file_exists("/$library_path/build/source-editing-codemirror.js") && file_exists("/$library_path/package.json")) {
+  if (file_exists("/$library_path/build/source-editing-codemirror.js")) {
     $return['ckeditor5_source_editing_codemirror_library'] = [
       'title' => t('CKEditor 5 CodeMirror plugin'),
       'severity' => REQUIREMENT_OK,

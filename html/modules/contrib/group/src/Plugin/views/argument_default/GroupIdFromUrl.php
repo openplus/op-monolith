@@ -4,6 +4,7 @@ namespace Drupal\group\Plugin\views\argument_default;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\views\Plugin\views\argument_default\ArgumentDefaultPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -40,9 +41,9 @@ class GroupIdFromUrl extends ArgumentDefaultPluginBase implements CacheableDepen
   public function __construct(array $configuration, $plugin_id, $plugin_definition, ContextProviderInterface $context_provider) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
-    /** @var \Drupal\Core\Plugin\Context\ContextInterface[] $contexts */
-    $contexts = $context_provider->getRuntimeContexts(['group']);
-    $this->group = $contexts['group']->getContextValue();
+    $context = $context_provider->getRuntimeContexts(['group'])['group'];
+    assert($context instanceof ContextInterface);
+    $this->group = $context->getContextValue();
   }
 
   /**

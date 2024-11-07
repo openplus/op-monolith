@@ -3,6 +3,7 @@
 namespace Drupal\Tests\diff\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use Drupal\user\Entity\User;
 
 /**
  * Base class for Diff web tests.
@@ -71,7 +72,7 @@ abstract class DiffTestBase extends BrowserTestBase {
    * @return \Drupal\user\Entity\User|false
    *   Newly created and logged in user object.
    */
-  protected function loginAsAdmin(array $additional_permissions = [], $reset_permissions = FALSE) {
+  protected function loginAsAdmin(array $additional_permissions = [], bool $reset_permissions = FALSE): User|false {
     $permissions = $this->adminPermissions;
 
     if ($reset_permissions) {

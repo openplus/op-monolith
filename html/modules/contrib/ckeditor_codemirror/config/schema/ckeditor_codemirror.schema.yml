@@ -1,5 +1,5 @@
 ckeditor5.plugin.ckeditor_codemirror_source_editing:
-  type: config_object
+  type: mapping
   label: 'CodeMirror Code Editor settings'
   mapping:
     enable:
@@ -9,7 +9,7 @@ ckeditor5.plugin.ckeditor_codemirror_source_editing:
       type: string
       label: 'Mode'
     options:
-      type: config_object
+      type: mapping
       label: 'CodeMirror options'
       mapping:
         autoCloseBrackets:

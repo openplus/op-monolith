@@ -120,8 +120,10 @@ class BlazyImage {
       }
 
       // Prevents 404 warning when video thumbnail missing for a reason.
-      if ($dimensions = @getimagesize($abs)) {
-        [$width, $height] = $dimensions;
+      if (!BlazyFile::isExternal($uri)) {
+        if ($dimensions = @getimagesize($abs)) {
+          [$width, $height] = $dimensions;
+        }
       }
     }
 
@@ -439,7 +441,9 @@ class BlazyImage {
     $dim = ['width' => $width, 'height' => $height];
 
     // Funnily $uri is ignored at all core image effects.
-    $style->transformDimensions($dim, $uri);
+    if ($style) {
+      $style->transformDimensions($dim, $uri);
+    }
 
     // Sometimes they are string, cast them integer to reduce JS logic.
     self::toInt($dim, 'width', 'height');

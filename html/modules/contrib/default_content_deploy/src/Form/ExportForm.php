@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\Messenger;
 use Drupal\default_content_deploy\DeployManager;
 use Drupal\default_content_deploy\Exporter;
+use Drupal\default_content_deploy\ExporterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -19,7 +20,7 @@ class ExportForm extends FormBase {
   /**
    * Default Content Deploy Export object.
    *
-   * @var \Drupal\default_content_deploy\Exporter
+   * @var ExporterInterface
    */
   protected $exporter;
 
@@ -49,11 +50,11 @@ class ExportForm extends FormBase {
    *
    * @param \Drupal\Core\Messenger\Messenger $messenger
    * @param \Drupal\default_content_deploy\DeployManager $deploy_manager
-   * @param \Drupal\default_content_deploy\Exporter $exporter
+   * @param ExporterInterface $exporter
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $bundle_info
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    */
-  public function __construct(Messenger $messenger, DeployManager $deploy_manager, Exporter $exporter, EntityTypeBundleInfoInterface $bundle_info, FileSystemInterface  $file_system) {
+  public function __construct(Messenger $messenger, DeployManager $deploy_manager, ExporterInterface $exporter, EntityTypeBundleInfoInterface $bundle_info, FileSystemInterface $file_system) {
     $this->exporter = $exporter;
     $this->messenger = $messenger;
     $this->deployManager = $deploy_manager;
@@ -292,7 +293,6 @@ class ExportForm extends FormBase {
       $this->exporter->setForceUpdate($force_update);
       $this->exporter->setFolder($folder);
       $this->exporter->export();
-      $this->addResultMessage();
     }
     else {
       $this->exporter->setForceUpdate(TRUE);
@@ -302,22 +302,6 @@ class ExportForm extends FormBase {
       // Redirect for download archive file.
       $form_state->setRedirect('default_content_deploy.export.download');
     }
-  }
-
-  /**
-   * Add a message with exporting results.
-   */
-  private function addResultMessage() {
-    $result = $this->exporter->getResult();
-
-    foreach ($result as $entity_type => $value) {
-      $this->messenger->addMessage($this->t('Exported @count entities of the "@entity_type" entity type.', [
-        '@count' => count($value),
-        '@entity_type' => $entity_type,
-      ]));
-    }
-
-    return $this;
   }
 
   /**

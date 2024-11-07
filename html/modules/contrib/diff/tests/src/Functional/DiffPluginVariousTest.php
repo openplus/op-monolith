@@ -37,7 +37,7 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    * @param string $widget_type
    *   The widget type.
    */
-  protected function addArticleTextField($field_name, $label, $field_type, $widget_type) {
+  protected function addArticleTextField($field_name, $label, $field_type, $widget_type): void {
     // Create a field.
     $field_storage = FieldStorageConfig::create([
       'field_name' => $field_name,
@@ -63,33 +63,33 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    *
    * @covers \Drupal\diff\Plugin\diff\Field\CommentFieldBuilder
    */
-  public function testCommentPlugin() {
+  public function testCommentPlugin(): void {
     // Add the comment field to articles.
     $this->addDefaultCommentField('node', 'article');
 
     // Create an article with comments enabled..
     $title = 'Sample article';
-    $edit = array(
+    $edit = [
       'title[0][value]' => $title,
       'body[0][value]' => '<p>Revision 1</p>',
-      'comment[0][status]' => CommentItemInterface::OPEN,
-    );
-    $this->drupalPostNodeForm('node/add/article', $edit, 'Save and publish');
+      'comment[0][status]' => (string) CommentItemInterface::OPEN,
+    ];
+    $this->drupalPostNodeForm('node/add/article', $edit, 'Save');
     $node = $this->drupalGetNodeByTitle($title);
 
     // Edit the article and close its comments.
-    $edit = array(
-      'comment[0][status]' => CommentItemInterface::CLOSED,
+    $edit = [
+      'comment[0][status]' => (string) CommentItemInterface::HIDDEN,
       'revision' => TRUE,
-    );
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save and keep published');
+    ];
+    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save');
 
     // Check the difference between the last two revisions.
-    $this->clickLink(t('Revisions'));
+    $this->clickLink('Revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->pageTextContains('Comments');
     $this->assertSession()->pageTextContains('Comments for this entity are open.');
-    $this->assertSession()->pageTextContains('Comments for this entity are closed.');
+    $this->assertSession()->pageTextContains('Comments for this entity are hidden.');
   }
 
   /**
@@ -97,7 +97,7 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    *
    * @covers \Drupal\diff\Plugin\diff\Field\CoreFieldBuilder
    */
-  public function testCorePlugin() {
+  public function testCorePlugin(): void {
     // Add an email field (supported by the Diff core plugin) to the Article
     // content type.
     $field_name = 'field_email';
@@ -130,14 +130,15 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
     ]);
 
     // Edit the article and change the email.
-    $edit = array(
+    $edit = [
       'field_email[0][value]' => 'bar@example.com',
       'revision' => TRUE,
-    );
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, t('Save and keep published'));
+    ];
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->submitForm($edit, 'Save');
 
     // Check the difference between the last two revisions.
-    $this->clickLink(t('Revisions'));
+    $this->clickLink('Revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->pageTextContains('Email');
     $this->assertSession()->pageTextContains('foo@example.com');
@@ -149,7 +150,7 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    *
    * @covers \Drupal\diff\Plugin\diff\Field\CoreFieldBuilder
    */
-  public function testCorePluginTimestampField() {
+  public function testCorePluginTimestampField(): void {
     // Add a timestamp field (supported by the Diff core plugin) to the Article
     // content type.
     $field_name = 'field_timestamp';
@@ -186,7 +187,9 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
     ]);
 
     // Create a new revision with an updated timestamp.
+    /** @var \Drupal\node\NodeInterface $node */
     $node = $this->drupalGetNodeByTitle('timestamp_test');
+    // @phpstan-ignore-next-line
     $node->field_timestamp = $new_timestamp;
     $node->setNewRevision(TRUE);
     $node->save();
@@ -207,7 +210,7 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    *
    * @covers \Drupal\diff\Plugin\diff\Field\LinkFieldBuilder
    */
-  public function testLinkPlugin() {
+  public function testLinkPlugin(): void {
     // Add a link field to the article content type.
     $field_name = 'field_link';
     $field_storage = FieldStorageConfig::create([
@@ -220,10 +223,10 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
       'field_storage' => $field_storage,
       'bundle' => 'article',
       'label' => 'Link',
-      'settings' => array(
+      'settings' => [
         'title' => DRUPAL_OPTIONAL,
         'link_type' => LinkItemInterface::LINK_GENERIC,
-      ),
+      ],
     ])->save();
     $this->formDisplay->load('node.article.default')
       ->setComponent($field_name, [
@@ -259,10 +262,11 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
       'field_link[0][uri]' => 'http://www.google.es',
       'revision' => TRUE,
     ];
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, t('Save and keep published'));
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->submitForm($edit, 'Save');
 
     // Check differences between revisions.
-    $this->clickLink(t('Revisions'));
+    $this->clickLink('Revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->pageTextContains('Link');
     $this->assertSession()->pageTextContains('Google');
@@ -276,7 +280,7 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    *
    * @covers \Drupal\diff\Plugin\diff\Field\ListFieldBuilder
    */
-  public function testListPlugin() {
+  public function testListPlugin(): void {
     // Add a list field to the article content type.
     $field_name = 'field_list';
     $field_storage = FieldStorageConfig::create([
@@ -320,10 +324,11 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
       'field_list' => 'value_b',
       'revision' => TRUE,
     ];
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, t('Save and keep published'));
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->submitForm($edit, 'Save');
 
     // Check differences between revisions.
-    $this->clickLink(t('Revisions'));
+    $this->clickLink('Revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->pageTextContains('List');
     $this->assertSession()->pageTextContains('value_a');
@@ -335,7 +340,7 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    *
    * @covers \Drupal\diff\Plugin\diff\Field\TextFieldBuilder
    */
-  public function testTextPlugin() {
+  public function testTextPlugin(): void {
     // Add a text and a text long field to the Article content type.
     $this->addArticleTextField('field_text', 'Text Field', 'string', 'string_textfield');
     $this->addArticleTextField('field_text_long', 'Text Long Field', 'string_long', 'string_textarea');
@@ -354,10 +359,11 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
       'field_text_long[0][value]' => 'Fly',
       'revision' => TRUE,
     ];
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, t('Save and keep published'));
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->submitForm($edit, 'Save');
 
     // Check differences between revisions.
-    $this->clickLink(t('Revisions'));
+    $this->clickLink('Revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->pageTextContains('Text Field');
     $this->assertSession()->pageTextContains('Text Long Field');
@@ -372,7 +378,7 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
    *
    * @covers \Drupal\diff\Plugin\diff\Field\TextWithSummaryFieldBuilder
    */
-  public function testTextWithSummaryPlugin() {
+  public function testTextWithSummaryPlugin(): void {
     // Enable the comparison of the summary.
     $config = \Drupal::configFactory()->getEditable('diff.plugins');
     $settings['compare_summary'] = TRUE;
@@ -396,10 +402,11 @@ class DiffPluginVariousTest extends DiffPluginTestBase {
       'body[0][summary]' => 'Bar summary',
       'revision' => TRUE,
     ];
-    $this->drupalPostNodeForm('node/' . $node->id() . '/edit', $edit, 'Save and keep published');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->submitForm($edit, 'Save');
 
     // Check differences between revisions.
-    $this->clickLink(t('Revisions'));
+    $this->clickLink('Revisions');
     $this->submitForm([], 'Compare selected revisions');
     $this->assertSession()->pageTextContains('Body');
     $this->assertSession()->pageTextContains('Foo value');

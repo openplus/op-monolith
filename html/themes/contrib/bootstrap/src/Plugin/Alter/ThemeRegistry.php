@@ -2,6 +2,7 @@
 
 namespace Drupal\bootstrap\Plugin\Alter;
 
+use Composer\Semver\Comparator;
 use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Plugin\PreprocessManager;
 use Drupal\Core\Theme\Registry;
@@ -41,17 +42,33 @@ class ThemeRegistry extends Registry implements AlterInterface {
       $configuration['theme'] = Bootstrap::getTheme();
     }
     $this->currentTheme = $configuration['theme'];
-    parent::__construct(
-      \Drupal::root(),
-      \Drupal::service('cache.default'),
-      \Drupal::service('lock'),
-      \Drupal::service('module_handler'),
-      \Drupal::service('theme_handler'),
-      \Drupal::service('theme.initialization'),
-      \Drupal::service('cache.bootstrap'),
-      \Drupal::service('extension.list.module'),
-      $this->currentTheme->getName(),
-    );
+    if (Comparator::greaterThanOrEqualTo(\Drupal::VERSION, '10.3.0-dev')) {
+      parent::__construct(
+        \Drupal::root(),
+        \Drupal::service('cache.default'),
+        \Drupal::service('lock'),
+        \Drupal::service('module_handler'),
+        \Drupal::service('theme_handler'),
+        \Drupal::service('theme.initialization'),
+        \Drupal::service('cache.bootstrap'),
+        \Drupal::service('extension.list.module'),
+        \Drupal::service('kernel'),
+        $this->currentTheme->getName(),
+      );
+    }
+    else {
+      parent::__construct(
+        \Drupal::root(),
+        \Drupal::service('cache.default'),
+        \Drupal::service('lock'),
+        \Drupal::service('module_handler'),
+        \Drupal::service('theme_handler'),
+        \Drupal::service('theme.initialization'),
+        \Drupal::service('cache.bootstrap'),
+        \Drupal::service('extension.list.module'),
+        $this->currentTheme->getName(),
+      );
+    }
     $this->setThemeManager(\Drupal::service('theme.manager'));
     $this->init();
   }

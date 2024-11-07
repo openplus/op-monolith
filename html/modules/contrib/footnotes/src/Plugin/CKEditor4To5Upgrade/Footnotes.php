@@ -31,10 +31,12 @@ class Footnotes extends PluginBase implements CKEditor4To5UpgradePluginInterface
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore
   public function mapCKEditor4ToolbarButtonToCKEditor5ToolbarItem(string $cke4_button, HTMLRestrictions $text_format_html_restrictions): ?array {
     switch ($cke4_button) {
       case 'footnotes':
-        return ['Footnotes'];      
+        return ['footnotes'];
+
       default:
         throw new \OutOfBoundsException();
     }
@@ -43,6 +45,7 @@ class Footnotes extends PluginBase implements CKEditor4To5UpgradePluginInterface
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore
   public function mapCKEditor4SettingsToCKEditor5Configuration(string $cke4_plugin_id, array $cke4_plugin_settings): ?array {
     throw new \OutOfBoundsException();
   }
@@ -50,6 +53,7 @@ class Footnotes extends PluginBase implements CKEditor4To5UpgradePluginInterface
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore
   public function computeCKEditor5PluginSubsetConfiguration(string $cke5_plugin_id, FilterFormatInterface $text_format): ?array {
     throw new \OutOfBoundsException();
   }

@@ -5,7 +5,3 @@ Patches applied to this directory:
 Source: https://www.drupal.org/files/issues/2021-11-19/redis-support_tls_on_predis-3004561-37.patch
 
 
-3175412 - Use item_id instead of qid for Queue item
-Source: https://www.drupal.org/files/issues/2020-10-07/redis-queue-item-id-3175412-2.patch
-
-

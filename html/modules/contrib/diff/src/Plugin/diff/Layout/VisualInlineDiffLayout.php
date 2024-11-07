@@ -3,9 +3,9 @@
 namespace Drupal\diff\Plugin\diff\Layout;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Datetime\DateFormatter;
-use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\PhpStorage\PhpStorageFactory;
 use Drupal\Core\Render\RendererInterface;
@@ -14,7 +14,6 @@ use Drupal\diff\DiffEntityComparison;
 use Drupal\diff\DiffEntityParser;
 use Drupal\diff\DiffLayoutBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use HtmlDiffAdvancedInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -78,7 +77,7 @@ class VisualInlineDiffLayout extends DiffLayoutBase {
    *   The entity type manager.
    * @param \Drupal\diff\DiffEntityParser $entity_parser
    *   The entity parser.
-   * @param \Drupal\Core\DateTime\DateFormatter $date
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date
    *   The date service.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
@@ -91,7 +90,20 @@ class VisualInlineDiffLayout extends DiffLayoutBase {
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entity_display_repository
    *   The entity display repository.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config, EntityTypeManagerInterface $entity_type_manager, DiffEntityParser $entity_parser, DateFormatter $date, RendererInterface $renderer, DiffEntityComparison $entity_comparison, HtmlDiffAdvancedInterface $html_diff, RequestStack $request_stack, EntityDisplayRepositoryInterface $entity_display_repository) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ConfigFactoryInterface $config,
+    EntityTypeManagerInterface $entity_type_manager,
+    DiffEntityParser $entity_parser,
+    DateFormatterInterface $date,
+    RendererInterface $renderer,
+    DiffEntityComparison $entity_comparison,
+    \HtmlDiffAdvancedInterface $html_diff,
+    RequestStack $request_stack,
+    EntityDisplayRepositoryInterface $entity_display_repository,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $config, $entity_type_manager, $entity_parser, $date);
     $this->renderer = $renderer;
     $this->entityComparison = $entity_comparison;
@@ -121,7 +133,7 @@ class VisualInlineDiffLayout extends DiffLayoutBase {
       $container->get('diff.entity_comparison'),
       $container->get('diff.html_diff'),
       $container->get('request_stack'),
-      $container->get('entity_display.repository')
+      $container->get('entity_display.repository'),
     );
   }
 
@@ -148,13 +160,22 @@ class VisualInlineDiffLayout extends DiffLayoutBase {
           $left_revision->getRevisionId(),
           $right_revision->getRevisionId(),
           'visual_inline',
-          ['view_mode' => $view_mode]
+          ['view_mode' => $view_mode],
         ),
       ];
     }
 
-    $active_option = array_keys($options);
-    $active_view_mode = $this->requestStack->getCurrentRequest()->query->get('view_mode') ?: reset($active_option);
+    $default_view_mode = $this->configFactory->get('diff.settings')->get('general_settings.visual_default_view_mode');
+    // If the configured default view mode is not enabled on the current
+    // bundle type, fallback to one of the enabled ones.
+    if (!is_string($default_view_mode) || !in_array($default_view_mode, array_keys($view_modes), TRUE)) {
+      $keys = array_keys($options);
+      $active_option = reset($keys);
+    }
+    else {
+      $active_option = $default_view_mode;
+    }
+    $active_view_mode = $this->requestStack->getCurrentRequest()->query->get('view_mode') ?: $active_option;
 
     $filter = $options[$active_view_mode];
     unset($options[$active_view_mode]);
@@ -163,7 +184,7 @@ class VisualInlineDiffLayout extends DiffLayoutBase {
     $build['controls']['view_mode'] = [
       '#type' => 'item',
       '#title' => $this->t('View mode'),
-      '#wrapper_attributes' => ['class' => 'diff-controls__item'],
+      '#wrapper_attributes' => ['class' => ['diff-controls__item']],
       'filter' => [
         '#type' => 'operations',
         '#links' => $options,

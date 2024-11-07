@@ -10,5 +10,7 @@
     "issues": "http://drupal.org/project/issues/webform_migrate",
     "source": "http://cgit.drupalcode.org/webform_migrate"
   },
-  "require": { }
+  "require": {
+    "drupal/webform": "*"
+  }
 }

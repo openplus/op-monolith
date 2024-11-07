@@ -3,10 +3,12 @@
 namespace Drupal\default_content_deploy\Controller;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\File\Event\FileUploadSanitizeNameEvent;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\default_content_deploy\DeployManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Returns responses for config module routes.
@@ -28,6 +30,13 @@ class DownloadController implements ContainerInjectionInterface {
   protected $fileSystem;
 
   /**
+   * The Event dispatcher.
+   *
+   * @var EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * DownloadController constructor.
    *
    * @param \Drupal\default_content_deploy\DeployManager $deploy_manager
@@ -35,9 +44,10 @@ class DownloadController implements ContainerInjectionInterface {
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *   The File system.
    */
-  public function __construct(DeployManager $deploy_manager, FileSystemInterface $file_system) {
+  public function __construct(DeployManager $deploy_manager, FileSystemInterface $file_system, EventDispatcherInterface $event_dispatcher) {
     $this->deployManager = $deploy_manager;
     $this->fileSystem = $file_system;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
@@ -46,7 +56,8 @@ class DownloadController implements ContainerInjectionInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('default_content_deploy.manager'),
-      $container->get('file_system')
+      $container->get('file_system'),
+      $container->get('event_dispatcher')
     );
   }
 
@@ -55,14 +66,21 @@ class DownloadController implements ContainerInjectionInterface {
    *
    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
    */
-  public function downloadCompressedContent() {
+  public function downloadCompressedContent(?string $file_name = NULL) {
     $this->deployManager->compressContent();
     $path = $this->fileSystem->getTempDirectory() . '/dcd/content.tar.gz';
+
+    $sanitized_filename = 'content.tar.gz';
+    if ($file_name) {
+      $event = new FileUploadSanitizeNameEvent($file_name, 'tar.gz');
+      $this->eventDispatcher->dispatch($event);
+      $sanitized_filename = $event->getFilename();
+    }
 
     $headers = [
       'Content-Type' => 'application/tar+gzip',
       'Content-Description' => 'File Download',
-      'Content-Disposition' => 'attachment; filename=content.tar.gz'
+      'Content-Disposition' => 'attachment; filename=' . $sanitized_filename
     ];
 
     return new BinaryFileResponse($path, 200, $headers);

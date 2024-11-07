@@ -33,7 +33,7 @@ insert_view_adv_extension:
     # The library loaded while using the editor.
     library: insert_view_adv/ckeditor5
     # The library loaded when configuring the text format using this plugin.
-    # admin_library: MODULE_NAME/admin.demobox
+    admin_library: insert_view_adv/admin
     toolbar_items:
       # This should match the name of the corresponding plugin exported in the
       # plugin's index.js.

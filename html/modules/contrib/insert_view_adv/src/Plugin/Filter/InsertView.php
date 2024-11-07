@@ -41,7 +41,6 @@ class InsertView extends FilterBase implements TrustedCallbackInterface {
     $count = preg_match_all("/\[view:([^=\]]+)=?([^=\]]+)?=?([^\]]*)?\]/i", $text, $matches);
     // Keep track of the number of times a view was inserted.
     $insert_view_count = 0;
-
     if ($count) {
       $search = $replace = [];
       foreach ($matches[0] as $key => $value) {
@@ -63,7 +62,7 @@ class InsertView extends FilterBase implements TrustedCallbackInterface {
       }
       $text = str_replace($search, $replace, $text, $insert_view_count);
     }
-    // Check the view inserted from the CKeditor plugin.
+    // Check the view inserted from the CKEditor plugin module version 1.x.
     $count = preg_match_all('/(<p>)?(?<json>{(?=.*inserted_view_adv\b)(?=.*arguments\b)(.*)})(<\/p>)?/', $text, $matches);
     if ($count) {
       $search = $replace = [];
@@ -93,14 +92,16 @@ class InsertView extends FilterBase implements TrustedCallbackInterface {
       }
       $text = str_replace($search, $replace, $text, $insert_view_count);
     }
-    // Process text for new tags.
+    // Process text for <drupal-view> tags (new 2.x approach).
     $this->processText($text, $result, $insert_view_count, $encoded_configuration);
     // If views were actually inserted, then update the processed text and add
     // cache tags and contexts. This check is important because cache tags and
     // contexts may be incorrectly added to a render array and cause
     // unnecessary cache variations.
     if ($insert_view_count > 0) {
-      $result->setProcessedText($text)->addCacheTags(['insert_view_adv'])->addCacheContexts(['url', 'user.permissions']);
+      $result->setProcessedText($text)
+        ->addCacheTags(['insert_view_adv'])
+        ->addCacheContexts(['url', 'user.permissions']);
     }
 
     return $result;
@@ -255,14 +256,61 @@ class InsertView extends FilterBase implements TrustedCallbackInterface {
         ];
       }
     }
-    // Try to get the arguments from the current path.
-    $url_args = explode('/', $current_path);
-    foreach ($url_args as $id => $arg) {
-      $args = str_replace("%$id", $arg, $args);
-    }
-    $args = preg_replace(',/?(%\d),', '', $args);
     $args = $args ? explode('/', $args) : [];
-
+    // Count number of set arguments.
+    $count_set_arguments = count(array_filter($args));
+    $view->initHandlers();
+    // In case user has not set all the arguments, the default or exception
+    // values should be set, so that the view has full list of arguments.
+    if ($count_set_arguments != count($view->argument)) {
+      // Build arguments.
+      $built_arguments = [];
+      $position = -1;
+      // Next lines are copied from $view->buildTitle() method. They are needed
+      // to get the automatically built arguments. This could be default
+      // arguments built from URL, or from any default argument plugin.
+      // Iterate through each argument and process.
+      foreach ($view->argument as $id => $arg) {
+        $position++;
+        $argument = $view->argument[$id];
+        if ($argument->broken()) {
+          continue;
+        }
+        $argument->setRelationship();
+        $arg = $view->args[$position] ?? NULL;
+        if (isset($arg) || $argument->hasDefaultArgument()) {
+          if (!isset($arg)) {
+            $arg = $argument->getDefaultArgument();
+            // Make sure default args get put back.
+            if (isset($arg)) {
+              $built_arguments[$position] = $arg;
+            }
+          }
+        }
+        // Be safe with references and loops.
+        unset($argument);
+      }
+      // Add default arguments to the list of arguments.
+      foreach ($built_arguments as $delta => $build_argument) {
+        if (empty($args[$delta]) && !empty($build_argument)) {
+          $args[$delta] = $build_argument;
+        }
+      }
+      // Check if there are any empty arguments still. Set their exception value
+      // so that argument is not an empty string.
+      foreach ($args as $delta => $arg) {
+        if (empty($arg)) {
+          $i = -1;
+          foreach ($view->argument as $argument) {
+            $i++;
+            if ($i == $delta) {
+              $args[$delta] = $argument->options['exception']['value'];
+              break;
+            }
+          }
+        }
+      }
+    }
     return $view->preview($display_id, $args) ?: [];
   }
 

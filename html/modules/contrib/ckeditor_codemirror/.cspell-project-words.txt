@@ -1,0 +1,10 @@
+closebrackets
+closetag
+foldcode
+foldgutter
+htmlmixed
+matchbrackets
+matchtags
+phpcompatibility
+Plazik
+searchcursor

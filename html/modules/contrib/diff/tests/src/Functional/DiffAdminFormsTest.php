@@ -31,7 +31,7 @@ class DiffAdminFormsTest extends DiffTestBase {
   /**
    * Tests the descriptions in the Settings UI.
    */
-  public function testSettingsUi() {
+  public function testSettingsUi(): void {
     // Enable the help block.
     $this->drupalPlaceBlock('help_block', ['region' => 'help']);
 
@@ -46,21 +46,23 @@ class DiffAdminFormsTest extends DiffTestBase {
   /**
    * Tests the Settings tab.
    */
-  public function testSettingsTab() {
-    $edit = [
+  public function testSettingsTab(): void {
+    $this->drupalGet('admin/config/content/diff/general');
+    $this->assertSession()->optionExists('View mode', 'full');
+    $this->assertSession()->optionExists('View mode', 'default');
+    $this->assertSession()->optionExists('View mode', 'diff');
+    $this->submitForm([
       'radio_behavior' => 'linear',
       'context_lines_leading' => 10,
       'context_lines_trailing' => 5,
-    ];
-    $this->drupalGet('admin/config/content/diff/general');
-    $this->submitForm($edit, 'Save configuration');
+    ], 'Save configuration');
     $this->assertSession()->pageTextContains('The configuration options have been saved.');
   }
 
   /**
    * Tests the module requirements.
    */
-  public function testRequirements() {
+  public function testRequirements(): void {
     \Drupal::moduleHandler()->loadInclude('diff', 'install');
     $requirements = diff_requirements('runtime');
     $this->assertEquals($requirements['html_diff_advanced']['title'], 'Diff');
@@ -79,7 +81,7 @@ class DiffAdminFormsTest extends DiffTestBase {
   /**
    * Tests the Configurable Fields tab.
    */
-  public function testConfigurableFieldsTab() {
+  public function testConfigurableFieldsTab(): void {
     $this->drupalGet('admin/config/content/diff/fields');
 
     // Test changing type without changing settings.
@@ -140,19 +142,19 @@ class DiffAdminFormsTest extends DiffTestBase {
   /**
    * Tests the Compare Revisions vertical tab.
    */
-  public function testPluginWeight() {
+  public function testPluginWeight(): void {
     // Create a node with a revision.
     $edit = [
       'title[0][value]' => 'great_title',
       'body[0][value]' => '<p>great_body</p>',
     ];
-    $this->drupalPostNodeForm('node/add/article', $edit, 'Save and publish');
+    $this->drupalPostNodeForm('node/add/article', $edit, 'Save');
     $this->clickLink('Edit');
     $edit = [
       'title[0][value]' => 'greater_title',
       'body[0][value]' => '<p>greater_body</p>',
     ];
-    $this->drupalPostNodeForm(NULL, $edit, 'Save and keep published');
+    $this->submitForm($edit, 'Save');
 
     // Assert the diff display uses the classic layout.
     $node = $this->getNodeByTitle('greater_title');

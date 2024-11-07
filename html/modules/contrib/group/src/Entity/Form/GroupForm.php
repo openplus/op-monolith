@@ -4,6 +4,7 @@ namespace Drupal\group\Entity\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\group\Entity\GroupInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -24,7 +25,6 @@ class GroupForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    /** @var static $form */
     $form = parent::create($container);
     $form->privateTempStoreFactory = $container->get('tempstore.private');
     return $form;
@@ -36,8 +36,9 @@ class GroupForm extends ContentEntityForm {
   protected function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
 
-    /** @var \Drupal\group\Entity\GroupTypeInterface $group_type */
-    $group_type = $this->getEntity()->getGroupType();
+    $group = $this->getEntity();
+    assert($group instanceof GroupInterface);
+    $group_type = $group->getGroupType();
     $replace = ['@group_type' => $group_type->label()];
 
     // We need to adjust the actions when using the group creator wizard.

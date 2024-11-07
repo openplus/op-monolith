@@ -28,19 +28,19 @@ views_relationship_with_group_plugin_filter:
   mapping:
     group_content_plugins:
       type: 'sequence'
-      label: 'Group content plugins'
+      label: 'Group relation plugins'
       sequence:
         type: 'string'
-        label: 'Group content plugin ID'
+        label: 'Group relation plugin ID'
 
 views.relationship.group_content_to_entity:
   type: 'views_relationship_with_group_plugin_filter'
-  label: 'Group content to entity reference'
+  label: 'Group relationship to entity reference'
 
 views.relationship.group_content_to_entity_reverse:
   type: 'views_relationship_with_group_plugin_filter'
-  label: 'Reverse group content to entity reference'
+  label: 'Reverse group relationship to entity reference'
 
 views.relationship.group_to_group_content:
   type: 'views_relationship_with_group_plugin_filter'
-  label: 'Group to group content'
+  label: 'Group to group relationship'

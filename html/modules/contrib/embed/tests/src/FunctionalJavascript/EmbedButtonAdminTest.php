@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\embed\FunctionalJavascript;
 
 use Drupal\editor\Entity\Editor;
@@ -96,7 +98,7 @@ class EmbedButtonAdminTest extends WebDriverTestBase {
   /**
    * Tests the embed_button administration functionality.
    */
-  public function testEmbedButtonAdmin() {
+  public function testEmbedButtonAdmin(): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
 
@@ -143,7 +145,10 @@ class EmbedButtonAdminTest extends WebDriverTestBase {
     $assert_session->pageTextNotContains($button_label);
   }
 
-  public function testButtonValidation() {
+  /**
+   * Test embed button validation.
+   */
+  public function testButtonValidation(): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
 
@@ -171,7 +176,10 @@ class EmbedButtonAdminTest extends WebDriverTestBase {
     $this->assertSession()->fieldValueEquals('type_settings[aircraft_type]', 'rotorcraft');
   }
 
-  public function testCKEditorButtonConflict() {
+  /**
+   * Test adding an embed button that conflicts with a CKEditor core button.
+   */
+  public function testCkeditorButtonConflict(): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
 

@@ -3,12 +3,33 @@ footnotes:
   css:
     component:
       assets/css/footnotes.css: {}
+
 footnotes-ckeditor5:
   js:
     assets/js/build/footnotes.js: { preprocess: false, minified: true }
+  css:
+    theme:
+      assets/css/footnotes-ckeditor5.admin.css: {}
   dependencies:
     - core/ckeditor5
+    - editor/drupal.editor.dialog
+
 admin.footnotes-ckeditor5:
   css:
     theme:
-      assets/css/footnotes-ckeditor5.admin.css: { }
+      assets/css/footnotes-ckeditor5.admin.css: {}
+
+footnotes.group_block_via_js:
+  version: VERSION
+  js:
+    assets/js/footnotes.group_block.js: {}
+  dependencies:
+    - core/drupal
+
+footnotes.dialog:
+  version: VERSION
+  js:
+    assets/js/footnotes.dialog.js: {}
+  css:
+    component:
+      assets/css/footnotes-dialog.css: { }

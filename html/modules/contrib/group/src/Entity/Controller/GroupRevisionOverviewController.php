@@ -4,6 +4,7 @@ namespace Drupal\group\Entity\Controller;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\entity\Controller\RevisionOverviewController;
+use Drupal\group\Entity\GroupInterface;
 
 /**
  * Returns responses for Group revision UI routes.
@@ -14,7 +15,7 @@ class GroupRevisionOverviewController extends RevisionOverviewController {
    * {@inheritdoc}
    */
   protected function hasRevertRevisionAccess(EntityInterface $group) {
-    /** @var \Drupal\group\Entity\GroupInterface $group */
+    assert($group instanceof GroupInterface);
     return $group->hasPermission('revert group revisions', $this->currentUser());
   }
 
@@ -22,7 +23,7 @@ class GroupRevisionOverviewController extends RevisionOverviewController {
    * {@inheritdoc}
    */
   protected function hasDeleteRevisionAccess(EntityInterface $group) {
-    /** @var \Drupal\group\Entity\GroupInterface $group */
+    assert($group instanceof GroupInterface);
     return $group->hasPermission('delete group revisions', $this->currentUser());
   }
 

@@ -50,7 +50,7 @@ class DiffRevisionContentModerationTest extends DiffRevisionTest {
    *
    * Override form submission to work with content moderation.
    */
-  protected function drupalPostNodeForm($path, array $edit, $submit) {
+  protected function drupalPostNodeForm($path, array $edit, $submit): void {
     // New revisions are automatically enabled, so remove the manual value.
     unset($edit['revision']);
     parent::drupalPostNodeForm($path, $edit, $submit);
@@ -59,7 +59,7 @@ class DiffRevisionContentModerationTest extends DiffRevisionTest {
   /**
    * Test content moderation integration.
    */
-  public function testContentModeration() {
+  public function testContentModeration(): void {
     $this->loginAsAdmin();
     $title = $this->randomString();
     $node = $this->createNode([

@@ -62,6 +62,16 @@ final class LayoutBuilder extends CoreLayoutbuilder {
   /**
    * {@inheritdoc}
    */
+  protected function layout(SectionStorageInterface $section_storage) {
+    $output = parent::layout($section_storage);
+    $output['#attached']['library'][] = 'layout_builder_st/contextual';
+
+    return $output;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function buildAddSectionLink(SectionStorageInterface $section_storage, $delta) {
     $link = parent::buildAddSectionLink($section_storage, $delta);
     $this->setTranslationAcess($link, $section_storage);

@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Mostrar a legenda"
 	},
 	"cc-err": "Ocorreu um erro no carregamento da legenda",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Ativar a descrição de áudio",
 		off: "Desativar a descrição de áudio"
 	},
 	pos: "Posição atual:",
 	dur: "Tempo total:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Compartilhar",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

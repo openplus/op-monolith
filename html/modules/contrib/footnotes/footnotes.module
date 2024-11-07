@@ -8,6 +8,9 @@
  * automatically numbered footnotes into Drupal texts.
  */
 
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 
@@ -35,10 +38,19 @@ function footnotes_theme() {
         'fn'    => NULL,
       ],
     ],
+    'footnote_links' => [
+      'variables' => [
+        'footnote_links' => NULL,
+      ],
+    ],
     'footnote_list' => [
       'variables' => [
         'footnotes' => NULL,
+        'is_block' => FALSE,
       ],
+    ],
+    'footnote_dialog' => [
+      'variables' => [],
     ],
   ];
 }
@@ -88,4 +100,38 @@ function footnotes_theme() {
  */
 function footnotes_is_footnotes_later($format, $caller_filter) {
   return $format['filter_footnotes']['weight'] > $caller_filter['weight'];
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function footnotes_entity_extra_field_info() {
+  $extra = [];
+  $entityTypeManager = \Drupal::service('entity_type.manager');
+
+  $contentTypes = $entityTypeManager->getStorage('node_type')->loadMultiple();
+  foreach ($contentTypes as $contentType) {
+    $extra['node'][$contentType->id()]['display']['footnotes_group'] = [
+      'label' => t('Footnotes group'),
+      'description' => t('Display all footnotes from text content from this node and its content.'),
+      'weight' => 102,
+      'visible' => FALSE,
+    ];
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function footnotes_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($entity instanceof FieldableEntityInterface) {
+    if ($display->getComponent('footnotes_group')) {
+      $build['footnotes_group'] = [
+        '#create_placeholder' => TRUE,
+        '#lazy_builder' => ['footnotes.group:buildFooter', []],
+      ];
+    }
+  }
 }

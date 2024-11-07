@@ -1,0 +1,7 @@
+services:
+  footnotes.group:
+    class: Drupal\footnotes\FootnotesGroup
+  footnotes.dialog:
+    class: Drupal\footnotes\FootnotesDialog
+  footnotes.batch_manager:
+    class: Drupal\footnotes\Upgrade\FootnotesUpgradeBatchManager

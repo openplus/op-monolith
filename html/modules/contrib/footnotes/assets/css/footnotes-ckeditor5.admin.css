@@ -1,3 +1,21 @@
-.ckeditor5-toolbar-button-Footnotes {
-  background-image: url(../js/ckeditor5_plugins/footnotes/icons/footnotes.svg);
+.ckeditor5-toolbar-button-footnotes {
+  background-image: url("../js/ckeditor5_plugins/footnotes/icons/footnotes.svg");
+}
+.ck .ck-widget .footnotes-preview {
+  margin-right: var(--ck-widget-outline-thickness);
+  outline: var(--ck-widget-outline-thickness) solid
+    var(--ck-color-widget-blurred-border);
+}
+.ck .ck-widget .footnotes-preview .footnote-content-ckeditor-preview {
+  position: relative;
+  top: -0.2em;
+  vertical-align: top;
+  font-size: 0.73em;
+}
+/* Needed until https://www.drupal.org/project/drupal/issues/3328425 is resolved */
+.ck-body-wrapper,
+.ck.ck-balloon-panel {
+  --ck-z-modal: 1262;
+  --ck-z-panel: 1262;
+  --ck-z-dialog: 1262;
 }

@@ -4,7 +4,7 @@
 
 import { Plugin } from 'ckeditor5/src/core';
 import { ButtonView } from 'ckeditor5/src/ui';
-import icon from '../../../../icons/ftinsertcell.svg';
+import icon from '../theme/icons/ftinsertcell.svg';
 
 export default class InsertViewAdvUI extends Plugin {
   init() {
@@ -27,7 +27,7 @@ export default class InsertViewAdvUI extends Plugin {
       // Create the toolbar button.
       buttonView.set({
         label: editor.t('Insert View'),
-        icon,
+        icon: icon,
         tooltip: true,
       });
 

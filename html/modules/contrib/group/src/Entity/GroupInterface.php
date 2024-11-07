@@ -2,6 +2,7 @@
 
 namespace Drupal\group\Entity;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
@@ -29,68 +30,66 @@ interface GroupInterface extends ContentEntityInterface, EntityOwnerInterface, E
    * Returns the group type entity the group uses.
    *
    * @return \Drupal\group\Entity\GroupTypeInterface
+   *   The group type entity.
    */
   public function getGroupType();
 
   /**
-   * Adds a content entity as a group content entity.
+   * Adds an entity to a group.
    *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The content entity to add to the group.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to add to the group.
    * @param string $plugin_id
-   *   The ID of the content enabler plugin to add the entity with.
+   *   The group relation type ID to add the entity with.
    * @param array $values
-   *   (optional) Extra values to add to the group content relationship. You
-   *   cannot overwrite the group ID (gid) or entity ID (entity_id).
+   *   (optional) Extra values to add to the group relationship. You cannot
+   *   overwrite the group ID (gid) or entity ID (entity_id).
+   *
+   * @return \Drupal\group\Entity\GroupRelationshipInterface
+   *   The relationship entity for the newly added relationship.
    */
-  public function addContent(ContentEntityInterface $entity, $plugin_id, $values = []);
+  public function addRelationship(EntityInterface $entity, $plugin_id, $values = []);
 
   /**
-   * Retrieves all GroupContent entities for the group.
+   * Retrieves all relationship entities for the group.
    *
    * @param string $plugin_id
-   *   (optional) A content enabler plugin ID to filter on.
-   * @param array $filters
-   *   (optional) An associative array of extra filters where the keys are
-   *   property or field names and the values are the value to filter on.
+   *   (optional) A group relation type ID to filter on.
    *
-   * @return \Drupal\group\Entity\GroupContentInterface[]
-   *   A list of GroupContent entities matching the criteria.
+   * @return \Drupal\group\Entity\GroupRelationshipInterface[]
+   *   A list of relationship entities matching the criteria.
    */
-  public function getContent($plugin_id = NULL, $filters = []);
+  public function getRelationships($plugin_id = NULL);
 
   /**
-   * Retrieves all GroupContent entities for a specific entity.
+   * Retrieves all relationship entities for a specific entity in the group.
    *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to load the relationship entities for in the group.
    * @param string $plugin_id
-   *   A content enabler plugin ID to filter on.
-   * @param int $id
-   *   The ID of the entity to retrieve the GroupContent entities for.
+   *   (optional) A group relation type ID to filter on.
    *
-   * @return \Drupal\group\Entity\GroupContentInterface[]
-   *   A list of GroupContent entities matching the criteria.
+   * @return \Drupal\group\Entity\GroupRelationshipInterface[]
+   *   A list of relationship entities matching the criteria.
    */
-  public function getContentByEntityId($plugin_id, $id);
+  public function getRelationshipsByEntity(EntityInterface $entity, $plugin_id = NULL);
 
   /**
-   * Retrieves all group content for the group.
+   * Retrieves all related entities for the group.
    *
-   * Unlike GroupInterface::getContent(), this function actually returns the
-   * entities that were added to the group through GroupContent entities.
+   * Unlike GroupInterface::getRelationships(), this function actually returns
+   * the entities that were added to the group through relationship entities.
    *
    * @param string $plugin_id
-   *   (optional) A content enabler plugin ID to filter on.
-   * @param array $filters
-   *   (optional) An associative array of extra filters where the keys are
-   *   property or field names and the values are the value to filter on.
+   *   (optional) A group relation type ID to filter on.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   A list of entities matching the criteria. This list does not have keys
    *   that represent the entity IDs as we could have collisions that way.
    *
-   * @see \Drupal\group\Entity\GroupInterface::getContent()
+   * @see \Drupal\group\Entity\GroupInterface::getRelationships()
    */
-  public function getContentEntities($plugin_id = NULL, $filters = []);
+  public function getRelatedEntities($plugin_id = NULL);
 
   /**
    * Adds a user as a member of the group.
@@ -123,7 +122,7 @@ interface GroupInterface extends ContentEntityInterface, EntityOwnerInterface, E
    *   The user to load the membership for.
    *
    * @return \Drupal\group\GroupMembership|false
-   *   The loaded GroupMembership or FALSE if none was found.
+   *   The loaded group membership or FALSE if none was found.
    */
   public function getMember(AccountInterface $account);
 
@@ -135,7 +134,7 @@ interface GroupInterface extends ContentEntityInterface, EntityOwnerInterface, E
    *   names to filter on. Results only need to match on one role (IN query).
    *
    * @return \Drupal\group\GroupMembership[]
-   *   A list of GroupMembership objects representing the memberships.
+   *   A list of group memberships.
    */
   public function getMembers($roles = NULL);
 

@@ -1,25 +1,43 @@
 {# footnotes/footnote-list.html.twig #}
-{% if footnotes|length > 0 %}
-  <ul class="footnotes">
-    {% for fn in footnotes %}
-      {% if fn.ref_id is iterable %}
-        {#
-        // Output footnote that has more than one reference to it in the body.
-        // The only difference is to insert backlinks to all references.
-        // Helper: we need to enumerate a, b, c...
-        #}
-          {% set abc = "abcdefghijklmnopqrstuvwxyz"|split('') %}
-          {% set i = 0 %}
-        <li class="footnote" id="{{ fn.fn_id }}"><a href="#{{ fn.ref_id.0 }}" class="footnote-label">{{ fn.value }}</a>
-        {% for ref in fn.ref_id %}
-          <a class="footnote-multi" href="#{{ ref }}">{{ attribute(abc, i) }}</a>
-          {% set i = i + 1 %}
-        {% endfor %}
-        {{ fn.text|raw }}</li>
-      {% else %}
-        {# Output normal footnote. #}
-        <li class="footnote" id="{{ fn.fn_id }}"><a class="footnote-label" href="#{{ fn.ref_id }}">{{ fn.value }}</a>{{ fn.text|raw }}</li>
-      {% endif %}
-    {% endfor %}
-  </ul>
-{% endif %}
+{# When overriding, the .js-* classes should be kept when using Footnotes Group
+   block. Additionally, the footnotes_group ID should be remain in place.
+   Similarly, .js-is-auto is required to fix auto-numbering when grouping
+   together via JS. #}
+{% apply spaceless %}
+  {% if footnotes|length > 0 %}
+    <ul class="footnotes js-footnotes"{{ is_block ? ' id="footnotes_group"' }}>
+      {% for footnote_id, footnote_group in footnotes %}
+        {% set first_footnote = footnote_group|first %}
+        {% if not first_footnote.is_same_text %}
+
+          {# The texts are not the same, output each footnote as a separate
+             line even though they have the same backlink number. #}
+          {% for footnote in footnote_group %}
+            <li class="footnotes__item-wrapper js-footnote-reference">
+              <span class="footnotes__item-backlinks">
+                <a class="footnotes__item-backlink{{ footnote.is_auto ? ' js-is-auto' }}" href="#{{ footnote.ref_id }}" id="{{ footnote.fn_id }}">{{ footnote.backlink_value }}</a>
+              </span>
+              <span class="footnotes__item-text js-footnote-reference-text">{{ footnote.text|raw }}</span>
+            </li>
+          {% endfor %}
+
+        {% else %}
+
+          {# The values and texts are the same, combine them into a single
+             line and output multiple backlinks. #}
+          <li class="footnotes__item-wrapper js-footnote-reference {{ footnote_group|length > 1 ? ' has-multiple' }}">
+            <span class="footnotes__item-backlinks">
+              {% for footnote in footnote_group %}
+                <a class="footnotes__item-backlink{{ footnote.is_auto ? ' js-is-auto' }}{{ loop.last ? '' : ' has-next' }}" href="#{{ footnote.ref_id }}" id="{{ footnote.fn_id }}">{{ footnote.backlink_value }}</a>
+              {% endfor %}
+            </span>
+            <span class="footnotes__item-text js-footnote-reference-text">{{ first_footnote.text|raw }}</span>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% elseif is_block %}
+    {# Empty placeholder block is needed even if no footnotes when loaded via the Block. #}
+    <ul class="footnotes" id="footnotes_group"></ul>
+  {% endif %}
+{% endapply %}

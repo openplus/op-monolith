@@ -9,7 +9,7 @@ dependencies:
   - drupal:filter
   - drupal:system
 
-# Information added by Drupal.org packaging script on 2023-11-06
-version: '8.x-1.5'
+# Information added by Drupal.org packaging script on 2024-04-08
+version: '8.x-1.6'
 project: 'entity_embed'
-datestamp: 1699304351
+datestamp: 1712587673

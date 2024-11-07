@@ -2,6 +2,7 @@
 
 namespace Drupal\group\Entity\Controller;
 
+use Drupal\group\Entity\GroupRoleInterface;
 use Drupal\group\Entity\GroupTypeInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Config\Entity\DraggableListBuilder;
@@ -9,6 +10,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\group\PermissionScopeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -60,7 +62,6 @@ class GroupRoleListBuilder extends DraggableListBuilder {
    */
   protected function getEntityIds() {
     $query = $this->getStorage()->getQuery()
-      ->condition('internal', 0, '=')
       ->condition('group_type', $this->groupType->id(), '=')
       ->sort($this->entityType->getKey('weight'));
 
@@ -84,6 +85,8 @@ class GroupRoleListBuilder extends DraggableListBuilder {
    */
   public function buildHeader() {
     $header['label'] = $this->t('Name');
+    $header['scope'] = $this->t('Scope');
+    $header['global_role'] = $this->t('Synchronizes with');
     return $header + parent::buildHeader();
   }
 
@@ -91,7 +94,20 @@ class GroupRoleListBuilder extends DraggableListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
+    assert($entity instanceof GroupRoleInterface);
+    if ($entity->getScope() === PermissionScopeInterface::INDIVIDUAL_ID) {
+      $scope_label = $this->t('Individual');
+      $global_role = $this->t('n/a');
+    }
+    else {
+      $scope_label = $entity->getScope() === PermissionScopeInterface::OUTSIDER_ID ? $this->t('Outsider') : $this->t('Insider');
+      $global_role = $entity->getGlobalRole()->label();
+    }
+
     $row['label'] = $entity->label();
+    $row['scope'] = ['#plain_text' => $scope_label];
+    $row['global_role'] = ['#plain_text' => $global_role];
+
     return $row + parent::buildRow($entity);
   }
 
@@ -116,10 +132,21 @@ class GroupRoleListBuilder extends DraggableListBuilder {
    * {@inheritdoc}
    */
   public function render() {
-    $build = parent::render();
+    $build['info'] = [
+      '#prefix' => '<p>' . $this->t('Group roles can belong to one of three scopes:') . '</p>',
+      '#theme' => 'item_list',
+      '#items' => [
+        ['#markup' => $this->t('<strong>Outsider:</strong> Assigned to all non-members who have the corresponding global role.')],
+        ['#markup' => $this->t('<strong>Insider:</strong> Assigned to all members who have the corresponding global role.')],
+        ['#markup' => $this->t('<strong>Individual:</strong> Can be assigned to individual members.')],
+      ],
+    ];
+
+    $build += parent::render();
     $build['table']['#empty'] = $this->t('No group roles available. <a href="@link">Add group role</a>.', [
       '@link' => Url::fromRoute('entity.group_role.add_form', ['group_type' => $this->groupType->id()])->toString()
     ]);
+
     return $build;
   }
 

@@ -24,14 +24,15 @@ class GroupTokenReplaceTest extends GroupTokenReplaceKernelTestBase {
     ];
 
     // Create a group and retrieve its owner.
-    $group = $this->createGroup();
+    $group_type = $this->createGroupType();
+    $group = $this->createGroup(['type' => $group_type->id()]);
     $account = $group->getOwner();
 
     // Generate and test tokens.
     $tests = [];
     $tests['[group:id]'] = $group->id();
-    $tests['[group:type]'] = 'default';
-    $tests['[group:type-name]'] = 'Default label';
+    $tests['[group:type]'] = $group_type->id();
+    $tests['[group:type-name]'] = Html::escape($group_type->label());
     $tests['[group:title]'] = Html::escape($group->label());
     $tests['[group:langcode]'] = $group->language()->getId();
     $tests['[group:url]'] = $group->toUrl('canonical', $url_options)->toString();

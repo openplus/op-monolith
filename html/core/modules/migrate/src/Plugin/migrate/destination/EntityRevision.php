@@ -9,7 +9,9 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\MigrateException;
+use Drupal\migrate\Plugin\Derivative\MigrateEntityRevision;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 
@@ -105,18 +107,17 @@ use Drupal\migrate\Row;
  *   required:
  *     - custom_article_migration
  * @endcode
- *
- * @MigrateDestination(
- *   id = "entity_revision",
- *   deriver = "Drupal\migrate\Plugin\Derivative\MigrateEntityRevision"
- * )
  */
+#[MigrateDestination(
+  id: 'entity_revision',
+  deriver: MigrateEntityRevision::class
+)]
 class EntityRevision extends EntityContentBase {
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountSwitcherInterface $account_switcher, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, AccountSwitcherInterface $account_switcher, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL) {
     $plugin_definition += [
       'label' => new TranslatableMarkup('@entity_type revisions', ['@entity_type' => $storage->getEntityType()->getSingularLabel()]),
     ];

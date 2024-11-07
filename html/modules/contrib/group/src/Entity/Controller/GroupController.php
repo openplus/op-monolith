@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\group\Entity\GroupTypeInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\group\Entity\Storage\GroupRelationshipTypeStorageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -112,10 +113,14 @@ class GroupController extends ControllerBase {
     }
     // Wizard step 2: Group membership form.
     else {
+      $relationship_type_storage = $this->entityTypeManager()->getStorage('group_content_type');
+      assert($relationship_type_storage instanceof GroupRelationshipTypeStorageInterface);
+
       // Create an empty group membership that does not yet have a group set.
       $values = [
-        'type' => $group_type->getContentPlugin('group_membership')->getContentTypeConfigId(),
+        'type' => $relationship_type_storage->getRelationshipTypeId($group_type->id(), 'group_membership'),
         'entity_id' => $this->currentUser()->id(),
+        'group_roles' => $group_type->getCreatorRoleIds(),
       ];
       $entity = $this->entityTypeManager()->getStorage('group_content')->create($values);
     }

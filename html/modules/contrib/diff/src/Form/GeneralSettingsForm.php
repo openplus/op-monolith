@@ -4,6 +4,7 @@ namespace Drupal\diff\Form;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\diff\DiffLayoutManager;
@@ -23,14 +24,13 @@ class GeneralSettingsForm extends ConfigFormBase {
 
   /**
    * GeneralSettingsForm constructor.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\diff\DiffLayoutManager $diff_layout_manager
-   *   The diff layout manager service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, DiffLayoutManager $diff_layout_manager) {
-    parent::__construct($config_factory);
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    DiffLayoutManager $diff_layout_manager,
+  ) {
+    parent::__construct($config_factory, $typedConfigManager);
 
     $this->diffLayoutManager = $diff_layout_manager;
   }
@@ -41,7 +41,8 @@ class GeneralSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('plugin.manager.diff.layout')
+      $container->get('config.typed'),
+      $container->get('plugin.manager.diff.layout'),
     );
   }
 
@@ -67,17 +68,17 @@ class GeneralSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $field_type = NULL) {
     $config = $this->config('diff.settings');
 
-    $form['radio_behavior'] = array(
+    $form['radio_behavior'] = [
       '#type' => 'select',
       '#title' => $this->t('Diff radio behavior'),
       '#default_value' => $config->get('general_settings' . '.' . 'radio_behavior'),
-      '#options' => array(
+      '#options' => [
         'simple' => $this->t('Simple exclusion'),
         'linear' => $this->t('Linear restrictions'),
-      ),
+      ],
       '#empty_option' => $this->t('- None -'),
       '#description' => $this->t('<em>Simple exclusion</em> means that users will not be able to select the same revision, <em>Linear restrictions</em> means that users can only select older or newer revisions of the current selections.'),
-    );
+    ];
 
     $layout_plugins = $this->diffLayoutManager->getDefinitions();
     $weight = count($layout_plugins) + 1;
@@ -88,7 +89,7 @@ class GeneralSettingsForm extends ConfigFormBase {
         'label' => $layout_plugin['label'],
         'description' => $layout_plugin['description'] ?: '',
         'enabled' => $layout_plugin_settings['enabled'],
-        'weight' => isset($layout_plugin_settings['weight']) ? $layout_plugin_settings['weight'] : $weight,
+        'weight' => $layout_plugin_settings['weight'] ?? $weight,
       ];
       $weight++;
     }
@@ -152,22 +153,22 @@ class GeneralSettingsForm extends ConfigFormBase {
       ],
     ];
 
-    $context_lines = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    $context_lines = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     $options = array_combine($context_lines, $context_lines);
-    $form['field_based_settings']['context_lines_leading'] = array(
+    $form['field_based_settings']['context_lines_leading'] = [
       '#type' => 'select',
       '#title' => $this->t('Leading'),
       '#description' => $this->t('This governs the number of unchanged <em>leading context "lines"</em> to preserve.'),
       '#default_value' => $config->get('general_settings' . '.' . 'context_lines_leading'),
       '#options' => $options,
-    );
-    $form['field_based_settings']['context_lines_trailing'] = array(
+    ];
+    $form['field_based_settings']['context_lines_trailing'] = [
       '#type' => 'select',
       '#title' => $this->t('Trailing'),
       '#description' => $this->t('This governs the number of unchanged <em>trailing context "lines"</em> to preserve.'),
       '#default_value' => $config->get('general_settings' . '.' . 'context_lines_trailing'),
       '#options' => $options,
-    );
+    ];
 
     // Check if Visual inline layout is installed.
     if ($this->diffLayoutManager->hasDefinition('visual_inline')) {
@@ -180,6 +181,18 @@ class GeneralSettingsForm extends ConfigFormBase {
             ':input[name="layout_plugins[visual_inline][enabled]"]' => ['checked' => TRUE],
           ],
         ],
+      ];
+
+      $form['visual_inline_settings']['visual_default_view_mode'] = [
+        '#type' => 'select',
+        '#title' => $this->t('View mode'),
+        '#options' => [
+          'default' => $this->t('Default'),
+          'diff' => $this->t('Diff'),
+          'full' => $this->t('Full content'),
+        ],
+        '#description' => $this->t('Choose a default view mode.'),
+        '#default_value' => $config->get('general_settings')['visual_default_view_mode'],
       ];
 
       // Get the theme data to display the related theme name.
@@ -227,13 +240,14 @@ class GeneralSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('diff.settings');
 
-    $keys = array(
+    $keys = [
       'radio_behavior',
       'context_lines_leading',
       'context_lines_trailing',
       'layout_plugins',
+      'visual_default_view_mode',
       'visual_inline_theme',
-    );
+    ];
     foreach ($keys as $key) {
       $config->set('general_settings.' . $key, $form_state->getValue($key));
     }

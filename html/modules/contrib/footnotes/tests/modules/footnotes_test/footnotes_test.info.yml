@@ -1,0 +1,12 @@
+name: Footnotes Test
+description: 'Test module for footnotes.'
+type: module
+core_version_requirement: ^10 | ^11
+dependencies:
+  - drupal:footnotes
+  - drupal:metatag
+
+# Information added by Drupal.org packaging script on 2024-07-23
+version: '4.0.0-beta5'
+project: 'footnotes'
+datestamp: 1721752684

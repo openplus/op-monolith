@@ -5,7 +5,7 @@ namespace Drupal\group\EventSubscriber;
 use Drupal\Core\Config\ConfigImporterEvent;
 use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\group\Plugin\GroupContentEnablerManagerInterface;
+use Drupal\group\Plugin\Group\Relation\GroupRelationTypeManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -21,9 +21,9 @@ class ConfigSubscriber implements EventSubscriberInterface {
   protected $entityTypeManager;
 
   /**
-   * The group content enabler plugin manager.
+   * The group relation type manager.
    *
-   * @var \Drupal\group\Plugin\GroupContentEnablerManagerInterface
+   * @var \Drupal\group\Plugin\Group\Relation\GroupRelationTypeManagerInterface
    */
   protected $pluginManager;
 
@@ -32,10 +32,10 @@ class ConfigSubscriber implements EventSubscriberInterface {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\group\Plugin\GroupContentEnablerManagerInterface $plugin_manager
-   *   The group content enabler plugin manager.
+   * @param \Drupal\group\Plugin\Group\Relation\GroupRelationTypeManagerInterface $plugin_manager
+   *   The group relation type manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, GroupContentEnablerManagerInterface $plugin_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, GroupRelationTypeManagerInterface $plugin_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->pluginManager = $plugin_manager;
   }
@@ -48,11 +48,6 @@ class ConfigSubscriber implements EventSubscriberInterface {
    */
   public function onConfigImport(ConfigImporterEvent $event) {
     $this->pluginManager->installEnforced();
-
-    /** @var \Drupal\group\Entity\Storage\GroupRoleStorageInterface $storage */
-    $storage = $this->entityTypeManager->getStorage('group_role');
-    $storage->createInternal();
-    $storage->createSynchronized();
   }
 
   /**

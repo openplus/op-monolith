@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\group\Kernel;
 
+use Drupal\group\PermissionScopeInterface;
+use Drupal\user\RoleInterface;
+
 /**
  * Tests the general access behavior of group entities.
  *
@@ -55,7 +58,12 @@ class GroupAccessControlHandlerTest extends GroupKernelTestBase {
     $this->assertFalse($this->group->access($operation), 'A member without the right permission has no access');
     $access_control_handler->resetCache();
 
-    $this->groupType->getMemberRole()->grantPermission($permission)->save();
+    $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::INSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => [$permission],
+    ]);
     $this->assertTrue($this->group->access($operation), 'A member with the right permission has access');
     $access_control_handler->resetCache();
 
@@ -101,7 +109,12 @@ class GroupAccessControlHandlerTest extends GroupKernelTestBase {
     $this->assertFalse($this->group->access('view'), 'A member without the right permission has no access');
     $access_control_handler->resetCache();
 
-    $this->groupType->getMemberRole()->grantPermission('view group')->save();
+    $insider_role = $this->createGroupRole([
+      'group_type' => $this->groupType->id(),
+      'scope' => PermissionScopeInterface::INSIDER_ID,
+      'global_role' => RoleInterface::AUTHENTICATED_ID,
+      'permissions' => ['view group'],
+    ]);
     $this->assertTrue($this->group->access('view'), 'A member with the right permission has access');
     $access_control_handler->resetCache();
 
@@ -109,7 +122,7 @@ class GroupAccessControlHandlerTest extends GroupKernelTestBase {
     $this->assertFalse($this->group->access('view'), 'Unpublishing the group denies access');
     $access_control_handler->resetCache();
 
-    $this->groupType->getMemberRole()->grantPermission('view own unpublished group')->save();
+    $insider_role->grantPermission('view own unpublished group')->save();
     $this->assertTrue($this->group->access('view'), 'A member and owner with the view own unpublished permission has access');
     $access_control_handler->resetCache();
 
@@ -117,7 +130,7 @@ class GroupAccessControlHandlerTest extends GroupKernelTestBase {
     $this->assertFalse($this->group->access('view'), 'Changing the group owner once again denies access');
     $access_control_handler->resetCache();
 
-    $this->groupType->getMemberRole()->grantPermission('view any unpublished group')->save();
+    $insider_role->grantPermission('view any unpublished group')->save();
     $this->assertTrue($this->group->access('view'), 'A member with the view any unpublished permission has access');
     $access_control_handler->resetCache();
 
@@ -137,7 +150,7 @@ class GroupAccessControlHandlerTest extends GroupKernelTestBase {
     $access_control_handler->resetCache();
 
     $this->entityTypeManager->getStorage('user_role')
-      ->load('authenticated')
+      ->load(RoleInterface::AUTHENTICATED_ID)
       ->grantPermission('create foo group')
       ->save();
     $this->assertTrue($access_control_handler->createAccess('foo'), 'A user with the right permission has access');

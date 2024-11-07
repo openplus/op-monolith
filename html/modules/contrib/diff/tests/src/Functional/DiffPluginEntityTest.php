@@ -48,11 +48,11 @@ class DiffPluginEntityTest extends DiffPluginTestBase {
    *
    * @see \Drupal\diff\Plugin\diff\Field\EntityReferenceFieldBuilder
    */
-  public function testEntityReferencePlugin() {
+  public function testEntityReferencePlugin(): void {
     // Add an entity reference field to the article content type.
     $bundle_path = 'admin/structure/types/manage/article';
     $field_name = 'reference';
-    $storage_edit = $field_edit = array();
+    $storage_edit = $field_edit = [];
     $storage_edit['settings[target_type]'] = 'node';
     $field_edit['settings[handler_settings][target_bundles][article]'] = TRUE;
     $this->fieldUIAddNewField($bundle_path, $field_name, 'Reference', 'entity_reference', $storage_edit, $field_edit);
@@ -72,18 +72,18 @@ class DiffPluginEntityTest extends DiffPluginTestBase {
     ]);
 
     // Reference article B in article A.
-    $edit = array(
+    $edit = [
       'field_reference[0][target_id]' => 'Article B (' . $node2->id() . ')',
       'revision' => TRUE,
-    );
-    $this->drupalPostNodeForm('node/' . $node1->id() . '/edit', $edit, 'Save and keep published');
+    ];
+    $this->drupalPostNodeForm('node/' . $node1->id() . '/edit', $edit, 'Save');
 
     // Update article A so it points to article C instead of B.
-    $edit = array(
+    $edit = [
       'field_reference[0][target_id]' => 'Article C (' . $node3->id() . ')',
       'revision' => TRUE,
-    );
-    $this->drupalPostNodeForm('node/' . $node1->id() . '/edit', $edit, 'Save and keep published');
+    ];
+    $this->drupalPostNodeForm('node/' . $node1->id() . '/edit', $edit, 'Save');
 
     // Check differences between revisions.
     $this->clickLink(t('Revisions'));

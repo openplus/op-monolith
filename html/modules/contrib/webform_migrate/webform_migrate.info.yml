@@ -4,5 +4,9 @@ description: 'Migration routines from d6, d7 webform to d8 webform'
 core_version_requirement: ^8.8 || ^9 || ^10
 package: 'Migration'
 dependencies:
+  - drupal:field
+  - drupal:migrate
+  - drupal:migrate_drupal
+  - drupal:node
   - webform:webform
   - webform:webform_node

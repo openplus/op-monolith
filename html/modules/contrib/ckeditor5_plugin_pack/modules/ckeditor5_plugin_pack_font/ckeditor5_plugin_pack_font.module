@@ -1,0 +1,17 @@
+<?php
+
+/*
+ * Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see https://ckeditor.com/legal/ckeditor-oss-license
+ */
+
+declare(strict_types=1);
+
+use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
+
+/**
+ * Implements hook_library_info_build().
+ */
+function ckeditor5_plugin_pack_font_library_info_build(): array {
+  return ckeditor5_plugin_pack_library_loader(['font']);
+}

@@ -6,6 +6,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\group\Entity\GroupTypeInterface;
 
 /**
  * Defines the access control handler for the group type entity type.
@@ -18,7 +19,7 @@ class GroupTypeAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    /** @var \Drupal\group\Entity\GroupTypeInterface $entity */
+    assert($entity instanceof GroupTypeInterface);
     if ($operation == 'delete') {
       return parent::checkAccess($entity, $operation, $account)->addCacheableDependency($entity);
     }

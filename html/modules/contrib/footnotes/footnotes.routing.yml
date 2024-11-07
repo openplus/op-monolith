@@ -1,0 +1,14 @@
+footnotes.dialog:
+  path: '/footnotes/dialog/{editor}'
+  defaults:
+    _title: 'Insert footnotes'
+    _form: '\Drupal\footnotes\Form\FootnotesDialogForm'
+  requirements:
+    _custom_access: '\Drupal\footnotes\Form\FootnotesDialogForm::checkAccess'
+
+footnotes.preview:
+  path: '/footnotes/preview/{editor}'
+  defaults:
+    _controller: '\Drupal\footnotes\Controller\FootnotesPreview::preview'
+  requirements:
+    _custom_access: '\Drupal\footnotes\Controller\FootnotesPreview::checkAccess'

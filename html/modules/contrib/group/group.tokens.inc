@@ -8,6 +8,8 @@
 use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\group\Entity\GroupInterface;
+use Drupal\group\Entity\GroupRelationshipInterface;
 
 /**
  * Implements hook_token_info().
@@ -75,24 +77,24 @@ function group_token_info() {
   ];
 
   $types['group_content'] = [
-    'name' => t('Group content'),
+    'name' => t('Group relationship'),
     'description' => t('Tokens related to the relationships between a group and its content.'),
     'needs-data' => 'group_content',
   ];
 
   $tokens['group_content']['id'] = [
-    'name' => t('Group content ID'),
-    'description' => t('The unique ID of the group content.'),
+    'name' => t('Group relationship ID'),
+    'description' => t('The unique ID of the group relationship.'),
   ];
 
   $tokens['group_content']['langcode'] = [
     'name' => t('Language code'),
-    'description' => t('The language code of the language the group content is in.'),
+    'description' => t('The language code of the language the group relationship is in.'),
   ];
 
   $tokens['group_content']['url'] = [
     'name' => t('URL'),
-    'description' => t('The URL of the group content.'),
+    'description' => t('The URL of the group relationship.'),
   ];
 
   $tokens['group_content']['edit-url'] = [
@@ -107,7 +109,7 @@ function group_token_info() {
 
   $tokens['group_content']['changed'] = [
     'name' => t('Date changed'),
-    'description' => t('The date the group content was most recently updated.'),
+    'description' => t('The date the group relationship was most recently updated.'),
     'type' => 'date',
   ];
 
@@ -118,7 +120,7 @@ function group_token_info() {
 
   $tokens['group_content']['pretty-path-key'] = [
     'name' => t('Pretty path key'),
-    'description' => t('A prettier way of labeling group content of the same plugin type.'),
+    'description' => t('A prettier way of labeling group relationship of the same relation type.'),
   ];
 
   return ['types' => $types, 'tokens' => $tokens];
@@ -141,8 +143,8 @@ function group_tokens($type, $tokens, array $data, array $options, BubbleableMet
   }
 
   if ($type == 'group' && !empty($data[$type])) {
-    /** @var \Drupal\group\Entity\GroupInterface $group */
     $group = $data['group'];
+    assert($group instanceof GroupInterface);
 
     foreach ($tokens as $name => $original) {
       switch ($name) {
@@ -213,34 +215,34 @@ function group_tokens($type, $tokens, array $data, array $options, BubbleableMet
     }
   }
   elseif ($type == 'group_content' && !empty($data[$type])) {
-    /** @var \Drupal\group\Entity\GroupContentInterface $group_content */
-    $group_content = $data['group_content'];
+    $group_relationship = $data['group_content'];
+    assert($group_relationship instanceof GroupRelationshipInterface);
 
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'id':
-          $replacements[$original] = $group_content->id();
+          $replacements[$original] = $group_relationship->id();
           break;
 
         case 'langcode':
-          $replacements[$original] = $group_content->language()->getId();
+          $replacements[$original] = $group_relationship->language()->getId();
           break;
 
         case 'url':
-          $replacements[$original] = $group_content->toUrl('canonical', $url_options)->toString();
+          $replacements[$original] = $group_relationship->toUrl('canonical', $url_options)->toString();
           break;
 
         case 'edit-url':
-          $replacements[$original] = $group_content->toUrl('edit-form', $url_options)->toString();
+          $replacements[$original] = $group_relationship->toUrl('edit-form', $url_options)->toString();
           break;
 
         case 'pretty-path-key':
-          $replacements[$original] = $group_content->getContentPlugin()->getPrettyPathKey();
+          $replacements[$original] = $group_relationship->getPlugin()->getRelationType()->getPrettyPathKey();
           break;
 
         // Default values for the chained tokens handled below.
         case 'group':
-          $group = $group_content->getGroup();
+          $group = $group_relationship->getGroup();
           $bubbleable_metadata->addCacheableDependency($group);
           $replacements[$original] = $group->label();
           break;
@@ -248,27 +250,27 @@ function group_tokens($type, $tokens, array $data, array $options, BubbleableMet
         case 'created':
           $date_format = DateFormat::load('medium');
           $bubbleable_metadata->addCacheableDependency($date_format);
-          $replacements[$original] = \Drupal::service('date.formatter')->format($group_content->getCreatedTime(), 'medium', '', NULL, $langcode);
+          $replacements[$original] = \Drupal::service('date.formatter')->format($group_relationship->getCreatedTime(), 'medium', '', NULL, $langcode);
           break;
 
         case 'changed':
           $date_format = DateFormat::load('medium');
           $bubbleable_metadata->addCacheableDependency($date_format);
-          $replacements[$original] = \Drupal::service('date.formatter')->format($group_content->getChangedTime(), 'medium', '', NULL, $langcode);
+          $replacements[$original] = \Drupal::service('date.formatter')->format($group_relationship->getChangedTime(), 'medium', '', NULL, $langcode);
           break;
       }
 
       // Actual chaining of tokens handled below.
       if ($group_tokens = $token_service->findWithPrefix($tokens, 'group')) {
-        $replacements += $token_service->generate('group', $group_tokens, ['group' => $group_content->getGroup()], $options, $bubbleable_metadata);
+        $replacements += $token_service->generate('group', $group_tokens, ['group' => $group_relationship->getGroup()], $options, $bubbleable_metadata);
       }
 
       if ($created_tokens = $token_service->findWithPrefix($tokens, 'created')) {
-        $replacements += $token_service->generate('date', $created_tokens, ['date' => $group_content->getCreatedTime()], $options, $bubbleable_metadata);
+        $replacements += $token_service->generate('date', $created_tokens, ['date' => $group_relationship->getCreatedTime()], $options, $bubbleable_metadata);
       }
 
       if ($changed_tokens = $token_service->findWithPrefix($tokens, 'changed')) {
-        $replacements += $token_service->generate('date', $changed_tokens, ['date' => $group_content->getChangedTime()], $options, $bubbleable_metadata);
+        $replacements += $token_service->generate('date', $changed_tokens, ['date' => $group_relationship->getChangedTime()], $options, $bubbleable_metadata);
       }
     }
   }

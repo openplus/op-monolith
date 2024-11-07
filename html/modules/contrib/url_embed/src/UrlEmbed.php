@@ -31,7 +31,7 @@ class UrlEmbed implements UrlEmbedInterface {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   (optional) The config factory.
    */
-  public function __construct(array $config = [], ConfigFactoryInterface $config_factory = NULL) {
+  public function __construct(array $config = [], ConfigFactoryInterface|null $config_factory = NULL) {
     $global_config = $config_factory ? $config_factory->get('url_embed.settings') : NULL;
     $defaults = [];
 

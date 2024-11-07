@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "Покажи Затворени надписи"
 	},
 	"cc-err": "Грешка при зареждане на затворени надписи",
+	fs: "Enter full screen",
 	adesc: {
 		on: "Активиране на аудио описание",
 		off: "Изключване на аудио описание"
 	},
 	pos: "Позиция:",
 	dur: "Общо време:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "Споделете",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

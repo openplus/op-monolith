@@ -19,4 +19,10 @@ final class DefaultContentDeployEvents {
    */
   const PRE_SERIALIZE = PreSerializeEvent::class;
 
+  /**
+   * Alter the serialized entity data.
+   *
+   * @Event
+   */
+  const POST_SERIALIZE = PostSerializeEvent::class;
 }

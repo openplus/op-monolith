@@ -5,9 +5,12 @@ namespace Drupal\panels_ipe\Form;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\Context\Context;
+use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextHandlerInterface;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
@@ -17,6 +20,7 @@ use Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
 use Drupal\panels_ipe\PanelsIPEBlockRendererTrait;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides a form for adding a block plugin temporarily using AJAX.
@@ -173,6 +177,10 @@ class PanelsIPEBlockPluginForm extends FormBase {
     $form['flipper']['front']['settings']['context_mapping'] = $this->addContextAssignmentElement($block_instance, $this->panelsDisplay->getContexts());
     $form['flipper']['front']['settings']['#tree'] = TRUE;
 
+    if (!empty($_POST['currentPath'])) {
+      $form['currentPath'] = ['#type' => 'hidden', '#value' => $_POST['currentPath']];
+    }
+
     // Add the block ID, variant ID to the form as values.
     $form['plugin_id'] = ['#type' => 'value', '#value' => $plugin_id];
     $form['variant_id'] = ['#type' => 'value', '#value' => $panels_display->id()];
@@ -234,6 +242,7 @@ class PanelsIPEBlockPluginForm extends FormBase {
     foreach ($block_form_state->getErrors() as $name => $error) {
       $form_state->setErrorByName($name, $error);
     }
+
     $form_state->setValue('settings', $block_form_state->getValues());
   }
 
@@ -266,10 +275,21 @@ class PanelsIPEBlockPluginForm extends FormBase {
       return $form;
     }
 
+    // Reload the panels display. If this is not done, the contexts are not
+    // correctly populated after ajax updates. Not sure why this is.
+    $panels_config = $this->panelsDisplay->getConfiguration();
+    $panels_storage = \Drupal::service('panels.storage_manager');
+    $this->panelsDisplay = $panels_storage->load($panels_config['storage_type'], $panels_config['storage_id']);
+
     // If a temporary configuration for this variant exists, use it.
     $temp_store_key = $this->panelsDisplay->getTempStoreId();
     if ($variant_config = $this->tempStore->get($temp_store_key)) {
       $this->panelsDisplay->setConfiguration($variant_config);
+    }
+
+    if ($form_state->getValue('currentPath')) {
+      $contexts = array_merge($this->panelsDisplay->getContexts(), $this->getContextsForPath($form_state->getValue('currentPath')));
+      $this->panelsDisplay->setContexts($contexts);
     }
 
     $block_instance = $this->getBlockInstance($form_state);
@@ -367,6 +387,11 @@ class PanelsIPEBlockPluginForm extends FormBase {
       return $form;
     }
 
+    if ($form_state->getValue('currentPath')) {
+      $contexts = array_merge($this->panelsDisplay->getContexts(), $this->getContextsForPath($form_state->getValue('currentPath')));
+      $this->panelsDisplay->setContexts($contexts);
+    }
+
     // Get the Block instance.
     $block_instance = $this->getBlockInstance($form_state);
 
@@ -450,6 +475,51 @@ class PanelsIPEBlockPluginForm extends FormBase {
     }
 
     return $block_instance;
+  }
+
+  /**
+   * Retrieve additional context values based on the path.
+   *
+   * @param string $path
+   *   The path to the page being edited using IPE.
+   *
+   * @return \Drupal\Core\Plugin\Context\Context[]
+   *   The extracted contexts.
+   */
+  protected function getContextsForPath($path) {
+    $request = Request::create('/' . $path);
+    $router = \Drupal::service('router.no_access_checks');
+    $result = $router->matchRequest($request);
+
+    $route = $result['_route_object'];
+    $page = $result['page_manager_page'];
+
+    $contexts = [];
+    if ($route && $route_contexts = $route->getOption('parameters')) {
+      foreach ($route_contexts as $route_context_name => $route_context) {
+        // Skip this parameter.
+        if ($route_context_name == 'page_manager_page_variant' || $route_context_name == 'page_manager_page') {
+          continue;
+        }
+
+        $parameter = $page->getParameter($route_context_name);
+        $context_name = !empty($parameter['label']) ? $parameter['label'] : $this->t('{@name} from route', ['@name' => $route_context_name]);
+        if ($request->attributes->has($route_context_name)) {
+          $value = $request->attributes->get($route_context_name);
+        }
+        else {
+          $value = NULL;
+        }
+        $cacheability = new CacheableMetadata();
+        $cacheability->setCacheContexts(['route']);
+
+        $context = new Context(new ContextDefinition($route_context['type'], $context_name, FALSE), $value);
+        $context->addCacheableDependency($cacheability);
+
+        $contexts[$route_context_name] = $context;
+      }
+    }
+    return $contexts;
   }
 
 }

@@ -5,3 +5,8 @@ package: Testing
 core_version_requirement: ^8 || ^9
 dependencies:
   - drupal:library_manager
+
+# Information added by Drupal.org packaging script on 2024-07-15
+version: '2.1.1'
+project: 'library_manager'
+datestamp: 1721037471

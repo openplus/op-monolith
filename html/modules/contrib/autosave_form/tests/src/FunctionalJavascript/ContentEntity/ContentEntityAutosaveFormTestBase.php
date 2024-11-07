@@ -108,7 +108,7 @@ abstract class ContentEntityAutosaveFormTestBase extends AutosaveFormTestBase {
    */
   protected function doTestAutosaveFormNewEntity() {
     $this->drupalGet($this->getCreateNewEntityURL());
-    $this->assertAutosaveFormLibraryLoaded(FALSE);
+    $this->assertAutosaveFormLibraryLoaded(TRUE);
   }
 
   /**

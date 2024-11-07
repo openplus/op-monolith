@@ -4,7 +4,6 @@ namespace Drupal\Tests\embed\Functional;
 
 use Drupal\editor\EditorInterface;
 use Drupal\editor\Entity\Editor;
-use Drupal\embed\Access\EmbedButtonEditorAccessCheck;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 
 /**

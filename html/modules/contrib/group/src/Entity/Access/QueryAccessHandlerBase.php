@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\entity\QueryAccess\QueryAccessEvent;
 use Drupal\entity\QueryAccess\QueryAccessHandlerInterface;
-use Drupal\group\Access\ChainGroupPermissionCalculatorInterface;
+use Drupal\group\Access\GroupPermissionCalculatorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -55,10 +55,10 @@ abstract class QueryAccessHandlerBase implements EntityHandlerInterface, QueryAc
    *   The event dispatcher.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The current user.
-   * @param \Drupal\group\Access\ChainGroupPermissionCalculatorInterface $permission_calculator
+   * @param \Drupal\group\Access\GroupPermissionCalculatorInterface $permission_calculator
    *   The group permission calculator.
    */
-  public function __construct(EntityTypeInterface $entity_type, EventDispatcherInterface $event_dispatcher, AccountInterface $current_user, ChainGroupPermissionCalculatorInterface $permission_calculator) {
+  public function __construct(EntityTypeInterface $entity_type, EventDispatcherInterface $event_dispatcher, AccountInterface $current_user, GroupPermissionCalculatorInterface $permission_calculator) {
     $this->entityType = $entity_type;
     $this->eventDispatcher = $event_dispatcher;
     $this->currentUser = $current_user;
@@ -73,7 +73,7 @@ abstract class QueryAccessHandlerBase implements EntityHandlerInterface, QueryAc
       $entity_type,
       $container->get('event_dispatcher'),
       $container->get('current_user'),
-      $container->get('group_permission.chain_calculator')
+      $container->get('group_permission.calculator')
     );
   }
 

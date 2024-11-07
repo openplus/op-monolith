@@ -1,0 +1,7 @@
+ckeditor5_premium_features_notifications.form.settings:
+  path: '/admin/config/ckeditor5-premium-features/notifications'
+  defaults:
+    _title: 'Notifications'
+    _form: 'Drupal\ckeditor5_premium_features_notifications\Form\SettingsForm'
+  requirements:
+    _permission: 'administer site configuration'

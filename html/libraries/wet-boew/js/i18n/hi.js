@@ -88,12 +88,15 @@ wb.i18nDict = {
 		on: "बंद कैप्शन दिखाएं"
 	},
 	"cc-err": "लोड करने में त्रुटि बंद कैप्शन",
+	fs: "Enter full screen",
 	adesc: {
 		on: "ऑडियो विवरण सक्षम",
 		off: "ऑडियो विवरण अक्षम"
 	},
 	pos: "वर्तमान स्थिति:",
 	dur: "कुल समय:",
+	msgYoutubeNotLoad: "Video encountered loading issues",
+	msgYoutubeVdLoad: "Loading Youtube video",
 
 	/* Share widget */
 	"shr-txt": "शेयर",
@@ -238,7 +241,7 @@ wb.i18nDict = {
 
 	/* Filter */
 	"fltr-lbl": "Filter<span class=\"wb-inv\"> content: results appear below as you type.</span>",
-	"fltr-info": "Showing _NBITEM_ filtered from _TOTAL_ total entries"
+	"fltr-info": "Showing <span data-nbitem></span> filtered from <span data-total></span> total entries"
 };
 
 } )( wb );

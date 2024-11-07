@@ -31,6 +31,9 @@ diff.settings:
               weight:
                 type: integer
                 label: 'Weight'
+        visual_default_view_mode:
+          type: string
+          label: 'View mode'
         visual_inline_theme:
           type: string
           label: 'Theme'
@@ -38,11 +41,11 @@ diff.settings:
       type: sequence
       label: 'Entities'
       sequence:
-        - type: sequence
-          label: 'Entity ID'
-          sequence:
-            - type: integer
-              label: 'Compare base field'
+        type: sequence
+        label: 'Entity ID'
+        sequence:
+          type: integer
+          label: 'Compare base field'
 
 diff.plugins:
   type: config_object

@@ -2,13 +2,13 @@
 
 namespace Drupal\diff;
 
+use Drupal\Component\Diff\Diff;
+use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Component\Utility\Xss;
 use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\Core\Config\ConfigFactory;
-use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Component\Diff\Diff;
 use Drupal\Core\Entity\RevisionLogInterface;
-use Drupal\Component\Utility\Xss;
 
 /**
  * Entity comparison service that prepares a diff of a pair of entities.
@@ -78,7 +78,13 @@ class DiffEntityComparison {
    * @param \Drupal\diff\DiffBuilderManager $diff_builder_manager
    *   The diff builder manager.
    */
-  public function __construct(ConfigFactory $config_factory, DiffFormatter $diff_formatter, PluginManagerInterface $plugin_manager, DiffEntityParser $entity_parser, DiffBuilderManager $diff_builder_manager) {
+  public function __construct(
+    ConfigFactory $config_factory,
+    DiffFormatter $diff_formatter,
+    PluginManagerInterface $plugin_manager,
+    DiffEntityParser $entity_parser,
+    DiffBuilderManager $diff_builder_manager,
+  ) {
     $this->configFactory = $config_factory;
     $this->pluginsConfig = $this->configFactory->get('diff.plugins');
     $this->diffFormatter = $diff_formatter;
@@ -99,13 +105,13 @@ class DiffEntityComparison {
    *   Items ready to be compared by the Diff component.
    */
   public function compareRevisions(ContentEntityInterface $left_entity, ContentEntityInterface $right_entity) {
-    $result = array();
+    $result = [];
 
     $left_values = $this->entityParser->parseEntity($left_entity);
     $right_values = $this->entityParser->parseEntity($right_entity);
 
     foreach ($left_values as $left_key => $values) {
-      list (, $field_key) = explode(':', $left_key);
+      [, $field_key] = explode(':', $left_key);
       // Get the compare settings for this field type.
       $compare_settings = $this->pluginsConfig->get('fields.' . $field_key);
       $result[$left_key] = [
@@ -129,7 +135,7 @@ class DiffEntityComparison {
 
     // Fields which exist only on the right entity.
     foreach ($right_values as $right_key => $values) {
-      list (, $field_key) = explode(':', $right_key);
+      [, $field_key] = explode(':', $right_key);
       $compare_settings = $this->pluginsConfig->get('fields.' . $field_key);
       $result[$right_key] = [
         '#name' => (isset($compare_settings['settings']['show_header']) && $compare_settings['settings']['show_header'] == 0) ? '' : $values['label'],
@@ -154,11 +160,11 @@ class DiffEntityComparison {
    *   Array resulted after combining the left and right values.
    */
   protected function combineFields(array $left_values, array $right_values) {
-    $result = array(
-      '#left' => array(),
-      '#right' => array(),
-    );
-    $max = max(array(count($left_values), count($right_values)));
+    $result = [
+      '#left' => [],
+      '#right' => [],
+    ];
+    $max = max([count($left_values), count($right_values)]);
     for ($delta = 0; $delta < $max; $delta++) {
       // EXPERIMENTAL: Transform thumbnail from ImageFieldBuilder.
       // @todo Make thumbnail / rich diff data pluggable.
@@ -210,10 +216,10 @@ class DiffEntityComparison {
    */
   public function getRows($a, $b, $show_header = FALSE, array &$line_stats = NULL) {
     if (!isset($line_stats)) {
-      $line_stats = array(
-        'counter' => array('x' => 0, 'y' => 0),
-        'offset' => array('x' => 0, 'y' => 0),
-      );
+      $line_stats = [
+        'counter' => ['x' => 0, 'y' => 0],
+        'offset' => ['x' => 0, 'y' => 0],
+      ];
     }
 
     // Header is the line counter.
@@ -276,7 +282,6 @@ class DiffEntityComparison {
 
     // @todo Autogenerate summary again.
     // @see https://www.drupal.org/project/diff/issues/2880936
-
     // Add workflow/content moderation state information.
     if ($state = $this->getModerationState($revision)) {
       $revision_summary .= " ($state)";

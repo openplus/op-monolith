@@ -64,7 +64,7 @@ class EmbedPreviewTest extends BrowserTestBase {
 
     $this->assertSession()->statusCodeEquals(403);
 
-    // Now test with a CSRF token
+    // Now test with a CSRF token.
     $this->drupalGet('embed-test/get_csrf_token');
     $token = json_decode($this->getSession()->getPage()->getContent());
     $headers = ['X-Drupal-EmbedPreview-CSRF-Token' => $token];

@@ -68,7 +68,13 @@ class DiffBuilderManager extends DefaultPluginManager {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    */
-  public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(
+    \Traversable $namespaces,
+    CacheBackendInterface $cache_backend,
+    ModuleHandlerInterface $module_handler,
+    EntityTypeManagerInterface $entity_type_manager,
+    ConfigFactoryInterface $config_factory,
+  ) {
     parent::__construct('Plugin/diff/Field', $namespaces, $module_handler, '\Drupal\diff\FieldDiffBuilderInterface', 'Drupal\diff\Annotation\FieldDiffBuilder');
 
     $this->setCacheBackend($cache_backend, 'field_diff_builder_plugins');
@@ -76,7 +82,6 @@ class DiffBuilderManager extends DefaultPluginManager {
     $this->entityTypeManager = $entity_type_manager;
     $this->config = $config_factory->get('diff.settings');
     $this->pluginsConfig = $config_factory->get('diff.plugins');
-
   }
 
   /**
@@ -151,7 +156,7 @@ class DiffBuilderManager extends DefaultPluginManager {
     // Start with the stored configuration, this returns NULL if there is none.
     $selected_plugin = $this->pluginsConfig->get('fields.' . $field_key);
 
-    // If there is configuration and it is a valid type or exlplicitly set to
+    // If there is configuration and it is a valid type or explicitly set to
     // hidden, then use that, otherwise try to find a suitable default plugin.
     if ($selected_plugin && (in_array($selected_plugin['type'], array_keys($plugin_options)) || $selected_plugin['type'] == 'hidden')) {
       return $selected_plugin + ['settings' => []];
@@ -170,7 +175,7 @@ class DiffBuilderManager extends DefaultPluginManager {
    * Determines if a field should be displayed when comparing revisions based on
    * the entity view display if there is no plugin selected for the field.
    *
-   * @param FieldStorageDefinitionInterface $field_storage_definition
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition
    *   The field name.
    *
    * @return bool
@@ -200,7 +205,7 @@ class DiffBuilderManager extends DefaultPluginManager {
    * Loop over the plugins that can be applied to the field and builds an array
    * of possible plugins based on each plugin weight.
    *
-   * @param FieldStorageDefinitionInterface $field_definition
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_definition
    *   The field storage definition.
    *
    * @return array

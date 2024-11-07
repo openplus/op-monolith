@@ -1,0 +1,13 @@
+{% apply spaceless %}
+  {# footnotes/footnote-links.html.twig #}
+  {%- if footnote_links -%}
+    <span class="footnote__citations-wrapper">
+      {%- for footnote_link in footnote_links -%}
+        {% if not loop.first %}
+          <span class="footnote__citation-separator">, </span>
+        {% endif %}
+        {{ footnote_link }}
+      {%- endfor -%}
+    </span>
+  {%- endif -%}
+{% endapply %}

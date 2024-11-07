@@ -1,35 +1,142 @@
-import FootnotesTextAreaView from "./footnotestextareaview";
+// eslint-disable-next-line import/no-unresolved
+import { isWidget } from 'ckeditor5/src/widget';
 
 /**
- * A helper for creating labeled footnotes text area inputs.
+ * Checks if the provided model element is `footnotes`.
  *
- * This helper functions the same as createLabeledInputText(), but creates an instance of our custom text area instead.
+ * @param  {module:engine/model/element~Element} modelElement
+ *   The model element to be checked.
+ * @return {boolean}
+ *   A boolean indicating if the element is a footnotes element.
  *
- * @param {module:ui/labeledview/labeledview~LabeledView} labeledFieldView The instance of the labeled view.
- * @param {String} viewUid An UID string that allows DOM logical connection between the
- * {@link module:ui/labeledview/labeledview~LabeledView#labelView labeled view's label} and the input.
- * @param {String} statusUid An UID string that allows DOM logical connection between the
- * {@link module:ui/labeledview/labeledview~LabeledView#statusView labeled view's status} and the input.
- * @returns {module:ui/inputtext/inputtextview~InputTextView} The input text view instance.
+ * @private
  */
-export function createLabeledFootnotesTextArea(labeledFieldView, viewUid, statusUid ) {
-  const inputView = new FootnotesTextAreaView( labeledFieldView.locale );
+export function isFootnotes(modelElement) {
+  return !!modelElement && modelElement.is('element', 'footnotes');
+}
 
-  inputView.set( {
-    id: viewUid,
-    ariaDescribedById: statusUid
-  } );
+/**
+ * Checks if view element is <footnotes> element.
+ *
+ * @param  {module:engine/view/element~Element} viewElement
+ *   The view element.
+ * @return {boolean}
+ *   A boolean indicating if the element is a <footnotes> element.
+ *
+ * @private
+ */
+export function isFootnotesWidget(viewElement) {
+  return isWidget(viewElement) && !!viewElement.getCustomProperty('footnotes');
+}
 
-  inputView.bind( 'isReadOnly' ).to( labeledFieldView, 'isEnabled', value => !value );
-  inputView.bind( 'hasError' ).to( labeledFieldView, 'errorText', value => !!value );
+/**
+ * Gets `footnotes` element from selection.
+ *
+ * @param  {module:engine/model/selection~Selection|module:engine/model/documentselection~DocumentSelection} selection
+ *   The current selection.
+ * @return {module:engine/model/element~Element|null}
+ *   The `footnotes` element which could be either the current selected an
+ *   ancestor of the selection. Returns null if the selection has no Drupal
+ *   Media element.
+ *
+ * @private
+ */
+export function getClosestSelectedFootnotesElement(selection) {
+  const selectedElement = selection.getSelectedElement();
 
-  inputView.on( 'input', () => {
-    // UX: Make the error text disappear and disable the error indicator as the user
-    // starts fixing the errors.
-    labeledFieldView.errorText = null;
-  } );
+  return isFootnotes(selectedElement)
+    ? selectedElement
+    : selection.getFirstPosition().findAncestor('footnotes');
+}
 
-  labeledFieldView.bind( 'isEmpty', 'isFocused', 'placeholder' ).to( inputView );
+/**
+ * Gets selected Drupal Media widget if only Drupal Media is currently selected.
+ *
+ * @param  {module:engine/model/selection~Selection} selection
+ *   The current selection.
+ * @return {module:engine/view/element~Element|null}
+ *   The currently selected Drupal Media widget or null.
+ *
+ * @private
+ */
+export function getClosestSelectedFootnotesWidget(selection) {
+  const viewElement = selection.getSelectedElement();
+  if (viewElement && isFootnotesWidget(viewElement)) {
+    return viewElement;
+  }
 
-  return inputView;
+  let { parent } = selection.getFirstPosition();
+
+  while (parent) {
+    if (parent.is('element') && isFootnotesWidget(parent)) {
+      return parent;
+    }
+
+    parent = parent.parent;
+  }
+
+  return null;
+}
+
+/**
+ * Checks if value is a JavaScript object.
+ *
+ * This will return true for any type of JavaScript object. (e.g. arrays,
+ * functions, objects, regexes, new Number(0), and new String(''))
+ *
+ * @param {*} value
+ *   Value to check.
+ * @return {boolean}
+ *   True if value is an object, else false.
+ */
+export function isObject(value) {
+  const type = typeof value;
+  return value != null && (type === 'object' || type === 'function');
+}
+
+/**
+ * Gets the preview container element from the media element.
+ *
+ * @param  {Iterable.<module:engine/view/element~Element>} children
+ *   The child elements.
+ * @return {null|module:engine/view/element~Element}
+ *   The preview child element if available.
+ */
+export function getPreviewContainer(children) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const child of children) {
+    if (child.hasAttribute('data-footnotes-preview')) {
+      return child;
+    }
+
+    if (child.childCount) {
+      const recursive = getPreviewContainer(child.getChildren());
+      // Return only if preview container was found within this element's
+      // children.
+      if (recursive) {
+        return recursive;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Gets model attribute key based on Drupal Element Style group.
+ *
+ * @example
+ *    Example: 'align' -> 'drupalElementStyleAlign'
+ *
+ * @param  {string} group
+ *   The name of the group (ex. 'align', 'viewMode').
+ * @return {string}
+ *   Model attribute key.
+ *
+ * @internal
+ */
+export function groupNameToModelAttributeKey(group) {
+  // Manipulate string to have first letter capitalized to append in camel case.
+  const capitalizedFirst = group[0].toUpperCase() + group.substring(1);
+  return `drupalElementStyle${capitalizedFirst}`;
 }
