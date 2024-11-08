@@ -1,0 +1,6 @@
+{
+    "name": "openplus/op-monolith",
+    "version":"1.0.9",
+    "description": "Pre-packaged dependencies for site-cra",
+    "type": "project"
+}
