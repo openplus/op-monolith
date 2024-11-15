@@ -2985,7 +2985,7 @@
                     "homepage": "https://www.drupal.org/user/112790"
                 },
                 {
-                    "name": "Rajab Natshah",
+                    "name": "rajab natshah",
                     "homepage": "https://www.drupal.org/user/1414312"
                 }
             ],
@@ -4396,9 +4396,9 @@
                     "2313309 - Admin toolbar follow lang preference": "https://www.drupal.org/files/issues/2023-12-19/2313309-179.patch",
                     "2783897 - Select all for theme visibility condition": "https://www.drupal.org/files/issues/2023-07-10/core_drupal-current-theme_2783897_11x_37_0.patch",
                     "3417971 - wsod when saving content language settings": "https://www.drupal.org/files/issues/2024-09-19/logic_exception_wsod_temporary-3417971-14.patch",
+                    "2630732 - Implement Entity::fields() for migration destinations": "https://www.drupal.org/files/issues/2024-11-13/entity-fields-migration-destination-10.3.x-2630732-161.patch",
                     "Enter drupal/core patch #2752443 description here": "https://www.drupal.org/files/issues/in_correct_order_and-2752443-1.patch",
                     "Enter drupal/core patch #850600 description here": "https://www.drupal.org/files/issues/2024-08-19/postgresql-ssl-dns-850600-38.patch",
-                    "Enter drupal/core patch #2630732 description here": "https://git.drupalcode.org/project/drupal/-/merge_requests/6111.diff",
                     "Enter drupal/core patch #2816921 description here": "https://www.drupal.org/files/issues/user_password-2816921-2.patch",
                     "Enter drupal/core patch #2857273 description here": "https://www.drupal.org/files/issues/2020-07-13/D91x-self_closing_correct-2857273-13.patch",
                     "Enter drupal/core patch #2885370 description here": "https://www.drupal.org/files/issues/systemmainblock_build-2885370-3.patch",
@@ -6873,6 +6873,10 @@
                 {
                     "name": "kevinquillen",
                     "homepage": "https://www.drupal.org/user/317279"
+                },
+                {
+                    "name": "xmacinfo",
+                    "homepage": "https://www.drupal.org/user/12131"
                 }
             ],
             "description": "Adds the FakeObjects plugin to CKEditor. This plugin is a utility plugin that is required by certain user-facing CKEditor plugins.",
@@ -8945,6 +8949,10 @@
                     "homepage": "https://www.drupal.org/user/61203"
                 },
                 {
+                    "name": "japerry",
+                    "homepage": "https://www.drupal.org/user/45640"
+                },
+                {
                     "name": "larowlan",
                     "homepage": "https://www.drupal.org/user/395439"
                 },
@@ -9392,7 +9400,7 @@
                     "homepage": "https://www.drupal.org/user/3260690"
                 },
                 {
-                    "name": "Primsi",
+                    "name": "primsi",
                     "homepage": "https://www.drupal.org/user/282629"
                 },
                 {
@@ -9586,7 +9594,7 @@
                     "homepage": "https://www.drupal.org/user/370574"
                 },
                 {
-                    "name": "RenatoG",
+                    "name": "renatog",
                     "homepage": "https://www.drupal.org/user/3326031"
                 },
                 {
@@ -9721,7 +9729,7 @@
                     "role": "Developer"
                 },
                 {
-                    "name": "Dave Reid",
+                    "name": "dave reid",
                     "homepage": "https://www.drupal.org/user/53892"
                 }
             ],
@@ -10095,10 +10103,6 @@
                 {
                     "name": "EclipseGc",
                     "homepage": "https://www.drupal.org/user/61203"
-                },
-                {
-                    "name": "ivnish",
-                    "homepage": "https://www.drupal.org/user/3547706"
                 },
                 {
                     "name": "japerry",

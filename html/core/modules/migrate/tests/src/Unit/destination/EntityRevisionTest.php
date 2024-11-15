@@ -51,9 +51,9 @@ class EntityRevisionTest extends UnitTestCase {
   protected $accountSwitcher;
 
   /**
-   * @var Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
-  protected $entityTypeBundle;
+  protected EntityTypeBundleInfoInterface $entityTypeBundle;
 
   /**
    * {@inheritdoc}
@@ -73,7 +73,7 @@ class EntityRevisionTest extends UnitTestCase {
     $this->entityFieldManager = $this->prophesize('\Drupal\Core\Entity\EntityFieldManagerInterface');
     $this->fieldTypeManager = $this->prophesize('\Drupal\Core\Field\FieldTypePluginManagerInterface');
     $this->accountSwitcher = $this->prophesize(AccountSwitcherInterface::class);
-    $this->entityTypeBundle = $this->prophesize(EntityTypeBundleInfoInterface::class);
+    $this->entityTypeBundle = $this->prophesize(EntityTypeBundleInfoInterface::class)->reveal();
   }
 
   /**
@@ -216,7 +216,7 @@ class EntityRevisionTest extends UnitTestCase {
       $this->entityFieldManager->reveal(),
       $this->fieldTypeManager->reveal(),
       $this->accountSwitcher->reveal(),
-      $this->entityTypeBundle->reveal(),
+      $this->entityTypeBundle,
     );
   }
 
