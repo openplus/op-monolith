@@ -3,7 +3,7 @@
         'name' => 'openplus/site-cra',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'af1c35e84106f37fefffc4f64400424ea8ea3896',
+        'reference' => 'df08d46dc9bf577a04c6ca95ae66d008071cca65',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -2251,7 +2251,7 @@
         'openplus/site-cra' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'af1c35e84106f37fefffc4f64400424ea8ea3896',
+            'reference' => 'df08d46dc9bf577a04c6ca95ae66d008071cca65',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

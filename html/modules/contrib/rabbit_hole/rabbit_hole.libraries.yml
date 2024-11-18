@@ -1,6 +1,0 @@
-field-ui:
-  version: 1.x
-  js:
-    js/rabbit-hole.field-ui.js: {}
-  dependencies:
-    - core/jquery
