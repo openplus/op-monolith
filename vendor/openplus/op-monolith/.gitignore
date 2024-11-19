@@ -1,0 +1,26 @@
+# Directories
+.github
+/config
+/content
+/drush/*
+html/modules/custom
+html/themes/custom
+html/sites/default
+html/sites/settings.php
+/scripts
+/translations
+
+# Files
+.dockerignore
+.editorconfig
+.env
+.gitattributes
+/Makefile
+README.md
+composer.lock
+docker-compose.base.yml
+docker-compose.ci.yml
+docker-compose.mutagen.yml
+docker-compose.yml
+load.environment.php
+/theme-topic.css
