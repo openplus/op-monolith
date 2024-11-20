@@ -1,0 +1,6 @@
+/**
+ * CKEditor5 styles.
+ */
+.ck-editor__main > .ck-content {
+  min-height: 250px;
+}

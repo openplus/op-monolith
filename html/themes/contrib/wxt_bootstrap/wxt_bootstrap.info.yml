@@ -1,0 +1,36 @@
+name: WxT Bootstrap
+description: 'Provides Templates to adhere to the WET-BOEW and Canada.ca Design System and C&IA Specification.'
+type: theme
+core_version_requirement: '^9 || ^10'
+package: 'WxT'
+base theme: bootstrap
+ckeditor5-stylesheets:
+  - css/ckeditor5.css
+
+regions:
+  branding: 'Branding'
+  breadcrumb: 'Breadcrumbs'
+  language_toggle: 'Language Toggle'
+  banner: 'Banner'
+  search: 'Search'
+  navigation: 'Navigation'
+  navigation_collapsible: 'Navigation (Collapsible)'
+  header: 'Header'
+  highlighted: 'Highlighted'
+  help: 'Help'
+  content: 'Content'
+  content_footer: 'Content Footer'
+  sidebar_first: 'Sidebar First'
+  sidebar_second: 'Sidebar Second'
+  footer: 'Footer'
+  page_top: 'Page top'
+  page_bottom: 'Page bottom'
+
+libraries-extend:
+  bootstrap/framework:
+    - 'wxt_bootstrap/drupal.wxt_bootstrap'
+
+# Information added by Drupal.org packaging script on 2024-07-02
+version: '8.x-8.5'
+project: 'wxt_bootstrap'
+datestamp: 1719888218

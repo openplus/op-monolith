@@ -1,0 +1,31 @@
+/**
+ * Alert styling.
+ */
+.alert-sm {
+  padding: 5px 10px;
+}
+
+.alert-dismissible button.close {
+  right: 15px;
+}
+
+.alert-dismissible > p {
+  padding-top: 15px;
+}
+
+// Treat all links inside alert as .alert-link
+.alert a {
+  font-weight: $headings-font-weight;
+}
+.alert-success a {
+  color: darken($alert-success-text, 10%);
+}
+.alert-info a {
+  color: darken($alert-info-text, 10%);
+}
+.alert-warning a {
+  color: darken($alert-warning-text, 10%);
+}
+.alert-danger a {
+  color: darken($alert-danger-text, 10%);
+}
