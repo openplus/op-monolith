@@ -1,6 +1,6 @@
 {
     "name": "openplus/op-monolith",
-    "version":"1.25.5",
+    "version":"1.25.7",
     "description": "Pre-packaged dependencies for site-cra",
     "type": "monolith",
     "license": "GPL-2.0-or-later"
